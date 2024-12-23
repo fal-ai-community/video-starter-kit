@@ -74,13 +74,17 @@ export function VideoTrackView({
   const projectId = useProjectId();
   const { data: jobs = [] } = useProjectJobs(projectId);
 
-  const imageUrl = jobs.find((s) => s.id === frame.data.jobId)?.output
-    ?.images?.[0]?.url;
+  const output = jobs.find((s) => s.id === frame.data.jobId)?.output;
+
+  const imageUrl = output?.images?.[0]?.url;
+  const videoUrl = output?.video?.url;
+
+  const label = imageUrl ? "Image" : videoUrl ? "Video" : track.label;
 
   return (
     <div
       className={cn(
-        "flex flex-col rounded overflow-hidden group opacity-90",
+        "flex flex-col select-none rounded overflow-hidden group opacity-90",
         // https://tailwindcss.com/docs/content-configuration#dynamic-class-names
         {
           "bg-teal-500 dark:bg-teal-600": track.type === "video",
@@ -101,7 +105,7 @@ export function VideoTrackView({
             {createElement(trackIcons[track.type], {
               className: "w-3 h-3 opacity-70 stroke-[3px]",
             } as any)}
-            <span>{track.label}</span>
+            <span>{label}</span>
           </div>
           <div className="flex flex-row flex-1 items-center justify-end">
             <WithTooltip tooltip="Remove content">
@@ -116,11 +120,22 @@ export function VideoTrackView({
         </div>
       </div>
       <div className="p-px flex-1 relative">
-        <img
-          src={imageUrl}
-          className="rounded-md h-8 m-1 absolute top-0 left-0"
-          alt=""
-        />
+        {imageUrl && (
+          <img
+            src={imageUrl}
+            className="rounded-md h-8 m-1 absolute top-0 left-0"
+            alt=""
+          />
+        )}
+        {videoUrl && (
+          <video
+            src={videoUrl}
+            className="rounded-md h-8 m-1 absolute top-0 left-0"
+            controls={false}
+            poster={imageUrl}
+            style={{ pointerEvents: "none" }}
+          />
+        )}
       </div>
     </div>
   );
