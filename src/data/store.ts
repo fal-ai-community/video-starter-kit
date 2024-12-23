@@ -9,6 +9,13 @@ export const LAST_PROJECT_ID_KEY = "__aivs_lastProjectId";
 
 export type MediaType = "image" | "video" | "voiceover" | "music";
 
+type GenerateData = {
+  prompt: string;
+  image: File | string | null;
+  duration: number;
+  voice: string;
+};
+
 interface VideoProjectProps {
   projectId: string;
   projectDialogOpen: boolean;
@@ -19,6 +26,7 @@ interface VideoProjectProps {
   generateMediaType: MediaType;
   selectedMediaId: string | null;
   selectedKeyframes: string[];
+  generateData: GenerateData;
 }
 
 interface VideoProjectState extends VideoProjectProps {
@@ -32,6 +40,7 @@ interface VideoProjectState extends VideoProjectProps {
   closeGenerateDialog: () => void;
   setSelectedMediaId: (mediaId: string | null) => void;
   selectKeyframe: (frameId: string) => void;
+  setGenerateData: (generateData: Partial<GenerateData>) => void;
 }
 
 const DEFAULT_PROPS: VideoProjectProps = {
@@ -44,12 +53,18 @@ const DEFAULT_PROPS: VideoProjectProps = {
   generateMediaType: "image",
   selectedMediaId: null,
   selectedKeyframes: [],
+  generateData: {
+    prompt: "",
+    image: null,
+    duration: 30,
+    voice: "",
+  },
 };
 
 type VideoProjectStore = ReturnType<typeof createVideoProjectStore>;
 
 export const createVideoProjectStore = (
-  initProps?: Partial<VideoProjectProps>,
+  initProps?: Partial<VideoProjectProps>
 ) => {
   return createStore<VideoProjectState>()((set, state) => ({
     ...DEFAULT_PROPS,
@@ -58,6 +73,10 @@ export const createVideoProjectStore = (
     setProjectId: (projectId: string) => set({ projectId }),
     setProjectDialogOpen: (projectDialogOpen: boolean) =>
       set({ projectDialogOpen }),
+    setGenerateData: (generateData: Partial<GenerateData>) =>
+      set({
+        generateData: Object.assign({}, state().generateData, generateData),
+      }),
     setPlayer: (player: PlayerRef) => set({ player }),
     setPlayerCurrentTimestamp: (playerCurrentTimestamp: number) =>
       set({ playerCurrentTimestamp }),
@@ -86,11 +105,11 @@ export const createVideoProjectStore = (
 };
 
 export const VideoProjectStoreContext = createContext<VideoProjectStore>(
-  createVideoProjectStore(),
+  createVideoProjectStore()
 );
 
 export function useVideoProjectStore<T>(
-  selector: (state: VideoProjectState) => T,
+  selector: (state: VideoProjectState) => T
 ): T {
   const store = useContext(VideoProjectStoreContext);
   return useStore(store, selector);

@@ -147,6 +147,20 @@ export function MediaGallerySheet({
   const selectedMedia =
     jobs.find((job) => job.id === selectedMediaId) ?? MEDIA_PLACEHOLDER;
   const setSelectedMediaId = useVideoProjectStore((s) => s.setSelectedMediaId);
+  const setGenerateData = useVideoProjectStore((s) => s.setGenerateData);
+  const setGenerateMediaType = useVideoProjectStore(
+    (s) => s.setGenerateMediaType
+  );
+
+  const openGenerateDialog = useVideoProjectStore((s) => s.openGenerateDialog);
+
+  const handleOpenGenerateDialog = () => {
+    setGenerateMediaType("video");
+    openGenerateDialog();
+    const image = selectedMedia.output?.images?.[0]?.url;
+    setGenerateData({ image });
+    setSelectedMediaId(null);
+  };
 
   // Event handlers
   const preventClose: MouseEventHandler = (e) => {
@@ -245,7 +259,11 @@ export function MediaGallerySheet({
             <div className="flex flex-row gap-2">
               {selectedMedia?.mediaType === "image" && (
                 <>
-                  <Button variant="secondary" disabled={deleteMedia.isPending}>
+                  <Button
+                    onClick={handleOpenGenerateDialog}
+                    variant="secondary"
+                    disabled={deleteMedia.isPending}
+                  >
                     <FilmIcon className="w-4 h-4 opacity-50" />
                     Make Video
                   </Button>

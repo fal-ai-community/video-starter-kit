@@ -78,11 +78,7 @@ export function GenerateDialog({
   onOpenChange,
   ...props
 }: GenerateDialogProps) {
-  // TODO: improve field per model
-  const [prompt, setPrompt] = useState("");
-  const [image, setImage] = useState<File | null>(null);
-  const [duration, setDuration] = useState(30);
-  const [voice, setVoice] = useState("");
+  const { generateData, setGenerateData } = useVideoProjectStore((s) => s);
 
   const projectId = useProjectId();
   const openGenerateDialog = useVideoProjectStore((s) => s.openGenerateDialog);
@@ -92,8 +88,10 @@ export function GenerateDialog({
   const handleOnOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
       closeGenerateDialog();
-      setPrompt("");
-      setImage(null);
+      setGenerateData({
+        prompt: "",
+        image: null,
+      });
       return;
     }
     onOpenChange?.(isOpen);
@@ -105,10 +103,13 @@ export function GenerateDialog({
   const { toast } = useToast();
   const enhance = useMutation({
     mutationFn: async () => {
-      return enhancePrompt(prompt, { type: mediaType, project });
+      return enhancePrompt(generateData.prompt, {
+        type: mediaType,
+        project,
+      });
     },
     onSuccess: (enhancedPrompt) => {
-      setPrompt(enhancedPrompt);
+      setGenerateData({ prompt: enhancedPrompt });
     },
     onError: (error) => {
       console.warn("Failed to create suggestion", error);
@@ -138,7 +139,7 @@ export function GenerateDialog({
         endpoint?.endpointId === "fal-ai/hunyuan-video") ||
       mediaType !== "video"
     ) {
-      setImage(null);
+      setGenerateData({ image: null });
     }
 
     setEndpointId(endpoint?.endpointId ?? AVAILABLE_ENDPOINTS[0].endpointId);
@@ -146,7 +147,7 @@ export function GenerateDialog({
   // TODO improve model-specific parameters
   type InputType = {
     prompt: string;
-    image_url?: File;
+    image_url?: File | string | null;
     image_size?: { width: number; height: number };
     aspect_ratio?: string;
     seconds_total?: number;
@@ -155,24 +156,27 @@ export function GenerateDialog({
   };
 
   const input: InputType = {
-    prompt: prompt,
+    prompt: generateData.prompt,
     image_url: undefined,
     image_size:
       mediaType === "image" ? { width: 1920, height: 1080 } : undefined,
     aspect_ratio: mediaType === "video" ? "16:9" : undefined,
-    seconds_total: endpointId === "fal-ai/stable-audio" ? duration : undefined,
-    voice: endpointId === "fal-ai/playht/tts/v3" ? voice : undefined,
-    input: endpointId === "fal-ai/playht/tts/v3" ? prompt : undefined,
+    seconds_total:
+      endpointId === "fal-ai/stable-audio" ? generateData.duration : undefined,
+    voice:
+      endpointId === "fal-ai/playht/tts/v3" ? generateData.voice : undefined,
+    input:
+      endpointId === "fal-ai/playht/tts/v3" ? generateData.prompt : undefined,
   };
 
-  if (image) {
-    input["image_url"] = image;
+  if (generateData.image) {
+    input["image_url"] = generateData.image;
   }
 
   const extraInput =
     endpointId === "fal-ai/f5-tts"
       ? {
-          gen_text: prompt,
+          gen_text: generateData.prompt,
           ref_audio_url:
             "https://github.com/SWivid/F5-TTS/raw/21900ba97d5020a5a70bcc9a0575dc7dec5021cb/tests/ref_audio/test_en_1_ref_short.wav",
           ref_text: "Some call me nature, others call me mother nature.",
@@ -183,7 +187,7 @@ export function GenerateDialog({
   const createJob = useJobCreator({
     projectId,
     endpointId:
-      image && mediaType === "video"
+      generateData.image && mediaType === "video"
         ? `${endpointId}/image-to-video`
         : endpointId,
     mediaType,
@@ -255,9 +259,9 @@ export function GenerateDialog({
           <Textarea
             className="text-base placeholder:text-base w-full resize-none"
             placeholder="Imagine..."
-            value={prompt}
+            value={generateData.prompt}
             rows={3}
-            onChange={(e) => setPrompt(e.target.value)}
+            onChange={(e) => setGenerateData({ prompt: e.target.value })}
           />
 
           {mediaType === "video" && endpointId !== "fal-ai/hunyuan-video" && (
@@ -269,10 +273,10 @@ export function GenerateDialog({
                 id="image-upload"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) setImage(file);
+                  if (file) setGenerateData({ image: file });
                 }}
               />
-              {!image && (
+              {!generateData.image && (
                 <label
                   htmlFor="image-upload"
                   className="cursor-pointer min-h-[70px] flex flex-col items-center justify-center border border-dashed border-neutral-700 rounded-md p-4"
@@ -282,14 +286,19 @@ export function GenerateDialog({
                   </span>
                 </label>
               )}
-              {image && (
+              {generateData.image && (
                 <label
                   htmlFor="image-upload"
                   className="cursor-pointer max-h-[70px] flex flex-col items-center justify-center border border-dashed border-neutral-700 rounded-md"
                 >
                   <img
                     id="image-preview"
-                    src={image ? URL.createObjectURL(image) : ""}
+                    src={
+                      generateData.image &&
+                      typeof generateData.image !== "string"
+                        ? URL.createObjectURL(generateData.image)
+                        : generateData.image || ""
+                    }
                     className="h-[70px]"
                     alt="Image Preview"
                   />
@@ -309,14 +318,21 @@ export function GenerateDialog({
                   max={30}
                   step={1}
                   type="number"
-                  value={duration}
-                  onChange={(e) => setDuration(parseInt(e.target.value))}
+                  value={generateData.duration}
+                  onChange={(e) =>
+                    setGenerateData({ duration: parseInt(e.target.value) })
+                  }
                 />
                 <span>s</span>
               </div>
             )}
             {endpointId === "fal-ai/playht/tts/v3" && (
-              <VoiceSelector value={voice} onValueChange={setVoice} />
+              <VoiceSelector
+                value={generateData.voice}
+                onValueChange={(voice) => {
+                  setGenerateData({ voice });
+                }}
+              />
             )}
             {/* <Popover>
               <PopoverTrigger asChild>
