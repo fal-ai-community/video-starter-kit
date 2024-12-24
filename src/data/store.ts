@@ -9,10 +9,11 @@ export const LAST_PROJECT_ID_KEY = "__aivs_lastProjectId";
 
 export type MediaType = "image" | "video" | "voiceover" | "music";
 
-type GenerateData = {
+export type GenerateData = {
   prompt: string;
   image?: File | string | null;
   video_url?: File | string | null;
+  audio_url?: File | string | null;
   duration: number;
   voice: string;
 };

@@ -4,13 +4,15 @@ export const fal = createFalClient({
   proxyUrl: "/api/fal",
 });
 
+export type InputAsset = "video" | "image" | "audio";
+
 export type ApiInfo = {
   endpointId: string;
   label: string;
   description: string;
   cost: string;
   inferenceTime?: string;
-  inputAsset?: "video" | "image" | "audio";
+  inputAsset?: InputAsset[];
   category: "image" | "video" | "music" | "voiceover";
 };
 
@@ -49,7 +51,7 @@ export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
     description: "High quality video, realistic motion and physics",
     cost: "",
     category: "video",
-    inputAsset: "image",
+    inputAsset: ["image"],
   },
   {
     endpointId: "fal-ai/hunyuan-video",
@@ -64,7 +66,7 @@ export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
     description: "High quality video",
     cost: "",
     category: "video",
-    inputAsset: "image",
+    inputAsset: ["image"],
   },
   {
     endpointId: "fal-ai/luma-dream-machine",
@@ -72,7 +74,7 @@ export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
     description: "High quality video",
     cost: "",
     category: "video",
-    inputAsset: "image",
+    inputAsset: ["image"],
   },
   {
     endpointId: "fal-ai/minimax-music",
@@ -88,8 +90,17 @@ export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
     description:
       "MMAudio generates synchronized audio given video and/or text inputs. It can be combined with video models to get videos with audio.",
     cost: "",
-    inputAsset: "video",
+    inputAsset: ["video"],
     category: "music",
+  },
+  {
+    endpointId: "fal-ai/sync-lipsync",
+    label: "sync.so -- lipsync 1.8.0",
+    description:
+      "Generate realistic lipsync animations from audio using advanced algorithms for high-quality synchronization.",
+    cost: "",
+    inputAsset: ["video", "audio"],
+    category: "video",
   },
   {
     endpointId: "fal-ai/stable-audio",

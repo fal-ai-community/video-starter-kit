@@ -1,15 +1,17 @@
 import { useJobCreator } from "@/data/mutations";
 import { useProject, useProjectJobs } from "@/data/queries";
 import {
+  GenerateData,
   type MediaType,
   useProjectId,
   useVideoProjectStore,
 } from "@/data/store";
 import { useToast } from "@/hooks/use-toast";
-import { AVAILABLE_ENDPOINTS } from "@/lib/fal";
+import { AVAILABLE_ENDPOINTS, InputAsset } from "@/lib/fal";
 import { enhancePrompt } from "@/lib/prompt";
 import { useMutation } from "@tanstack/react-query";
 import {
+  ArrowLeft,
   ImageIcon,
   MicIcon,
   MusicIcon,
@@ -76,6 +78,12 @@ function ModelEndpointPicker({
 
 type GenerateDialogProps = {} & Parameters<typeof Dialog>[0];
 
+const assetKeyMap: Record<InputAsset, keyof GenerateData> = {
+  image: "image",
+  video: "video_url",
+  audio: "audio_url",
+};
+
 export function GenerateDialog({
   onOpenChange,
   ...props
@@ -96,6 +104,7 @@ export function GenerateDialog({
         prompt: "",
         image: null,
         video_url: null,
+        audio_url: null,
       });
       return;
     }
@@ -163,6 +172,7 @@ export function GenerateDialog({
     prompt: string;
     image_url?: File | string | null;
     video_url?: File | string | null;
+    audio_url?: File | string | null;
     image_size?: { width: number; height: number } | string;
     aspect_ratio?: string;
     seconds_total?: number;
@@ -188,6 +198,9 @@ export function GenerateDialog({
   }
   if (generateData.video_url) {
     input["video_url"] = generateData.video_url;
+  }
+  if (generateData.audio_url) {
+    input["audio_url"] = generateData.audio_url;
   }
 
   const extraInput =
@@ -287,11 +300,18 @@ export function GenerateDialog({
           {tab === "asset" && (
             <div className="mt-4 flex flex-row gap-2 items-center justify-start font-medium text-base">
               <div>Select Asset</div>
+              <Button
+                variant="outline"
+                className="ml-auto"
+                onClick={() => setTab("generation")}
+              >
+                <ArrowLeft size={14} /> Back
+              </Button>
             </div>
           )}
         </DialogHeader>
         {tab === "generation" && (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-4 divide-y divide-border">
             <Textarea
               className="text-base placeholder:text-base w-full resize-none"
               placeholder="Imagine..."
@@ -300,87 +320,74 @@ export function GenerateDialog({
               onChange={(e) => setGenerateData({ prompt: e.target.value })}
             />
 
-            {endpoint?.inputAsset && (
-              <div className="">
-                <Input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  id="image-upload"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) setGenerateData({ image: file });
-                  }}
-                />
-                {!generateData.image && !generateData.video_url && (
-                  <div className="flex flex-col min-h-[70px] justify-between">
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        setTab("asset");
-                        setAssetMediaType(endpoint.inputAsset ?? "all");
-                      }}
-                      className="cursor-pointer min-h-[30px] flex flex-col items-center justify-center border border-dashed border-border rounded-md px-4"
-                    >
-                      <span className="text-muted-foreground text-xs text-center text-nowrap">
-                        Select an {endpoint.inputAsset ?? "asset"}
-                      </span>
-                    </Button>
-                    <label
-                      htmlFor="image-upload"
-                      className="cursor-pointer min-h-[30px] flex flex-col items-center justify-center border border-dashed border-border rounded-md px-4"
-                    >
-                      <span className="text-muted-foreground text-xs text-center text-nowrap">
-                        Upload an {endpoint.inputAsset ?? "asset"}
-                      </span>
-                    </label>
-                  </div>
-                )}
-                {(generateData.image || generateData.video_url) && (
-                  <div className="cursor-pointer relative max-h-[70px] flex flex-col items-center justify-center border border-dashed border-border rounded-md">
-                    <WithTooltip tooltip="Remove media">
-                      <button
-                        className="p-1 rounded hover:bg-black/50 absolute top-1 z-50 bg-black/80 right-1 group-hover:text-white"
-                        onClick={() =>
-                          setGenerateData({
-                            image: undefined,
-                            video_url: undefined,
-                          })
-                        }
+            <div className="flex divide-x divide-border">
+              {endpoint?.inputAsset?.map((asset) => (
+                <div className="max-w-xs py-4 px-8" key={asset}>
+                  <h4 className="capitalize font-medium mb-2">
+                    {asset} Reference
+                  </h4>
+                  <Input
+                    key={asset}
+                    type="file"
+                    className="hidden"
+                    id={`${asset}-upload`}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      console.log(asset, assetKeyMap[asset], file);
+                      if (file) setGenerateData({ [assetKeyMap[asset]]: file });
+                    }}
+                  />
+                  {!generateData[assetKeyMap[asset]] && (
+                    <div className="flex flex-col min-h-[70px] justify-between">
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          setTab("asset");
+                          setAssetMediaType(asset ?? "all");
+                        }}
+                        className="cursor-pointer min-h-[30px] flex flex-col items-center justify-center border border-dashed border-border rounded-md px-4"
                       >
-                        <TrashIcon className="w-3 h-3 stroke-2" />
-                      </button>
-                    </WithTooltip>
-                    {generateData.video_url && (
-                      <video
-                        src={
-                          generateData.video_url &&
-                          typeof generateData.video_url !== "string"
-                            ? URL.createObjectURL(generateData.video_url)
-                            : generateData.video_url || ""
-                        }
-                        className="h-[70px]"
-                        controls={false}
-                        style={{ pointerEvents: "none" }}
-                      />
-                    )}
-                    {generateData.image && (
-                      <img
-                        id="image-preview"
-                        src={
-                          generateData.image &&
-                          typeof generateData.image !== "string"
-                            ? URL.createObjectURL(generateData.image)
-                            : generateData.image || ""
-                        }
-                        className="h-[70px]"
-                        alt="Image Preview"
-                      />
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
+                        <span className="text-muted-foreground text-xs text-center text-nowrap">
+                          Select
+                        </span>
+                      </Button>
+                      <label
+                        htmlFor={`${asset}-upload`}
+                        className="cursor-pointer min-h-[30px] flex flex-col items-center justify-center border border-dashed border-border rounded-md px-4"
+                      >
+                        <span className="text-muted-foreground text-xs text-center text-nowrap">
+                          Upload
+                        </span>
+                      </label>
+                    </div>
+                  )}
+                  {generateData[assetKeyMap[asset]] && (
+                    <div className="cursor-pointer overflow-hidden relative w-full flex flex-col items-center justify-center border border-dashed border-border rounded-md">
+                      <WithTooltip tooltip="Remove media">
+                        <button
+                          className="p-1 rounded hover:bg-black/50 absolute top-1 z-50 bg-black/80 right-1 group-hover:text-white"
+                          onClick={() =>
+                            setGenerateData({
+                              image: undefined,
+                              video_url: undefined,
+                              audio_url: undefined,
+                            })
+                          }
+                        >
+                          <TrashIcon className="w-3 h-3 stroke-2" />
+                        </button>
+                      </WithTooltip>
+                      {generateData[assetKeyMap[asset]] && (
+                        <SelectedAssetPreview
+                          asset={asset}
+                          data={generateData}
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
         {tab === "asset" && (
@@ -472,3 +479,52 @@ export function GenerateDialog({
     </Dialog>
   );
 }
+
+const SelectedAssetPreview = ({
+  data,
+  asset,
+}: {
+  data: GenerateData;
+  asset: InputAsset;
+}) => {
+  console.log(asset, { data });
+  return (
+    <>
+      {data.audio_url && asset === "audio" && (
+        <audio
+          src={
+            data.audio_url && typeof data.audio_url !== "string"
+              ? URL.createObjectURL(data.audio_url)
+              : data.audio_url || ""
+          }
+          className=""
+          controls={true}
+        />
+      )}
+      {data.video_url && asset === "video" && (
+        <video
+          src={
+            data.video_url && typeof data.video_url !== "string"
+              ? URL.createObjectURL(data.video_url)
+              : data.video_url || ""
+          }
+          className=""
+          controls={false}
+          style={{ pointerEvents: "none" }}
+        />
+      )}
+      {data.image && asset === "image" && (
+        <img
+          id="image-preview"
+          src={
+            data.image && typeof data.image !== "string"
+              ? URL.createObjectURL(data.image)
+              : data.image || ""
+          }
+          className=""
+          alt="Image Preview"
+        />
+      )}
+    </>
+  );
+};
