@@ -62,7 +62,7 @@ export function VideoTrackView({
   };
 
   const isSelected = useVideoProjectStore((state) =>
-    state.selectedKeyframes.includes(frame.id),
+    state.selectedKeyframes.includes(frame.id)
   );
   const selectKeyframe = useVideoProjectStore((state) => state.selectKeyframe);
   const handleOnClick: MouseEventHandler = (e) => {
@@ -107,7 +107,7 @@ export function VideoTrackView({
           {
             "border-white/50": isSelected,
           },
-          className,
+          className
         )}
         {...props}
       >
@@ -119,7 +119,7 @@ export function VideoTrackView({
               "bg-teal-500 dark:bg-teal-600": track.type === "video",
               "bg-sky-500 dark:bg-sky-600": track.type === "music",
               "bg-violet-500 dark:bg-violet-600": track.type === "voiceover",
-            },
+            }
           )}
         >
           <div className="px-2 py-0.5 bg-black/10 flex flex-row items-center">
@@ -154,7 +154,6 @@ export function VideoTrackView({
                 className="rounded-md h-8"
                 controls={false}
                 poster={imageUrl}
-                preload="none"
                 style={{ pointerEvents: "none" }}
               />
             )}

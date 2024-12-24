@@ -22,9 +22,16 @@ import { useToast } from "@/hooks/use-toast";
 type JobItemProps = {
   data: GenerationJob;
   onOpen: (data: GenerationJob) => void;
+  draggable?: boolean;
 } & HTMLAttributes<HTMLDivElement>;
 
-export function JobItem({ data, className, onOpen, ...props }: JobItemProps) {
+export function JobItem({
+  data,
+  className,
+  onOpen,
+  draggable = true,
+  ...props
+}: JobItemProps) {
   const isDone = data.status === "completed" || data.status === "failed";
   const queryClient = useQueryClient();
   const projectId = useProjectId();
@@ -82,7 +89,7 @@ export function JobItem({ data, className, onOpen, ...props }: JobItemProps) {
   });
   const mediaUrl = Array.isArray(data.output?.images)
     ? data.output.images[0].url
-    : "";
+    : data.output?.video?.url || "";
   const jobId = data.id.split("-")[0];
   const handleOnDragStart: DragEventHandler<HTMLDivElement> = (event) => {
     event.dataTransfer.setData("job", JSON.stringify(data));
@@ -92,15 +99,20 @@ export function JobItem({ data, className, onOpen, ...props }: JobItemProps) {
   return (
     <div
       className={cn(
-        "flex items-start space-x-2 py-2 px-4 hover:bg-accent transition-all",
-        className,
+        "flex items-start space-x-2 py-2 w-full px-4 hover:bg-accent transition-all",
+        className
       )}
       {...props}
-      draggable={data.status === "completed"}
+      onClick={(e) => {
+        if (draggable) return;
+        e.stopPropagation();
+        onOpen(data);
+      }}
+      draggable={draggable && data.status === "completed"}
       onDragStart={handleOnDragStart}
     >
       <button
-        className="w-16 h-16 aspect-square rounded overflow-hidden border border-transparent hover:border-accent transition-all"
+        className="w-16 h-16 aspect-square relative rounded overflow-hidden border border-transparent hover:border-accent transition-all"
         onClick={() => onOpen(data)}
       >
         {data.status === "completed" ? (
@@ -112,13 +124,28 @@ export function JobItem({ data, className, onOpen, ...props }: JobItemProps) {
                 className="h-full w-full object-cover"
               />
             )}
-            {data.mediaType !== "image" && (
-              <div className="w-full h-full bg-white/5 flex items-center justify-center text-muted-foreground">
+            {data.mediaType === "video" && (
+              <video
+                src={mediaUrl}
+                className="h-full w-full object-cover"
+                controls={false}
+                style={{ pointerEvents: "none" }}
+              />
+            )}
+            <div
+              className={cn(
+                "w-full h-full flex items-center justify-center top-0 left-0 absolute p-2 z-50",
+                (data.mediaType === "music" ||
+                  data.mediaType === "voiceover") &&
+                  "rounded-full bg-white/5"
+              )}
+            >
+              <div className="z-50 bg-black/60 p-2 rounded-full flex items-center justify-center text-muted-foreground">
                 {createElement(trackIcons[data.mediaType], {
-                  className: "w-8 h-8",
+                  className: "w-5 h-5 text-white",
                 } as any)}
               </div>
-            )}
+            </div>
           </>
         ) : (
           <div className="w-full h-full bg-white/5 flex items-center justify-center text-muted-foreground">

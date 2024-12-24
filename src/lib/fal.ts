@@ -10,6 +10,7 @@ export type ApiInfo = {
   description: string;
   cost: string;
   inferenceTime?: string;
+  inputAsset?: "video" | "image" | "audio";
   category: "image" | "video" | "music" | "voiceover";
 };
 
@@ -48,6 +49,7 @@ export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
     description: "High quality video, realistic motion and physics",
     cost: "",
     category: "video",
+    inputAsset: "image",
   },
   {
     endpointId: "fal-ai/hunyuan-video",
@@ -62,6 +64,7 @@ export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
     description: "High quality video",
     cost: "",
     category: "video",
+    inputAsset: "image",
   },
   {
     endpointId: "fal-ai/luma-dream-machine",
@@ -69,6 +72,7 @@ export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
     description: "High quality video",
     cost: "",
     category: "video",
+    inputAsset: "image",
   },
   {
     endpointId: "fal-ai/minimax-music",
@@ -76,6 +80,15 @@ export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
     description:
       "Advanced AI techniques to create high-quality, diverse musical compositions",
     cost: "",
+    category: "music",
+  },
+  {
+    endpointId: "fal-ai/mmaudio-v2",
+    label: "MMAudio V2",
+    description:
+      "MMAudio generates synchronized audio given video and/or text inputs. It can be combined with video models to get videos with audio.",
+    cost: "",
+    inputAsset: "video",
     category: "music",
   },
   {
