@@ -106,6 +106,7 @@ export function GenerateDialog({
         image: null,
         video_url: null,
         audio_url: null,
+        duration: 30,
       });
       return;
     }
@@ -300,6 +301,7 @@ export function GenerateDialog({
                     image: null,
                     video_url: null,
                     audio_url: null,
+                    duration: 30,
                   });
                   setEndpointId(endpoint);
                 }}
