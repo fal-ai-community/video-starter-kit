@@ -43,6 +43,7 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { VoiceSelector } from "./playht/voice-selector";
 import { JobItem } from "./jobs-panel";
+import { GenerationJob } from "@/data/schema";
 
 type ModelEndpointPickerProps = {
   mediaType: string;
@@ -236,15 +237,17 @@ export function GenerateDialog({
     });
   };
 
-  const handleSelectMedia = (job: any) => {
-    console.log({ job });
+  const handleSelectMedia = (job: GenerationJob) => {
     if (job.mediaType === "image") {
-      setGenerateData({ image: job.output.images?.[0]?.url });
-      setTab("generation");
+      setGenerateData({ image: job.output?.images?.[0]?.url });
     } else if (job.mediaType === "video") {
-      setGenerateData({ video_url: job.output.video?.url });
-      setTab("generation");
+      setGenerateData({ video_url: job.output?.video?.url });
+    } else if (job.mediaType === "music" || job.mediaType === "voiceover") {
+      setGenerateData({
+        audio_url: job.output?.audio?.url || job.output?.audio_file?.url,
+      });
     }
+    setTab("generation");
   };
 
   return (
@@ -395,6 +398,11 @@ export function GenerateDialog({
             {jobs
               .filter((job) => {
                 if (assetMediaType === "all") return true;
+                if (
+                  assetMediaType === "audio" &&
+                  (job.mediaType === "voiceover" || job.mediaType === "music")
+                )
+                  return true;
                 return job.mediaType === assetMediaType;
               })
               .map((job, index) => (
