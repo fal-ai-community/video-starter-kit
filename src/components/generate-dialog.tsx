@@ -186,8 +186,7 @@ export function GenerateDialog({
     image_url: undefined,
     image_size: mediaType === "image" ? "landscape_16_9" : undefined,
     aspect_ratio: mediaType === "video" ? "16:9" : undefined,
-    seconds_total:
-      endpointId === "fal-ai/stable-audio" ? generateData.duration : undefined,
+    seconds_total: generateData.duration ?? undefined,
     voice:
       endpointId === "fal-ai/playht/tts/v3" ? generateData.voice : undefined,
     input:
@@ -296,7 +295,14 @@ export function GenerateDialog({
               <ModelEndpointPicker
                 mediaType={mediaType}
                 value={endpointId}
-                onValueChange={setEndpointId}
+                onValueChange={(endpoint) => {
+                  setGenerateData({
+                    image: null,
+                    video_url: null,
+                    audio_url: null,
+                  });
+                  setEndpointId(endpoint);
+                }}
               />
             </div>
           )}
@@ -334,10 +340,29 @@ export function GenerateDialog({
                     type="file"
                     className="hidden"
                     id={`${asset}-upload`}
-                    onChange={(e) => {
+                    onChange={async (e) => {
                       const file = e.target.files?.[0];
-                      console.log(asset, assetKeyMap[asset], file);
-                      if (file) setGenerateData({ [assetKeyMap[asset]]: file });
+                      if (file) {
+                        if (asset === "video" || asset === "audio") {
+                          const duration = await new Promise<number>(
+                            (resolve) => {
+                              const media = document.createElement(asset);
+                              media.onloadedmetadata = () => {
+                                resolve(media.duration);
+                              };
+                              media.src = URL.createObjectURL(file);
+                            }
+                          );
+
+                          const data: Partial<GenerateData> = {
+                            [assetKeyMap[asset]]: file,
+                          };
+                          if (!generateData.duration) data.duration = duration;
+                          setGenerateData(data);
+                        } else {
+                          setGenerateData({ [assetKeyMap[asset]]: file });
+                        }
+                      }
                     }}
                   />
                   {!generateData[assetKeyMap[asset]] && (
@@ -371,9 +396,7 @@ export function GenerateDialog({
                           className="p-1 rounded hover:bg-black/50 absolute top-1 z-50 bg-black/80 right-1 group-hover:text-white"
                           onClick={() =>
                             setGenerateData({
-                              image: undefined,
-                              video_url: undefined,
-                              audio_url: undefined,
+                              [assetKeyMap[asset]]: undefined,
                             })
                           }
                         >
