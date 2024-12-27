@@ -89,7 +89,8 @@ export function GenerateDialog({
   onOpenChange,
   ...props
 }: GenerateDialogProps) {
-  const { generateData, setGenerateData } = useVideoProjectStore((s) => s);
+  const { generateData, setGenerateData, resetGenerateData } =
+    useVideoProjectStore((s) => s);
 
   const [tab, setTab] = useState<"generation" | "asset">("generation");
   const [assetMediaType, setAssetMediaType] = useState("all");
@@ -101,13 +102,7 @@ export function GenerateDialog({
   const handleOnOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
       closeGenerateDialog();
-      setGenerateData({
-        prompt: "",
-        image: null,
-        video_url: null,
-        audio_url: null,
-        duration: 30,
-      });
+      resetGenerateData();
       return;
     }
     onOpenChange?.(isOpen);
@@ -297,12 +292,7 @@ export function GenerateDialog({
                 mediaType={mediaType}
                 value={endpointId}
                 onValueChange={(endpoint) => {
-                  setGenerateData({
-                    image: null,
-                    video_url: null,
-                    audio_url: null,
-                    duration: 30,
-                  });
+                  resetGenerateData();
                   setEndpointId(endpoint);
                 }}
               />

@@ -35,6 +35,7 @@ interface VideoProjectProps {
 interface VideoProjectState extends VideoProjectProps {
   setProjectId: (projectId: string) => void;
   setProjectDialogOpen: (open: boolean) => void;
+  resetGenerateData: () => void;
   setPlayer: (player: PlayerRef) => void;
   setPlayerCurrentTimestamp: (timestamp: number) => void;
   setPlayerState: (state: "playing" | "paused") => void;
@@ -62,6 +63,8 @@ const DEFAULT_PROPS: VideoProjectProps = {
     image: null,
     duration: 30,
     voice: "",
+    video_url: null,
+    audio_url: null,
   },
   exportDialogOpen: false,
 };
@@ -81,6 +84,18 @@ export const createVideoProjectStore = (
     setGenerateData: (generateData: Partial<GenerateData>) =>
       set({
         generateData: Object.assign({}, state().generateData, generateData),
+      }),
+    resetGenerateData: () =>
+      set({
+        generateData: {
+          ...state().generateData,
+          prompt: "",
+          duration: 30,
+          image: null,
+          video_url: null,
+          audio_url: null,
+          voice: "",
+        },
       }),
     setPlayer: (player: PlayerRef) => set({ player }),
     setPlayerCurrentTimestamp: (playerCurrentTimestamp: number) =>
