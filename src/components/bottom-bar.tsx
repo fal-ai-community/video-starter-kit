@@ -34,7 +34,7 @@ export default function BottomBar() {
   const queryClient = useQueryClient();
   const projectId = useProjectId();
   const playerCurrentTimestamp = useVideoProjectStore(
-    (s) => s.playerCurrentTimestamp,
+    (s) => s.playerCurrentTimestamp
   );
   const formattedTimestamp =
     (playerCurrentTimestamp < 10 ? "0" : "") +
@@ -68,10 +68,18 @@ export default function BottomBar() {
         track = newTrack;
       }
       const keyframes = await db.keyFrames.keyFramesByTrack(track.id);
-      const duration = keyframes.reduce(
-        (acc, frame) => acc + frame.duration,
-        0,
-      );
+
+      const lastKeyframe = [...keyframes]
+        .sort((a, b) => a.timestamp - b.timestamp)
+        .reduce(
+          (acc, frame) => {
+            if (frame.timestamp + frame.duration > acc.timestamp + acc.duration)
+              return frame;
+            return acc;
+          },
+          { timestamp: 0, duration: 0 }
+        );
+
       const newId = await db.keyFrames.create({
         trackId: track.id,
         data: {
@@ -80,7 +88,9 @@ export default function BottomBar() {
           prompt: job.input?.prompt || "",
           url: job.input?.image_url?.url,
         },
-        timestamp: duration ? duration + 1 : 0,
+        timestamp: lastKeyframe
+          ? lastKeyframe.timestamp + 1 + lastKeyframe.duration / 1000
+          : 0,
         duration:
           resolveDuration(job.input) ?? resolveDuration(job.output) ?? 5000,
       });
@@ -97,7 +107,7 @@ export default function BottomBar() {
     queryFn: async () => {
       const result = await db.tracks.tracksByProject(projectId);
       return result.toSorted(
-        (a, b) => TRACK_TYPE_ORDER[a.type] - TRACK_TYPE_ORDER[b.type],
+        (a, b) => TRACK_TYPE_ORDER[a.type] - TRACK_TYPE_ORDER[b.type]
       );
     },
   });
@@ -169,7 +179,7 @@ export default function BottomBar() {
           "min-h-64 max-h-72 h-full flex flex-row bg-background-light overflow-y-scroll transition-colors",
           {
             "bg-white/5": dragOverTracks,
-          },
+          }
         )}
         onDragOver={handleOnDragOver}
         onDragLeave={() => setDragOverTracks(false)}

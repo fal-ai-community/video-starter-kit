@@ -47,7 +47,7 @@ export type VideoKeyFrame = {
 };
 
 export type KeyFrameData = {
-  type: "prompt" | "image";
+  type: "prompt" | "image" | "video" | "voiceover" | "music";
   jobId: string;
 } & (
   | {
@@ -56,6 +56,11 @@ export type KeyFrameData = {
     }
   | {
       type: "image";
+      prompt: string;
+      url: string;
+    }
+  | {
+      type: "video";
       prompt: string;
       url: string;
     }

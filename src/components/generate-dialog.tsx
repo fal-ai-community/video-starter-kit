@@ -510,7 +510,6 @@ const SelectedAssetPreview = ({
   data: GenerateData;
   asset: InputAsset;
 }) => {
-  console.log(asset, { data });
   return (
     <>
       {data.audio_url && asset === "audio" && (
