@@ -181,28 +181,23 @@ export function JobItem({
             } as any)}
             Job <code className="text-muted-foreground">#{jobId}</code>
           </h3>
-          <Badge
-            variant="outline"
-            className={cn({
-              "text-rose-700": data.status === "failed",
-              "text-sky-500": data.status === "running",
-              "text-muted-foreground": data.status === "pending",
-            })}
-          >
-            {data.status}
-          </Badge>
+          {data.status !== "completed" && (
+            <Badge
+              variant="outline"
+              className={cn({
+                "text-rose-700": data.status === "failed",
+                "text-sky-500": data.status === "running",
+                "text-muted-foreground": data.status === "pending",
+              })}
+            >
+              {data.status}
+            </Badge>
+          )}
         </div>
         <div className="flex flex-row gap-2 justify-between">
           <span className="text-xs text-muted-foreground">
             {formatDistanceToNow(data.createdAt, { addSuffix: true })}
           </span>
-          {!!data.endedAt && (
-            <span className="text-xs text-muted-foreground">
-              {formatDuration({
-                seconds: (data.endedAt - data.createdAt) / 1000,
-              })}
-            </span>
-          )}
         </div>
       </div>
     </div>

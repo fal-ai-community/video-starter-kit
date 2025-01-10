@@ -31,6 +31,7 @@
     "@remotion/player": "4.0.241",
     "@remotion/preload": "4.0.241",
     "@tanstack/react-query": "^5.62.7",
+    "@uploadthing/react": "^7.1.5",
     "@vercel/kv": "^3.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -47,6 +48,7 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "throttle-debounce": "^5.0.2",
+    "uploadthing": "^7.4.4",
     "waveform-path": "^0.0.2",
     "zod": "^3.24.1",
     "zustand": "^5.0.2"

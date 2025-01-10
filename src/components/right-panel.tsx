@@ -1,8 +1,8 @@
 "use client";
 
 import { useProjectUpdater } from "@/data/mutations";
-import { useProject, useProjectJobs } from "@/data/queries";
-import { PROJECT_PLACEHOLDER } from "@/data/schema";
+import { queryKeys, useProject, useProjectJobs } from "@/data/queries";
+import { GenerationJob, PROJECT_PLACEHOLDER } from "@/data/schema";
 import { useProjectId, useVideoProjectStore } from "@/data/store";
 import {
   ChevronDown,
@@ -14,6 +14,7 @@ import {
   ListPlusIcon,
   MicIcon,
   MusicIcon,
+  Upload,
 } from "lucide-react";
 import { JobsPanel } from "./jobs-panel";
 import { Button } from "./ui/button";
@@ -26,6 +27,12 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { useState } from "react";
+import { UploadButton } from "@/utils/uploadthing";
+import { cn, resolveDurationFromMedia } from "@/lib/utils";
+import { ClientUploadedFileData } from "uploadthing/types";
+import { db } from "@/data/db";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/hooks/use-toast";
 
 export default function RightPanel() {
   const projectId = useProjectId();
@@ -33,16 +40,82 @@ export default function RightPanel() {
   const { data: project = PROJECT_PLACEHOLDER } = useProject(projectId);
   const projectUpdate = useProjectUpdater(projectId);
   const [mediaType, setMediaType] = useState("all");
+  const queryClient = useQueryClient();
 
   const { data: jobs = [], isLoading } = useProjectJobs(projectId);
   const setProjectDialogOpen = useVideoProjectStore(
-    (s) => s.setProjectDialogOpen,
+    (s) => s.setProjectDialogOpen
   );
   const openGenerateDialog = useVideoProjectStore((s) => s.openGenerateDialog);
 
   const handleOpenGenerateDialog = () => {
     openGenerateDialog();
   };
+
+  const handleUploadComplete = async (
+    files: ClientUploadedFileData<{
+      uploadedBy: string;
+    }>[]
+  ) => {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const mediaType = file.type.split("/")[0];
+
+      let data: Omit<GenerationJob, "id"> = {
+        projectId,
+        createdAt: Date.now(),
+        endedAt: Date.now(),
+        endpointId: "",
+        requestId: "",
+        mediaType: mediaType as any,
+        status: "completed",
+        input: {},
+      };
+
+      if (mediaType === "image") {
+        const img = new Image();
+        img.src = file.url;
+        img.onload = async () => {
+          const width = img.width;
+          const height = img.height;
+
+          data.output = {
+            images: [
+              {
+                url: file.url,
+                content_type: file.type,
+                width,
+                height,
+              },
+            ],
+          };
+
+          await db.jobs.create(data).finally(() => {
+            queryClient.invalidateQueries({
+              queryKey: queryKeys.projectJobs(projectId),
+            });
+          });
+        };
+      } else {
+        data.mediaType = mediaType === "audio" ? "music" : (mediaType as any);
+        data.output = {
+          [mediaType]: {
+            url: file.url,
+            content_type: file.type,
+            file_size: file.size,
+            file_name: file.name,
+          },
+        };
+
+        await db.jobs.create(data).finally(() => {
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.projectJobs(projectId),
+          });
+        });
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col border-l border-border w-96">
       <div className="p-4 flex flex-col gap-4 border-b border-border">
@@ -92,6 +165,7 @@ export default function RightPanel() {
           <h2 className="text-sm text-muted-foreground font-semibold flex-1">
             Media Gallery
           </h2>
+
           {jobs.length > 0 && (
             <Button
               variant="secondary"
@@ -119,7 +193,29 @@ export default function RightPanel() {
             </Button>
           </div>
         )}
-        <div className="flex justify-end pt-4 w-full px-4 border-t border-border">
+        <div className="flex justify-between pt-4 w-full px-4 border-t border-border">
+          <UploadButton
+            appearance={{
+              button: cn([
+                "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium",
+                "transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring/20",
+                "disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+                "aria-disabled:opacity-50 aria-disabled:pointer-events-none",
+                "h-9 px-4 py-2",
+                "border border-input !bg-background shadow-sm hover:!bg-accent hover:!text-accent-foreground data-[state=open]:bg-accent",
+              ]),
+              allowedContent: "hidden",
+            }}
+            endpoint="fileUploader"
+            onClientUploadComplete={handleUploadComplete}
+            onUploadError={(error: Error) => {
+              console.warn(`ERROR! ${error.message}`);
+              toast({
+                title: "Failed to file upload",
+                description: "Please try again",
+              });
+            }}
+          />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="px-2">
