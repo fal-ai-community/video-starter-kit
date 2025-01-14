@@ -31,20 +31,19 @@ export const trackIcons: Record<
   image: ImageIcon,
 };
 
-export async function resolveDurationFromMedia(
-  video: string | File,
-  type: "video" | "audio",
-): Promise<number> {
-  return await new Promise<number>((resolve) => {
-    const media = document.createElement(type);
-    media.onloadedmetadata = () => {
-      resolve(media.duration * 1000);
-    };
-    media.src = video instanceof File ? URL.createObjectURL(video) : video;
-  });
-}
+export function resolveDuration(item: MediaItem): number | null {
+  if (!item) return null;
 
-export function resolveDuration(data: any): number | null {
+  const metadata = item.metadata;
+  if (
+    metadata &&
+    "duration" in metadata &&
+    typeof metadata.duration === "number"
+  ) {
+    return metadata.duration * 1000;
+  }
+
+  const data = item.output;
   if (!data) return null;
   if ("seconds_total" in data) {
     return data.seconds_total * 1000;

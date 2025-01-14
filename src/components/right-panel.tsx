@@ -28,7 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { useState } from "react";
-import { useUploadThing } from "@/utils/uploadthing";
+import { useUploadThing } from "@/lib/uploadthing";
 import { ClientUploadedFileData } from "uploadthing/types";
 import { db } from "@/data/db";
 import { useQueryClient } from "@tanstack/react-query";

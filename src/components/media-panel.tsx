@@ -61,11 +61,27 @@ export function MediaItemRow({
           const result = await fal.queue.result(data.endpointId, {
             requestId: data.requestId,
           });
-          await db.media.update(data.id, {
+          const media: MediaItem = {
             ...data,
             output: result.data,
             status: "completed",
-          });
+          };
+          await db.media.update(data.id, media);
+          if (media.mediaType !== "image") {
+            const { data: mediaMetadata } = await fal.subscribe(
+              "drochetti/ffmpeg-api/metadata",
+              {
+                input: {
+                  media_url: resolveMediaUrl(media),
+                },
+                mode: "streaming",
+              },
+            );
+            await db.media.update(data.id, {
+              ...media,
+              metadata: mediaMetadata.media,
+            });
+          }
           toast({
             title: "Generation completed",
             description: `Your ${data.mediaType} has been generated successfully.`,
@@ -88,7 +104,7 @@ export function MediaItemRow({
       return null;
     },
     enabled: !isDone && data.kind === "generated",
-    refetchInterval: data.mediaType === "video" ? 20000 : 500,
+    refetchInterval: data.mediaType === "video" ? 20000 : 1000,
   });
   const mediaUrl = resolveMediaUrl(data) ?? "";
   const mediaId = data.id.split("-")[0];
@@ -111,16 +127,18 @@ export function MediaItemRow({
       draggable={draggable && data.status === "completed"}
       onDragStart={handleOnDragStart}
     >
-      <div
-        className={cn(
-          "flex items-center h-full cursor-grab text-muted-foreground",
-          {
-            "text-muted": data.status !== "completed" || !draggable,
-          },
-        )}
-      >
-        <GripVerticalIcon className="w-4 h-4" />
-      </div>
+      {!!draggable && (
+        <div
+          className={cn(
+            "flex items-center h-full cursor-grab text-muted-foreground",
+            {
+              "text-muted": data.status !== "completed",
+            },
+          )}
+        >
+          <GripVerticalIcon className="w-4 h-4" />
+        </div>
+      )}
       <div className="w-16 h-16 aspect-square relative rounded overflow-hidden border border-transparent hover:border-accent bg-accent transition-all">
         {data.status === "completed" ? (
           <>

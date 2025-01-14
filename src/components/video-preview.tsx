@@ -3,7 +3,6 @@ import {
   EMPTY_VIDEO_COMPOSITION,
   useProject,
   useVideoComposition,
-  VideoCompositionData,
 } from "@/data/queries";
 import {
   type MediaItem,
@@ -86,15 +85,8 @@ const MainComposition: React.FC<VideoCompositionProps> = ({
               mediaItems={mediaItems}
             />
           )}
-          {track.type === "music" && (
-            <MusicTrackSequence
-              track={track}
-              frames={frames[track.id] || []}
-              mediaItems={mediaItems}
-            />
-          )}
-          {track.type === "voiceover" && (
-            <VoiceoverTrackSequence
+          {(track.type === "music" || track.type === "voiceover") && (
+            <AudioTrackSequence
               track={track}
               frames={frames[track.id] || []}
               mediaItems={mediaItems}
@@ -141,33 +133,7 @@ const VideoTrackSequence: React.FC<TrackSequenceProps> = ({
   );
 };
 
-const MusicTrackSequence: React.FC<TrackSequenceProps> = ({
-  frames,
-  mediaItems,
-}) => {
-  return (
-    <>
-      {frames.map((frame) => {
-        const media = mediaItems[frame.data.mediaId];
-        if (!media || media.status !== "completed") return null;
-
-        const audioUrl = resolveMediaUrl(media);
-        if (!audioUrl) return null;
-
-        return (
-          <Sequence
-            key={frame.id}
-            from={Math.floor(frame.timestamp / (1000 / FPS))}
-          >
-            <Audio src={audioUrl} />
-          </Sequence>
-        );
-      })}
-    </>
-  );
-};
-
-const VoiceoverTrackSequence: React.FC<TrackSequenceProps> = ({
+const AudioTrackSequence: React.FC<TrackSequenceProps> = ({
   frames,
   mediaItems,
 }) => {
@@ -212,15 +178,17 @@ export default function VideoPreview() {
         (media) => media.status === "completed" && mediaIds.includes(media.id),
       )
       .forEach((media) => {
-        // if (job.output?.video?.url) {
-        //   preloadVideo(job.output.video.url);
-        // }
-        // if (job.output?.audio_file?.url) {
-        //   preloadAudio(job.output.audio_file.url);
-        // }
-        // if (job.output?.audio_url?.url) {
-        //   preloadAudio(job.output.audio_url.url);
-        // }
+        const mediaUrl = resolveMediaUrl(media);
+        if (!mediaUrl) return;
+        if (media.mediaType === "video") {
+          preloadVideo(mediaUrl);
+        }
+        if (
+          mediaUrl.indexOf("v2.") === -1 &&
+          (media.mediaType === "music" || media.mediaType === "voiceover")
+        ) {
+          preloadAudio(mediaUrl);
+        }
       });
   }, [frames]);
 

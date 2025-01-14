@@ -44,12 +44,7 @@ import { Input } from "./ui/input";
 import { VoiceSelector } from "./playht/voice-selector";
 import { MediaItemRow } from "./media-panel";
 import { MediaItem } from "@/data/schema";
-import {
-  getAssetKey,
-  getAssetType,
-  resolveDurationFromMedia,
-  resolveMediaUrl,
-} from "@/lib/utils";
+import { getAssetKey, getAssetType, resolveMediaUrl } from "@/lib/utils";
 
 type ModelEndpointPickerProps = {
   mediaType: string;
@@ -320,14 +315,14 @@ export function GenerateDialog({
           )}
           {tab === "asset" && (
             <div className="mt-4 flex flex-row gap-2 items-center justify-start font-medium text-base">
-              <div>Select Asset</div>
               <Button
                 variant="outline"
-                className="ml-auto"
                 onClick={() => setTab("generation")}
+                size="sm"
               >
-                <ArrowLeft size={14} /> Back
+                <ArrowLeft /> Back
               </Button>
+              <div>Select Asset</div>
             </div>
           )}
         </DialogHeader>
@@ -355,28 +350,10 @@ export function GenerateDialog({
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (file) {
-                        if (
-                          getAssetType(asset) === "video" ||
-                          getAssetType(asset) === "audio"
-                        ) {
-                          const duration = await resolveDurationFromMedia(
-                            file,
-                            getAssetType(asset) as "video" | "audio",
-                          );
-
-                          const data: Partial<GenerateData> = {
-                            [getAssetKey(asset) ??
-                              assetKeyMap[getAssetType(asset)]]: file,
-                          };
-
-                          if (!generateData.duration) data.duration = duration;
-                          setGenerateData(data);
-                        } else {
-                          setGenerateData({
-                            [getAssetKey(asset) ??
-                              assetKeyMap[getAssetType(asset)]]: file,
-                          });
-                        }
+                        setGenerateData({
+                          [getAssetKey(asset) ??
+                            assetKeyMap[getAssetType(asset)]]: file,
+                        });
                       }
                     }}
                   />

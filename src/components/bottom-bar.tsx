@@ -5,7 +5,7 @@ import {
   type VideoTrack,
 } from "@/data/schema";
 import { useProjectId, useVideoProjectStore } from "@/data/store";
-import { cn, resolveDuration, resolveDurationFromMedia } from "@/lib/utils";
+import { cn, resolveDuration } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   type DragEventHandler,
@@ -67,29 +67,7 @@ export default function BottomBar() {
           },
           { timestamp: 0, duration: 0 },
         );
-
-      const fileType =
-        media.output?.audio_file ||
-        media.output?.audio ||
-        media.output?.audio_url
-          ? "audio"
-          : media.output?.video_url || media.output?.video
-            ? "video"
-            : null;
-
-      const mediaUrl =
-        fileType === "video"
-          ? media.output?.video?.url
-          : fileType === "audio"
-            ? media.output?.audio?.url || media.output?.audio_file.url
-            : null;
-
-      const duration = fileType
-        ? await resolveDurationFromMedia(mediaUrl, fileType)
-        : (resolveDuration(media.input) ??
-          resolveDuration(media.output) ??
-          5000);
-
+      const duration = resolveDuration(media) ?? 5000;
       const newId = await db.keyFrames.create({
         trackId: track.id,
         data: {
