@@ -164,6 +164,51 @@ export function VideoTrackView({
     document.addEventListener("mouseup", handleMouseUp);
   };
 
+  const handleResize = (
+    e: React.MouseEvent<HTMLDivElement>,
+    direction: "left" | "right"
+  ) => {
+    e.stopPropagation();
+    const trackElement = trackRef.current;
+    if (!trackElement) return;
+    const startX = e.clientX;
+    const startWidth = trackElement.offsetWidth;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      let newWidth = startWidth + (direction === "right" ? deltaX : -deltaX);
+
+      const minDuration = 3000;
+      const maxDuration = (media.metadata?.duration ?? 5) * 1000; // max duration in milliseconds
+
+      const timelineElement = trackElement.closest(".timeline-container");
+      const parentWidth = timelineElement
+        ? (timelineElement as HTMLElement).offsetWidth
+        : 1;
+      let newDuration = (newWidth / parentWidth) * 30 * 1000;
+
+      if (newDuration < minDuration) {
+        newWidth = (minDuration / 1000 / 30) * parentWidth;
+        newDuration = minDuration;
+      } else if (newDuration > maxDuration) {
+        newWidth = (maxDuration / 1000 / 30) * parentWidth;
+        newDuration = maxDuration;
+      }
+
+      frame.duration = newDuration;
+      trackElement.style.width = `${((frame.duration / 30) * 100) / 1000}%`;
+      db.keyFrames.update(frame.id, { duration: frame.duration });
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
   return (
     <div
       ref={trackRef}
@@ -210,12 +255,27 @@ export function VideoTrackView({
             </div>
           </div>
         </div>
-        <div className="p-px flex-1 items-center h-full">
+        <div className="p-px flex-1 items-center h-full relative">
           {imageUrl && <img src={imageUrl} className="rounded h-8" alt="" />}
           {/* TODO: Add audio waveform */}
           {/* {(media.mediaType === "music" || media.mediaType === "voiceover") && (
             <AudioWaveform data={media} />
           )} */}
+          {/* <div
+            className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize"
+            onMouseDown={(e) => handleResize(e, "left")}
+          /> */}
+          <div
+            className={cn(
+              "absolute right-0 top-0 bg- bottom-0 w-2 m-1 cursor-ew-resize",
+              {
+                "bg-green-400/50 rounded-md": track.type === "video",
+                "bg-sky-400/50 rounded-md": track.type === "music",
+                "bg-violet-400/50 rounded-md": track.type === "voiceover",
+              }
+            )}
+            onMouseDown={(e) => handleResize(e, "right")}
+          />
         </div>
       </div>
     </div>
