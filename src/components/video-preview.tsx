@@ -117,12 +117,15 @@ const VideoTrackSequence: React.FC<TrackSequenceProps> = ({
         const mediaUrl = resolveMediaUrl(media);
         if (!mediaUrl) return null;
 
+        const fps = media.metadata?.fps || FPS;
+        const duration = frame.duration || media.metadata?.duration || 5000;
+        const durationInFrames = Math.floor(duration / (1000 / fps));
+
         return (
           <Sequence
             key={frame.id}
-            from={Math.floor(
-              frame.timestamp / (1000 / media.metadata?.fps || FPS)
-            )}
+            from={Math.floor(frame.timestamp / (1000 / fps))}
+            durationInFrames={durationInFrames}
           >
             {media.mediaType === "video" && <Video src={mediaUrl} />}
             {media.mediaType === "image" && (
@@ -148,10 +151,15 @@ const AudioTrackSequence: React.FC<TrackSequenceProps> = ({
         const audioUrl = resolveMediaUrl(media);
         if (!audioUrl) return null;
 
+        const fps = media.metadata?.fps || FPS;
+        const duration = frame.duration || media.metadata?.duration || 5000;
+        const durationInFrames = Math.floor(duration / (1000 / fps));
+
         return (
           <Sequence
             key={frame.id}
             from={Math.floor(frame.timestamp / (1000 / FPS))}
+            durationInFrames={durationInFrames}
           >
             <Audio src={audioUrl} />
           </Sequence>
