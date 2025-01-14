@@ -120,7 +120,9 @@ const VideoTrackSequence: React.FC<TrackSequenceProps> = ({
         return (
           <Sequence
             key={frame.id}
-            from={Math.floor(frame.timestamp / (1000 / FPS))}
+            from={Math.floor(
+              frame.timestamp / (1000 / media.metadata?.fps || FPS)
+            )}
           >
             {media.mediaType === "video" && <Video src={mediaUrl} />}
             {media.mediaType === "image" && (

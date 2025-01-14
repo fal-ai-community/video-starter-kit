@@ -91,7 +91,7 @@ export function VideoTrackView({
       return (
         media.input?.image_url ||
         media.metadata?.start_frame_url ||
-        media?.metadata?.end_frame_url
+        media.metadata?.end_frame_url
       );
     }
     return undefined;
