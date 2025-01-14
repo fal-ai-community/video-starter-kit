@@ -88,7 +88,11 @@ export function VideoTrackView({
       return mediaUrl;
     }
     if (media.mediaType === "video") {
-      return media.input?.image_url ?? undefined;
+      return (
+        media.input?.image_url ||
+        media.metadata?.start_frame_url ||
+        media?.metadata?.end_frame_url
+      );
     }
     return undefined;
   }, [media]);
@@ -160,11 +164,6 @@ export function VideoTrackView({
     document.addEventListener("mouseup", handleMouseUp);
   };
 
-  const coverImage =
-    imageUrl ||
-    media?.metadata?.start_frame_url ||
-    media?.metadata?.end_frame_url;
-
   return (
     <div
       ref={trackRef}
@@ -212,9 +211,7 @@ export function VideoTrackView({
           </div>
         </div>
         <div className="p-px flex-1 items-center h-full">
-          {coverImage && (
-            <img src={coverImage} className="rounded h-8" alt="" />
-          )}
+          {imageUrl && <img src={imageUrl} className="rounded h-8" alt="" />}
           {/* TODO: Add audio waveform */}
           {/* {(media.mediaType === "music" || media.mediaType === "voiceover") && (
             <AudioWaveform data={media} />

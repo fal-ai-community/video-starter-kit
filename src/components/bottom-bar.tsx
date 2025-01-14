@@ -159,43 +159,6 @@ export default function BottomBar() {
           </div>
         </div>
       </div>
-      {/* <div className="border-b border-border p-1 flex flex-row gap-1">
-        <div className="flex flex-row gap-0.5 flex-1 items-center">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="px-2">
-                <ListPlusIcon className="w-4 h-4 opacity-50" />
-                Add Track
-                <ChevronRightIcon className="w-4 h-4 opacity-50" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent side="right" align="start">
-              <DropdownMenuItem className="text-sm">
-                <MusicIcon className="w-4 h-4 opacity-50" />
-                Music
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-sm">
-                <MicIcon className="w-4 h-4 opacity-50" />
-                Voiceover
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-sm">
-                <FilmIcon className="w-4 h-4 opacity-50" />
-                Video
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button variant="ghost" size="sm" className="px-2" disabled>
-            <ListXIcon className="w-4 h-4 opacity-50" />
-            Remove Track
-          </Button>
-        </div>
-        <div className="flex flex-row gap-0.5 items-center justify-end">
-          <Button variant="ghost" size="sm" disabled>
-            <TrashIcon className="w-4 h-4 opacity-50" />
-            Clear All
-          </Button>
-        </div>
-      </div> */}
       <div
         className={cn(
           "min-h-64  max-h-72 h-full flex flex-row overflow-y-scroll transition-colors",
