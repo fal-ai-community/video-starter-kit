@@ -4,6 +4,7 @@ import { useProjectUpdater } from "@/data/mutations";
 import { queryKeys, useProject, useProjectMediaItems } from "@/data/queries";
 import { MediaItem, PROJECT_PLACEHOLDER } from "@/data/schema";
 import { useProjectId, useVideoProjectStore } from "@/data/store";
+import { fal } from "@/lib/fal";
 import {
   ChevronDown,
   FilmIcon,
@@ -33,6 +34,7 @@ import { ClientUploadedFileData } from "uploadthing/types";
 import { db } from "@/data/db";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
+import { resolveMediaUrl } from "@/lib/utils";
 
 export default function RightPanel() {
   const projectId = useProjectId();
@@ -44,7 +46,7 @@ export default function RightPanel() {
 
   const { data: mediaItems = [], isLoading } = useProjectMediaItems(projectId);
   const setProjectDialogOpen = useVideoProjectStore(
-    (s) => s.setProjectDialogOpen,
+    (s) => s.setProjectDialogOpen
   );
   const openGenerateDialog = useVideoProjectStore((s) => s.openGenerateDialog);
 
@@ -75,25 +77,46 @@ export default function RightPanel() {
   const handleUploadComplete = async (
     files: ClientUploadedFileData<{
       uploadedBy: string;
-    }>[],
+    }>[]
   ) => {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const mediaType = file.type.split("/")[0];
+      const outputType = mediaType === "audio" ? "music" : mediaType;
 
       const data: Omit<MediaItem, "id"> = {
         projectId,
         kind: "uploaded",
         createdAt: Date.now(),
-        mediaType: mediaType as any,
+        mediaType: outputType as any,
         status: "completed",
         url: file.url,
       };
-      await db.media.create(data).finally(() => {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.projectMediaItems(projectId),
-        });
-      });
+
+      const mediaId = await db.media.create(data);
+      const media = await db.media.find(mediaId as string);
+
+      if (media) {
+        const { data: mediaMetadata } = await fal.subscribe(
+          "drochetti/ffmpeg-api/metadata",
+          {
+            input: {
+              media_url: resolveMediaUrl(media),
+            },
+            mode: "streaming",
+          }
+        );
+        await db.media
+          .update(media.id, {
+            ...media,
+            metadata: mediaMetadata.media,
+          })
+          .finally(() => {
+            queryClient.invalidateQueries({
+              queryKey: queryKeys.projectMediaItems(projectId),
+            });
+          });
+      }
     }
   };
 
