@@ -160,6 +160,11 @@ export function VideoTrackView({
     document.addEventListener("mouseup", handleMouseUp);
   };
 
+  const coverImage =
+    imageUrl ||
+    media?.metadata?.start_frame_url ||
+    media?.metadata?.end_frame_url;
+
   return (
     <div
       ref={trackRef}
@@ -207,7 +212,9 @@ export function VideoTrackView({
           </div>
         </div>
         <div className="p-px flex-1 items-center h-full">
-          {imageUrl && <img src={imageUrl} className="rounded h-8" alt="" />}
+          {coverImage && (
+            <img src={coverImage} className="rounded h-8" alt="" />
+          )}
           {/* TODO: Add audio waveform */}
           {/* {(media.mediaType === "music" || media.mediaType === "voiceover") && (
             <AudioWaveform data={media} />

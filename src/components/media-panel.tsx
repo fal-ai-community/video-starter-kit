@@ -10,8 +10,10 @@ import {
   CircleXIcon,
   GripVerticalIcon,
   HourglassIcon,
+  ImageIcon,
   MicIcon,
   MusicIcon,
+  VideoIcon,
 } from "lucide-react";
 import {
   type DragEventHandler,
@@ -73,6 +75,7 @@ export function MediaItemRow({
               {
                 input: {
                   media_url: resolveMediaUrl(media),
+                  extract_frames: true,
                 },
                 mode: "streaming",
               }
@@ -113,6 +116,12 @@ export function MediaItemRow({
     return true;
     // event.dataTransfer.dropEffect = "copy";
   };
+
+  const coverImage =
+    data.mediaType === "video"
+      ? data.metadata?.start_frame_url || data?.metadata?.end_frame_url
+      : resolveMediaUrl(data);
+
   return (
     <div
       className={cn(
@@ -142,21 +151,22 @@ export function MediaItemRow({
       <div className="w-16 h-16 aspect-square relative rounded overflow-hidden border border-transparent hover:border-accent bg-accent transition-all">
         {data.status === "completed" ? (
           <>
-            {data.mediaType === "image" && (
-              <img
-                src={mediaUrl}
-                alt="Generated media"
-                className="h-full w-full object-cover"
-              />
-            )}
-            {data.mediaType === "video" && (
-              <video
-                src={mediaUrl}
-                className="h-full w-full object-cover"
-                controls={false}
-                style={{ pointerEvents: "none" }}
-              />
-            )}
+            {(data.mediaType === "image" || data.mediaType === "video") &&
+              (coverImage ? (
+                <img
+                  src={coverImage}
+                  alt="Generated media"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center top-0 left-0 absolute p-2 z-50">
+                  {data.mediaType === "image" ? (
+                    <ImageIcon className="w-7 h-7 text-muted-foreground" />
+                  ) : (
+                    <VideoIcon className="w-7 h-7 text-muted-foreground" />
+                  )}
+                </div>
+              ))}
             {data.mediaType === "music" && (
               <div className="w-full h-full flex items-center justify-center top-0 left-0 absolute p-2 z-50">
                 <MusicIcon className="w-7 h-7 text-muted-foreground" />
