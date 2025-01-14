@@ -159,6 +159,32 @@ const AudioTrackSequence: React.FC<TrackSequenceProps> = ({
   );
 };
 
+const VoiceoverTrackSequence: React.FC<TrackSequenceProps> = ({
+  frames,
+  mediaItems,
+}) => {
+  return (
+    <>
+      {frames.map((frame) => {
+        const media = mediaItems[frame.data.mediaId];
+        if (!media || media.status !== "completed") return null;
+
+        const audioUrl = resolveMediaUrl(media);
+        if (!audioUrl) return null;
+
+        return (
+          <Sequence
+            key={frame.id}
+            from={Math.floor(frame.timestamp / (1000 / FPS))}
+          >
+            <Audio src={audioUrl} />
+          </Sequence>
+        );
+      })}
+    </>
+  );
+};
+
 export default function VideoPreview() {
   const projectId = useProjectId();
   const setPlayer = useVideoProjectStore((s) => s.setPlayer);
@@ -175,7 +201,7 @@ export default function VideoPreview() {
       .map((f) => f.data.mediaId);
     Object.values(mediaItems)
       .filter(
-        (media) => media.status === "completed" && mediaIds.includes(media.id),
+        (media) => media.status === "completed" && mediaIds.includes(media.id)
       )
       .forEach((media) => {
         const mediaUrl = resolveMediaUrl(media);
@@ -207,14 +233,14 @@ export default function VideoPreview() {
   const duration = calculateDuration();
 
   const setPlayerCurrentTimestamp = useVideoProjectStore(
-    (s) => s.setPlayerCurrentTimestamp,
+    (s) => s.setPlayerCurrentTimestamp
   );
 
   const setPlayerState = useVideoProjectStore((s) => s.setPlayerState);
   // Frame updates are super frequent, so we throttle the updates to the timestamp
   const updatePlayerCurrentTimestamp = useCallback(
     throttle(64, setPlayerCurrentTimestamp),
-    [],
+    []
   );
 
   // Register events on the player
@@ -238,7 +264,7 @@ export default function VideoPreview() {
   }, []);
 
   const setExportDialogOpen = useVideoProjectStore(
-    (s) => s.setExportDialogOpen,
+    (s) => s.setExportDialogOpen
   );
 
   return (

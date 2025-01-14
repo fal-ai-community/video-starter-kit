@@ -65,7 +65,7 @@ export function VideoTrackView({
   };
 
   const isSelected = useVideoProjectStore((state) =>
-    state.selectedKeyframes.includes(frame.id),
+    state.selectedKeyframes.includes(frame.id)
   );
   const selectKeyframe = useVideoProjectStore((state) => state.selectKeyframe);
   const handleOnClick: MouseEventHandler = (e) => {
@@ -170,7 +170,7 @@ export function VideoTrackView({
       onClick={handleOnClick}
       className={cn(
         "flex flex-col border border-transparent rounded-lg h-full",
-        className,
+        className
       )}
       {...props}
     >
@@ -183,7 +183,7 @@ export function VideoTrackView({
             "bg-gradient-to-t from-sky-800 to-sky-600": track.type === "music",
             "bg-gradient-to-t from-violet-800 to-violet-600":
               track.type === "voiceover",
-          },
+          }
         )}
       >
         <div className="px-2 py-0.5 bg-black/10 flex flex-row items-center">
