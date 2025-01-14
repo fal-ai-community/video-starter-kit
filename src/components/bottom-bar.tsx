@@ -1,38 +1,21 @@
 import { db } from "@/data/db";
 import {
   TRACK_TYPE_ORDER,
-  type GenerationJob,
+  type MediaItem,
   type VideoTrack,
 } from "@/data/schema";
 import { useProjectId, useVideoProjectStore } from "@/data/store";
 import { cn, resolveDuration, resolveDurationFromMedia } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  AudioLinesIcon,
-  ChevronRightIcon,
-  FilmIcon,
-  ListPlusIcon,
-  ListXIcon,
-  MicIcon,
-  MoreHorizontalIcon,
-  MusicIcon,
-} from "lucide-react";
-import {
   type DragEventHandler,
   type HTMLAttributes,
   useMemo,
   useState,
 } from "react";
-import { Button } from "./ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
 import { VideoControls } from "./video-controls";
 import { TimelineRuler } from "./video/timeline";
-import { VideoTrackRow, VideoTrackView } from "./video/track";
+import { VideoTrackRow } from "./video/track";
 import { queryKeys, refreshVideoCache } from "@/data/queries";
 
 export default function BottomBar() {
@@ -52,20 +35,20 @@ export default function BottomBar() {
     setDragOverTracks(true);
     const jobPayload = event.dataTransfer.getData("job");
     if (!jobPayload) return false;
-    const job: GenerationJob = JSON.parse(jobPayload);
+    const job: MediaItem = JSON.parse(jobPayload);
     return job.status === "completed";
   };
 
   const addToTrack = useMutation({
-    mutationFn: async (job: GenerationJob) => {
-      const tracks = await db.tracks.tracksByProject(job.projectId);
-      const trackType = job.mediaType === "image" ? "video" : job.mediaType;
+    mutationFn: async (media: MediaItem) => {
+      const tracks = await db.tracks.tracksByProject(media.projectId);
+      const trackType = media.mediaType === "image" ? "video" : media.mediaType;
       let track = tracks.find((t) => t.type === trackType);
       if (!track) {
         const id = await db.tracks.create({
-          projectId: job.projectId,
+          projectId: media.projectId,
           type: trackType,
-          label: job.mediaType,
+          label: media.mediaType,
           locked: true,
         });
         const newTrack = await db.tracks.find(id.toString());
@@ -86,30 +69,34 @@ export default function BottomBar() {
         );
 
       const fileType =
-        job.output?.audio_file || job.output?.audio || job.output?.audio_url
+        media.output?.audio_file ||
+        media.output?.audio ||
+        media.output?.audio_url
           ? "audio"
-          : job.output?.video_url || job.output?.video
+          : media.output?.video_url || media.output?.video
             ? "video"
             : null;
 
       const mediaUrl =
         fileType === "video"
-          ? job.output?.video?.url
+          ? media.output?.video?.url
           : fileType === "audio"
-            ? job.output?.audio?.url || job.output?.audio_file.url
+            ? media.output?.audio?.url || media.output?.audio_file.url
             : null;
 
       const duration = fileType
         ? await resolveDurationFromMedia(mediaUrl, fileType)
-        : (resolveDuration(job.input) ?? resolveDuration(job.output) ?? 5000);
+        : (resolveDuration(media.input) ??
+          resolveDuration(media.output) ??
+          5000);
 
       const newId = await db.keyFrames.create({
         trackId: track.id,
         data: {
-          jobId: job.id,
-          type: job.input?.image_url ? "image" : "prompt",
-          prompt: job.input?.prompt || "",
-          url: job.input?.image_url?.url,
+          mediaId: media.id,
+          type: media.input?.image_url ? "image" : "prompt",
+          prompt: media.input?.prompt || "",
+          url: media.input?.image_url?.url,
         },
         timestamp: lastKeyframe
           ? lastKeyframe.timestamp + 1 + lastKeyframe.duration
@@ -174,7 +161,7 @@ export default function BottomBar() {
     setDragOverTracks(false);
     const jobPayload = event.dataTransfer.getData("job");
     if (!jobPayload) return false;
-    const job: GenerationJob = JSON.parse(jobPayload);
+    const job: MediaItem = JSON.parse(jobPayload);
     addToTrack.mutate(job);
     return true;
   };

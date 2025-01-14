@@ -1,9 +1,9 @@
 import { db } from "@/data/db";
 import { queryKeys } from "@/data/queries";
-import type { GenerationJob } from "@/data/schema";
+import type { MediaItem } from "@/data/schema";
 import { useProjectId, useVideoProjectStore } from "@/data/store";
 import { fal } from "@/lib/fal";
-import { cn, trackIcons } from "@/lib/utils";
+import { cn, resolveMediaUrl, trackIcons } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -23,36 +23,37 @@ import { Badge } from "./ui/badge";
 import { LoadingIcon } from "./ui/icons";
 import { useToast } from "@/hooks/use-toast";
 
-type JobItemProps = {
-  data: GenerationJob;
-  onOpen: (data: GenerationJob) => void;
+type MediaItemRowProps = {
+  data: MediaItem;
+  onOpen: (data: MediaItem) => void;
   draggable?: boolean;
 } & HTMLAttributes<HTMLDivElement>;
 
-export function JobItem({
+export function MediaItemRow({
   data,
   className,
   onOpen,
   draggable = true,
   ...props
-}: JobItemProps) {
+}: MediaItemRowProps) {
   const isDone = data.status === "completed" || data.status === "failed";
   const queryClient = useQueryClient();
   const projectId = useProjectId();
   const { toast } = useToast();
   useQuery({
-    queryKey: queryKeys.projectJob(projectId, data.id),
+    queryKey: queryKeys.projectMedia(projectId, data.id),
     queryFn: async () => {
+      if (data.kind === "uploaded") return null;
       const queueStatus = await fal.queue.status(data.endpointId, {
         requestId: data.requestId,
       });
       if (queueStatus.status === "IN_PROGRESS") {
-        await db.jobs.update(data.id, {
+        await db.media.update(data.id, {
           ...data,
           status: "running",
         });
         await queryClient.invalidateQueries({
-          queryKey: queryKeys.projectJobs(data.projectId),
+          queryKey: queryKeys.projectMediaItems(data.projectId),
         });
       }
       if (queueStatus.status === "COMPLETED") {
@@ -60,10 +61,9 @@ export function JobItem({
           const result = await fal.queue.result(data.endpointId, {
             requestId: data.requestId,
           });
-          await db.jobs.update(data.id, {
+          await db.media.update(data.id, {
             ...data,
             output: result.data,
-            endedAt: Date.now(),
             status: "completed",
           });
           toast({
@@ -71,9 +71,8 @@ export function JobItem({
             description: `Your ${data.mediaType} has been generated successfully.`,
           });
         } catch {
-          await db.jobs.update(data.id, {
+          await db.media.update(data.id, {
             ...data,
-            endedAt: Date.now(),
             status: "failed",
           });
           toast({
@@ -82,19 +81,17 @@ export function JobItem({
           });
         } finally {
           await queryClient.invalidateQueries({
-            queryKey: queryKeys.projectJobs(data.projectId),
+            queryKey: queryKeys.projectMediaItems(data.projectId),
           });
         }
       }
       return null;
     },
-    enabled: !isDone,
+    enabled: !isDone && data.kind === "generated",
     refetchInterval: data.mediaType === "video" ? 20000 : 500,
   });
-  const mediaUrl = Array.isArray(data.output?.images)
-    ? data.output.images[0].url
-    : data.output?.video?.url || "";
-  const jobId = data.id.split("-")[0];
+  const mediaUrl = resolveMediaUrl(data) ?? "";
+  const mediaId = data.id.split("-")[0];
   const handleOnDragStart: DragEventHandler<HTMLDivElement> = (event) => {
     event.dataTransfer.setData("job", JSON.stringify(data));
     return true;
@@ -114,11 +111,16 @@ export function JobItem({
       draggable={draggable && data.status === "completed"}
       onDragStart={handleOnDragStart}
     >
-      {draggable && data.status === "completed" && (
-        <div className="flex items-center h-full cursor-grab text-muted-foreground">
-          <GripVerticalIcon className="w-4 h-4" />
-        </div>
-      )}
+      <div
+        className={cn(
+          "flex items-center h-full cursor-grab text-muted-foreground",
+          {
+            "text-muted": data.status !== "completed" || !draggable,
+          },
+        )}
+      >
+        <GripVerticalIcon className="w-4 h-4" />
+      </div>
       <div className="w-16 h-16 aspect-square relative rounded overflow-hidden border border-transparent hover:border-accent bg-accent transition-all">
         {data.status === "completed" ? (
           <>
@@ -166,7 +168,8 @@ export function JobItem({
             {createElement(trackIcons[data.mediaType], {
               className: "w-4 h-4 stroke-1",
             } as any)}
-            Job <code className="text-muted-foreground">#{jobId}</code>
+            <span>{data.kind === "generated" ? "Job" : "File"}</span>
+            <code className="text-muted-foreground">#{mediaId}</code>
           </h3>
           {data.status !== "completed" && (
             <Badge
@@ -191,15 +194,19 @@ export function JobItem({
   );
 }
 
-type JobsPanelProps = {
-  jobs: GenerationJob[];
+type MediaItemsPanelProps = {
+  data: MediaItem[];
   mediaType: string;
 } & HTMLAttributes<HTMLDivElement>;
 
-export function JobsPanel({ className, jobs, mediaType }: JobsPanelProps) {
+export function MediaItemPanel({
+  className,
+  data,
+  mediaType,
+}: MediaItemsPanelProps) {
   const setSelectedMediaId = useVideoProjectStore((s) => s.setSelectedMediaId);
-  const handleOnOpen = (data: GenerationJob) => {
-    setSelectedMediaId(data.id);
+  const handleOnOpen = (item: MediaItem) => {
+    setSelectedMediaId(item.id);
   };
 
   return (
@@ -209,14 +216,14 @@ export function JobsPanel({ className, jobs, mediaType }: JobsPanelProps) {
         className,
       )}
     >
-      {jobs
-        .filter((job) => {
+      {data
+        .filter((media) => {
           if (mediaType === "all") return true;
-          return job.mediaType === mediaType;
+          return media.mediaType === mediaType;
         })
-        .map((job, index) => (
-          <Fragment key={job.id}>
-            <JobItem data={job} onOpen={handleOnOpen} />
+        .map((media) => (
+          <Fragment key={media.id}>
+            <MediaItemRow data={media} onOpen={handleOnOpen} />
           </Fragment>
         ))}
     </div>

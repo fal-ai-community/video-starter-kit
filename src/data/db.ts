@@ -1,13 +1,13 @@
 import { openDB } from "idb";
 import type {
-  GenerationJob,
+  MediaItem,
   VideoKeyFrame,
   VideoProject,
   VideoTrack,
 } from "./schema";
 
 function open() {
-  return openDB("ai-vstudio-db", 1, {
+  return openDB("ai-vstudio-db-v2", 1, {
     upgrade(db) {
       db.createObjectStore("projects", { keyPath: "id" });
 
@@ -19,8 +19,10 @@ function open() {
       });
       keyFrameStore.createIndex("by_trackId", "trackId");
 
-      const jobStore = db.createObjectStore("jobs", { keyPath: "id" });
-      jobStore.createIndex("by_projectId", "projectId");
+      const mediaStore = db.createObjectStore("media_items", {
+        keyPath: "id",
+      });
+      mediaStore.createIndex("by_projectId", "projectId");
     },
   });
 }
@@ -113,40 +115,40 @@ export const db = {
     },
   },
 
-  jobs: {
-    async find(id: string): Promise<GenerationJob | null> {
+  media: {
+    async find(id: string): Promise<MediaItem | null> {
       const db = await open();
-      return db.get("jobs", id);
+      return db.get("media_items", id);
     },
-    async jobsByProject(projectId: string): Promise<GenerationJob[]> {
+    async mediaByProject(projectId: string): Promise<MediaItem[]> {
       const db = await open();
       const results = await db.getAllFromIndex(
-        "jobs",
+        "media_items",
         "by_projectId",
         projectId,
       );
 
       return results.toSorted((a, b) => b.createdAt - a.createdAt);
     },
-    async create(job: Omit<GenerationJob, "id">) {
+    async create(media: Omit<MediaItem, "id">) {
       const db = await open();
-      const tx = db.transaction("jobs", "readwrite");
+      const tx = db.transaction("media_items", "readwrite");
       const id = crypto.randomUUID().toString();
       const result = await tx.store.put({
-        ...job,
+        ...media,
         id,
       });
       await tx.done;
       return result;
     },
-    async update(id: string, job: Partial<GenerationJob>) {
+    async update(id: string, media: Partial<MediaItem>) {
       const db = await open();
-      const existing = await db.get("jobs", id);
+      const existing = await db.get("media_items", id);
       if (!existing) return;
-      const tx = db.transaction("jobs", "readwrite");
+      const tx = db.transaction("media_items", "readwrite");
       const result = await tx.store.put({
         ...existing,
-        ...job,
+        ...media,
         id,
       });
       await tx.done;
@@ -154,13 +156,13 @@ export const db = {
     },
     async delete(id: string) {
       const db = await open();
-      const job: GenerationJob | null = await db.get("jobs", id);
-      if (!job) return;
+      const media: MediaItem | null = await db.get("media_items", id);
+      if (!media) return;
       // Delete associated keyframes
       const tracks = await db.getAllFromIndex(
         "tracks",
         "by_projectId",
-        job.projectId,
+        media.projectId,
       );
       const trackIds = tracks.map((track) => track.id);
       const frames = (
@@ -174,13 +176,13 @@ export const db = {
         )
       )
         .flatMap((f) => f)
-        .filter((f) => f.data.jobId === id)
+        .filter((f) => f.data.mediaId === id)
         .map((f) => f.id);
-      const tx = db.transaction(["jobs", "keyFrames"], "readwrite");
+      const tx = db.transaction(["media_items", "keyFrames"], "readwrite");
       await Promise.all(
         frames.map((id) => tx.objectStore("keyFrames").delete(id)),
       );
-      await tx.objectStore("jobs").delete(id);
+      await tx.objectStore("media_items").delete(id);
       await tx.done;
     },
   },

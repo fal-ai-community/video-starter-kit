@@ -15,10 +15,14 @@ import {
   SheetPortal,
   SheetTitle,
 } from "./ui/sheet";
-import { queryKeys, refreshVideoCache, useProjectJobs } from "@/data/queries";
+import {
+  queryKeys,
+  refreshVideoCache,
+  useProjectMediaItems,
+} from "@/data/queries";
 import { useProjectId, useVideoProjectStore } from "@/data/store";
 import { cn, resolveMediaUrl } from "@/lib/utils";
-import { GenerationJob } from "@/data/schema";
+import { MediaItem } from "@/data/schema";
 import {
   CopyIcon,
   FilmIcon,
@@ -40,11 +44,11 @@ type MediaGallerySheetProps = ComponentProps<typeof Sheet> & {
 };
 
 type AudioPlayerProps = {
-  media: GenerationJob;
+  media: MediaItem;
 } & HTMLAttributes<HTMLAudioElement>;
 
 function AudioPlayer({ media, ...props }: AudioPlayerProps) {
-  const src = resolveMediaUrl(media.output);
+  const src = resolveMediaUrl(media);
   if (!src) {
     return null;
   }
@@ -128,8 +132,9 @@ function MediaPropertyItem({
   );
 }
 
-const MEDIA_PLACEHOLDER: GenerationJob = {
+const MEDIA_PLACEHOLDER: MediaItem = {
   id: "placeholder",
+  kind: "generated",
   input: { prompt: "n/a" },
   mediaType: "image",
   status: "pending",
@@ -144,9 +149,10 @@ export function MediaGallerySheet({
   ...props
 }: MediaGallerySheetProps) {
   const projectId = useProjectId();
-  const { data: jobs = [] } = useProjectJobs(projectId);
+  const { data: mediaItems = [] } = useProjectMediaItems(projectId);
   const selectedMedia =
-    jobs.find((job) => job.id === selectedMediaId) ?? MEDIA_PLACEHOLDER;
+    mediaItems.find((media) => media.id === selectedMediaId) ??
+    MEDIA_PLACEHOLDER;
   const setSelectedMediaId = useVideoProjectStore((s) => s.setSelectedMediaId);
   const setGenerateData = useVideoProjectStore((s) => s.setGenerateData);
   const setEndpointId = useVideoProjectStore((s) => s.setEndpointId);
@@ -180,22 +186,17 @@ export function MediaGallerySheet({
     setSelectedMediaId(null);
   };
   const mediaUrl = useMemo(
-    () => resolveMediaUrl(selectedMedia?.output),
+    () => resolveMediaUrl(selectedMedia),
     [selectedMedia],
   );
   const prompt = selectedMedia?.input?.prompt;
-  const duration = selectedMedia.endedAt
-    ? formatDuration({
-        seconds: (selectedMedia.endedAt - selectedMedia.createdAt) / 1000,
-      })
-    : "n/a";
 
   const queryClient = useQueryClient();
   const deleteMedia = useMutation({
-    mutationFn: () => db.jobs.delete(selectedMediaId),
+    mutationFn: () => db.media.delete(selectedMediaId),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: queryKeys.projectJobs(projectId),
+        queryKey: queryKeys.projectMediaItems(projectId),
       });
       refreshVideoCache(queryClient, projectId);
       close();
@@ -299,7 +300,7 @@ export function MediaGallerySheet({
               <MediaPropertyItem label="Media URL" value={mediaUrl ?? "n/a"} />
               <MediaPropertyItem
                 label="Model (fal endpoint)"
-                value={selectedMedia.endpointId}
+                value={selectedMedia.endpointId ?? "n/a"}
               >
                 <a
                   href={`https://fal.ai/models/${selectedMedia.endpointId}`}
@@ -315,11 +316,10 @@ export function MediaGallerySheet({
               />
               <MediaPropertyItem
                 label="Request ID"
-                value={selectedMedia.requestId}
+                value={selectedMedia.requestId ?? "n/a"}
               >
                 <code>{selectedMedia.requestId}</code>
               </MediaPropertyItem>
-              <MediaPropertyItem label="Duration" value={duration} />
             </div>
           </div>
         </SheetPanel>

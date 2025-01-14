@@ -5,7 +5,7 @@ import {
 } from "@tanstack/react-query";
 import { db } from "./db";
 import {
-  GenerationJob,
+  MediaItem,
   PROJECT_PLACEHOLDER,
   VideoKeyFrame,
   VideoTrack,
@@ -14,8 +14,12 @@ import {
 export const queryKeys = {
   projects: ["projects"],
   project: (projectId: string) => ["project", projectId],
-  projectJobs: (projectId: string) => ["jobs", projectId],
-  projectJob: (projectId: string, jobId: string) => ["job", projectId, jobId],
+  projectMediaItems: (projectId: string) => ["mediaItems", projectId],
+  projectMedia: (projectId: string, jobId: string) => [
+    "media",
+    projectId,
+    jobId,
+  ],
   projectTracks: (projectId: string) => ["tracks", projectId],
   projectPreview: (projectId: string) => ["preview", projectId],
 };
@@ -51,10 +55,10 @@ export const useProjects = () => {
   });
 };
 
-export const useProjectJobs = (projectId: string) => {
+export const useProjectMediaItems = (projectId: string) => {
   return useQuery({
-    queryKey: queryKeys.projectJobs(projectId),
-    queryFn: () => db.jobs.jobsByProject(projectId),
+    queryKey: queryKeys.projectMediaItems(projectId),
+    queryFn: () => db.media.mediaByProject(projectId),
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     placeholderData: keepPreviousData,
@@ -64,13 +68,13 @@ export const useProjectJobs = (projectId: string) => {
 export type VideoCompositionData = {
   tracks: VideoTrack[];
   frames: Record<string, VideoKeyFrame[]>;
-  jobs: Record<string, GenerationJob>;
+  mediaItems: Record<string, MediaItem>;
 };
 
 export const EMPTY_VIDEO_COMPOSITION: VideoCompositionData = {
   tracks: [],
   frames: {},
-  jobs: {},
+  mediaItems: {},
 };
 
 export const useVideoComposition = (projectId: string) =>
@@ -83,7 +87,7 @@ export const useVideoComposition = (projectId: string) =>
           tracks.map((track) => db.keyFrames.keyFramesByTrack(track.id)),
         )
       ).flatMap((f) => f);
-      const jobs = await db.jobs.jobsByProject(projectId);
+      const mediaItems = await db.media.mediaByProject(projectId);
       return {
         tracks,
         frames: Object.fromEntries(
@@ -92,7 +96,9 @@ export const useVideoComposition = (projectId: string) =>
             frames.filter((f) => f.trackId === track.id),
           ]),
         ),
-        jobs: Object.fromEntries(jobs.map((job) => [job.id, job])),
+        mediaItems: Object.fromEntries(
+          mediaItems.map((item) => [item.id, item]),
+        ),
       } satisfies VideoCompositionData;
     },
   });

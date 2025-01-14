@@ -1,8 +1,8 @@
 "use client";
 
 import { useProjectUpdater } from "@/data/mutations";
-import { queryKeys, useProject, useProjectJobs } from "@/data/queries";
-import { GenerationJob, PROJECT_PLACEHOLDER } from "@/data/schema";
+import { queryKeys, useProject, useProjectMediaItems } from "@/data/queries";
+import { MediaItem, PROJECT_PLACEHOLDER } from "@/data/schema";
 import { useProjectId, useVideoProjectStore } from "@/data/store";
 import {
   ChevronDown,
@@ -17,7 +17,7 @@ import {
   UploadIcon,
   LoaderCircleIcon,
 } from "lucide-react";
-import { JobsPanel } from "./jobs-panel";
+import { MediaItemPanel } from "./media-panel";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -42,7 +42,7 @@ export default function RightPanel() {
   const [mediaType, setMediaType] = useState("all");
   const queryClient = useQueryClient();
 
-  const { data: jobs = [], isLoading } = useProjectJobs(projectId);
+  const { data: mediaItems = [], isLoading } = useProjectMediaItems(projectId);
   const setProjectDialogOpen = useVideoProjectStore(
     (s) => s.setProjectDialogOpen,
   );
@@ -81,58 +81,19 @@ export default function RightPanel() {
       const file = files[i];
       const mediaType = file.type.split("/")[0];
 
-      let data: Omit<GenerationJob, "id"> = {
+      const data: Omit<MediaItem, "id"> = {
         projectId,
+        kind: "uploaded",
         createdAt: Date.now(),
-        endedAt: Date.now(),
-        endpointId: "",
-        requestId: "",
         mediaType: mediaType as any,
         status: "completed",
-        input: {},
+        url: file.url,
       };
-
-      if (mediaType === "image") {
-        const img = new Image();
-        img.src = file.url;
-        img.onload = async () => {
-          const width = img.width;
-          const height = img.height;
-
-          data.output = {
-            images: [
-              {
-                url: file.url,
-                content_type: file.type,
-                width,
-                height,
-              },
-            ],
-          };
-
-          await db.jobs.create(data).finally(() => {
-            queryClient.invalidateQueries({
-              queryKey: queryKeys.projectJobs(projectId),
-            });
-          });
-        };
-      } else {
-        data.mediaType = mediaType === "audio" ? "music" : (mediaType as any);
-        data.output = {
-          [mediaType]: {
-            url: file.url,
-            content_type: file.type,
-            file_size: file.size,
-            file_name: file.name,
-          },
-        };
-
-        await db.jobs.create(data).finally(() => {
-          queryClient.invalidateQueries({
-            queryKey: queryKeys.projectJobs(projectId),
-          });
+      await db.media.create(data).finally(() => {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.projectMediaItems(projectId),
         });
-      }
+      });
     }
   };
 
@@ -210,7 +171,7 @@ export default function RightPanel() {
               Upload
             </label>
           </Button>
-          {jobs.length > 0 && (
+          {mediaItems.length > 0 && (
             <Button
               variant="secondary"
               size="sm"
@@ -221,7 +182,7 @@ export default function RightPanel() {
             </Button>
           )}
         </div>
-        {!isLoading && jobs.length === 0 && (
+        {!isLoading && mediaItems.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center gap-4 px-4">
             <p className="text-sm text-center">
               Create your image, audio and voiceover collection to compose your
@@ -285,9 +246,9 @@ export default function RightPanel() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        {jobs.length > 0 && (
-          <JobsPanel
-            jobs={jobs}
+        {mediaItems.length > 0 && (
+          <MediaItemPanel
+            data={mediaItems}
             mediaType={mediaType}
             className="overflow-y-auto"
           />

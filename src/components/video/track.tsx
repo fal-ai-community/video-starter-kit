@@ -1,5 +1,5 @@
 import { db } from "@/data/db";
-import { refreshVideoCache, useProjectJobs } from "@/data/queries";
+import { refreshVideoCache, useProjectMediaItems } from "@/data/queries";
 import type { VideoKeyFrame, VideoTrack } from "@/data/schema";
 import { cn, trackIcons } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -75,9 +75,11 @@ export function VideoTrackView({
   };
 
   const projectId = useProjectId();
-  const { data: jobs = [] } = useProjectJobs(projectId);
+  const { data: mediaItems = [] } = useProjectMediaItems(projectId);
 
-  const output = jobs.find((s) => s.id === frame.data.jobId)?.output;
+  const output = mediaItems.find(
+    (item) => item.id === frame.data.mediaId,
+  )?.output;
 
   const imageUrl = output?.images?.[0]?.url;
   const videoUrl = output?.video?.url;

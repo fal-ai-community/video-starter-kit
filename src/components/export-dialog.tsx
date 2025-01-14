@@ -42,14 +42,14 @@ export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
   const router = useRouter();
   const exportVideo = useMutation({
     mutationFn: async () => {
-      const jobs = composition.jobs;
+      const mediaItems = composition.mediaItems;
       const videoData = composition.tracks.map((track) => ({
         id: track.id,
         type: track.type === "video" ? "video" : "audio",
         keyframes: composition.frames[track.id].map((frame) => ({
           timestamp: frame.timestamp,
           duration: frame.duration,
-          url: resolveMediaUrl(jobs[frame.data.jobId].output),
+          url: resolveMediaUrl(mediaItems[frame.data.mediaId]),
         })),
       }));
       if (videoData.length === 0) {

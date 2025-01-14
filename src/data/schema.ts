@@ -48,7 +48,7 @@ export type VideoKeyFrame = {
 
 export type KeyFrameData = {
   type: "prompt" | "image" | "video" | "voiceover" | "music";
-  jobId: string;
+  mediaId: string;
 } & (
   | {
       type: "prompt";
@@ -66,15 +66,28 @@ export type KeyFrameData = {
     }
 );
 
-export type GenerationJob = {
+export type MediaItem = {
   id: string;
-  requestId: string;
-  endpointId: string;
+  kind: "generated" | "uploaded";
+  endpointId?: string;
+  requestId?: string;
   projectId: string;
   mediaType: "image" | "video" | "music" | "voiceover";
   status: "pending" | "running" | "completed" | "failed";
   createdAt: number;
-  endedAt?: number;
-  input: Record<string, any>;
+  input?: Record<string, any>;
   output?: Record<string, any>;
-};
+  url?: string;
+} & (
+  | {
+      kind: "generated";
+      endpointId: string;
+      requestId: string;
+      input: Record<string, any>;
+      output?: Record<string, any>;
+    }
+  | {
+      kind: "uploaded";
+      url: string;
+    }
+);

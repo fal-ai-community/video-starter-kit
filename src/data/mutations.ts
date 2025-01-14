@@ -46,10 +46,11 @@ export const useJobCreator = ({
         input,
       }),
     onSuccess: async (data) => {
-      await db.jobs.create({
+      await db.media.create({
         projectId,
         createdAt: Date.now(),
         mediaType,
+        kind: "generated",
         endpointId,
         requestId: data.request_id,
         status: "pending",
@@ -57,7 +58,7 @@ export const useJobCreator = ({
       });
 
       await queryClient.invalidateQueries({
-        queryKey: queryKeys.projectJobs(projectId),
+        queryKey: queryKeys.projectMediaItems(projectId),
       });
     },
   });

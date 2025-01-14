@@ -1,13 +1,12 @@
 import { db } from "@/data/db";
 import {
   EMPTY_VIDEO_COMPOSITION,
-  queryKeys,
   useProject,
   useVideoComposition,
   VideoCompositionData,
 } from "@/data/queries";
 import {
-  type GenerationJob,
+  type MediaItem,
   PROJECT_PLACEHOLDER,
   TRACK_TYPE_ORDER,
   type VideoKeyFrame,
@@ -30,13 +29,12 @@ import {
 import { throttle } from "throttle-debounce";
 import { Button } from "./ui/button";
 import { DownloadIcon } from "lucide-react";
-import { fal } from "@/lib/fal";
 
 interface VideoCompositionProps {
   project: VideoProject;
   tracks: VideoTrack[];
   frames: Record<string, VideoKeyFrame[]>;
-  jobs: Record<string, GenerationJob>;
+  mediaItems: Record<string, MediaItem>;
 }
 
 const FPS = 30;
@@ -48,7 +46,7 @@ export const VideoComposition: React.FC<VideoCompositionProps> = ({
   project,
   tracks,
   frames,
-  jobs,
+  mediaItems,
 }) => {
   const sortedTracks = [...tracks].sort((a, b) => {
     return TRACK_TYPE_ORDER[a.type] - TRACK_TYPE_ORDER[b.type];
@@ -66,7 +64,7 @@ export const VideoComposition: React.FC<VideoCompositionProps> = ({
         project,
         tracks: sortedTracks,
         frames,
-        jobs,
+        mediaItems,
       }}
     />
   );
@@ -75,7 +73,7 @@ export const VideoComposition: React.FC<VideoCompositionProps> = ({
 const MainComposition: React.FC<VideoCompositionProps> = ({
   tracks,
   frames,
-  jobs,
+  mediaItems,
 }) => {
   return (
     <AbsoluteFill>
@@ -85,21 +83,21 @@ const MainComposition: React.FC<VideoCompositionProps> = ({
             <VideoTrackSequence
               track={track}
               frames={frames[track.id] || []}
-              jobs={jobs}
+              mediaItems={mediaItems}
             />
           )}
           {track.type === "music" && (
             <MusicTrackSequence
               track={track}
               frames={frames[track.id] || []}
-              jobs={jobs}
+              mediaItems={mediaItems}
             />
           )}
           {track.type === "voiceover" && (
             <VoiceoverTrackSequence
               track={track}
               frames={frames[track.id] || []}
-              jobs={jobs}
+              mediaItems={mediaItems}
             />
           )}
         </Sequence>
@@ -111,17 +109,20 @@ const MainComposition: React.FC<VideoCompositionProps> = ({
 interface TrackSequenceProps {
   track: VideoTrack;
   frames: VideoKeyFrame[];
-  jobs: Record<string, GenerationJob>;
+  mediaItems: Record<string, MediaItem>;
 }
 
-const VideoTrackSequence: React.FC<TrackSequenceProps> = ({ frames, jobs }) => {
+const VideoTrackSequence: React.FC<TrackSequenceProps> = ({
+  frames,
+  mediaItems,
+}) => {
   return (
     <AbsoluteFill>
       {frames.map((frame) => {
-        const job = jobs[frame.data.jobId];
-        if (!job || job.status !== "completed") return null;
+        const media = mediaItems[frame.data.mediaId];
+        if (!media || media.status !== "completed") return null;
 
-        const mediaUrl = resolveMediaUrl(job.output);
+        const mediaUrl = resolveMediaUrl(media);
         if (!mediaUrl) return null;
 
         return (
@@ -129,8 +130,8 @@ const VideoTrackSequence: React.FC<TrackSequenceProps> = ({ frames, jobs }) => {
             key={frame.id}
             from={Math.floor(frame.timestamp / (1000 / FPS))}
           >
-            {job.mediaType === "video" && <Video src={mediaUrl} />}
-            {job.mediaType === "image" && (
+            {media.mediaType === "video" && <Video src={mediaUrl} />}
+            {media.mediaType === "image" && (
               <Img src={mediaUrl} style={{ objectFit: "cover" }} />
             )}
           </Sequence>
@@ -140,14 +141,17 @@ const VideoTrackSequence: React.FC<TrackSequenceProps> = ({ frames, jobs }) => {
   );
 };
 
-const MusicTrackSequence: React.FC<TrackSequenceProps> = ({ frames, jobs }) => {
+const MusicTrackSequence: React.FC<TrackSequenceProps> = ({
+  frames,
+  mediaItems,
+}) => {
   return (
     <>
       {frames.map((frame) => {
-        const job = jobs[frame.data.jobId];
-        if (!job || job.status !== "completed") return null;
+        const media = mediaItems[frame.data.mediaId];
+        if (!media || media.status !== "completed") return null;
 
-        const audioUrl = resolveMediaUrl(job.output);
+        const audioUrl = resolveMediaUrl(media);
         if (!audioUrl) return null;
 
         return (
@@ -165,15 +169,15 @@ const MusicTrackSequence: React.FC<TrackSequenceProps> = ({ frames, jobs }) => {
 
 const VoiceoverTrackSequence: React.FC<TrackSequenceProps> = ({
   frames,
-  jobs,
+  mediaItems,
 }) => {
   return (
     <>
       {frames.map((frame) => {
-        const job = jobs[frame.data.jobId];
-        if (!job || job.status !== "completed") return null;
+        const media = mediaItems[frame.data.mediaId];
+        if (!media || media.status !== "completed") return null;
 
-        const audioUrl = resolveMediaUrl(job.output);
+        const audioUrl = resolveMediaUrl(media);
         if (!audioUrl) return null;
 
         return (
@@ -198,14 +202,16 @@ export default function VideoPreview() {
     data: composition = EMPTY_VIDEO_COMPOSITION,
     isLoading: isCompositionLoading,
   } = useVideoComposition(projectId);
-  const { tracks = [], frames = {}, jobs = {} } = composition;
+  const { tracks = [], frames = {}, mediaItems = {} } = composition;
   useEffect(() => {
-    const jobIds = Object.values(frames)
+    const mediaIds = Object.values(frames)
       .flatMap((f) => f)
-      .map((f) => f.data.jobId);
-    Object.values(jobs)
-      .filter((job) => job.status === "completed" && jobIds.includes(job.id))
-      .forEach((job) => {
+      .map((f) => f.data.mediaId);
+    Object.values(mediaItems)
+      .filter(
+        (media) => media.status === "completed" && mediaIds.includes(media.id),
+      )
+      .forEach((media) => {
         // if (job.output?.video?.url) {
         //   preloadVideo(job.output.video.url);
         // }
@@ -286,7 +292,7 @@ export default function VideoPreview() {
             project,
             tracks,
             frames,
-            jobs,
+            mediaItems,
           }}
           durationInFrames={duration * FPS}
           fps={FPS}

@@ -1,4 +1,4 @@
-import type { VideoTrack } from "@/data/schema";
+import type { MediaItem, VideoTrack } from "@/data/schema";
 import { LAST_PROJECT_ID_KEY } from "@/data/store";
 import { type ClassValue, clsx } from "clsx";
 import { ImageIcon, MicIcon, MusicIcon, VideoIcon } from "lucide-react";
@@ -60,7 +60,13 @@ export function resolveDuration(data: any): number | null {
  * might be represented by different properties. This utility function resolves
  * the URL of the media based on the output data.
  */
-export function resolveMediaUrl(data: any): string | null {
+export function resolveMediaUrl(item: MediaItem | undefined): string | null {
+  if (!item) return null;
+
+  if (item.kind === "uploaded") {
+    return item.url;
+  }
+  const data = item.output;
   if (!data) return null;
   if (
     "images" in data &&

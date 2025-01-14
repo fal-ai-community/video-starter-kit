@@ -1,5 +1,5 @@
 import { useJobCreator } from "@/data/mutations";
-import { useProject, useProjectJobs } from "@/data/queries";
+import { useProject, useProjectMediaItems } from "@/data/queries";
 import {
   GenerateData,
   type MediaType,
@@ -42,12 +42,13 @@ import { WithTooltip } from "./ui/tooltip";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { VoiceSelector } from "./playht/voice-selector";
-import { JobItem } from "./jobs-panel";
-import { GenerationJob } from "@/data/schema";
+import { MediaItemRow } from "./media-panel";
+import { MediaItem } from "@/data/schema";
 import {
   getAssetKey,
   getAssetType,
   resolveDurationFromMedia,
+  resolveMediaUrl,
 } from "@/lib/utils";
 
 type ModelEndpointPickerProps = {
@@ -141,7 +142,7 @@ export function GenerateDialog({
     },
   });
 
-  const { data: jobs = [] } = useProjectJobs(projectId);
+  const { data: mediaItems = [] } = useProjectMediaItems(projectId);
   const mediaType = useVideoProjectStore((s) => s.generateMediaType);
   const setMediaType = useVideoProjectStore((s) => s.setGenerateMediaType);
 
@@ -240,17 +241,17 @@ export function GenerateDialog({
     });
   };
 
-  const handleSelectMedia = (job: GenerationJob) => {
+  const handleSelectMedia = (media: MediaItem) => {
     const asset = endpoint?.inputAsset?.find((item) => {
       const assetType = getAssetType(item);
 
       if (
         assetType === "audio" &&
-        (job.mediaType === "voiceover" || job.mediaType === "music")
+        (media.mediaType === "voiceover" || media.mediaType === "music")
       ) {
         return true;
       } else {
-        return assetType === job.mediaType;
+        return assetType === media.mediaType;
       }
     });
 
@@ -260,16 +261,7 @@ export function GenerateDialog({
     }
 
     const key = getAssetKey(asset) || getAssetType(asset);
-
-    if (job.mediaType === "image") {
-      setGenerateData({ [key]: job.output?.images?.[0]?.url });
-    } else if (job.mediaType === "video") {
-      setGenerateData({ [key]: job.output?.video?.url });
-    } else if (job.mediaType === "music" || job.mediaType === "voiceover") {
-      setGenerateData({
-        [key]: job.output?.audio?.url || job.output?.audio_file?.url,
-      });
-    }
+    setGenerateData({ [key]: resolveMediaUrl(media) });
     setTab("generation");
   };
 
@@ -448,18 +440,19 @@ export function GenerateDialog({
         )}
         {tab === "asset" && (
           <div className="flex items-center gap-2 flex-wrap overflow-y-auto max-h-80 divide-y divide-border">
-            {jobs
-              .filter((job) => {
+            {mediaItems
+              .filter((media) => {
                 if (assetMediaType === "all") return true;
                 if (
                   assetMediaType === "audio" &&
-                  (job.mediaType === "voiceover" || job.mediaType === "music")
+                  (media.mediaType === "voiceover" ||
+                    media.mediaType === "music")
                 )
                   return true;
-                return job.mediaType === assetMediaType;
+                return media.mediaType === assetMediaType;
               })
               .map((job, index) => (
-                <JobItem
+                <MediaItemRow
                   draggable={false}
                   key={job.id}
                   data={job}
