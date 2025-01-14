@@ -197,10 +197,13 @@ export function VideoTrackView({
 
       frame.duration = newDuration;
       trackElement.style.width = `${((frame.duration / 30) * 100) / 1000}%`;
-      db.keyFrames.update(frame.id, { duration: frame.duration });
     };
 
     const handleMouseUp = () => {
+      frame.duration = Math.round(frame.duration / 100) * 100;
+      trackElement.style.width = `${((frame.duration / 30) * 100) / 1000}%`;
+      db.keyFrames.update(frame.id, { duration: frame.duration });
+
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
