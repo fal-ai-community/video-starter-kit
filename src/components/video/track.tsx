@@ -1,5 +1,9 @@
 import { db } from "@/data/db";
-import { refreshVideoCache, useProjectMediaItems } from "@/data/queries";
+import {
+  queryKeys,
+  refreshVideoCache,
+  useProjectMediaItems,
+} from "@/data/queries";
 import type { VideoKeyFrame, VideoTrack } from "@/data/schema";
 import { cn, resolveMediaUrl, trackIcons } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -203,7 +207,9 @@ export function VideoTrackView({
       frame.duration = Math.round(frame.duration / 100) * 100;
       trackElement.style.width = `${((frame.duration / 30) * 100) / 1000}%`;
       db.keyFrames.update(frame.id, { duration: frame.duration });
-
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.projectPreview(projectId),
+      });
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
