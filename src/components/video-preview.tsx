@@ -36,7 +36,7 @@ interface VideoCompositionProps {
   mediaItems: Record<string, MediaItem>;
 }
 
-const FPS = 30;
+const FPS = 25;
 const DEFAULT_DURATION = 5;
 const VIDEO_WIDTH = 1024;
 const VIDEO_HEIGHT = 720;
@@ -158,34 +158,8 @@ const AudioTrackSequence: React.FC<TrackSequenceProps> = ({
         return (
           <Sequence
             key={frame.id}
-            from={Math.floor(frame.timestamp / (1000 / FPS))}
+            from={Math.floor(frame.timestamp / (1000 / fps))}
             durationInFrames={durationInFrames}
-          >
-            <Audio src={audioUrl} />
-          </Sequence>
-        );
-      })}
-    </>
-  );
-};
-
-const VoiceoverTrackSequence: React.FC<TrackSequenceProps> = ({
-  frames,
-  mediaItems,
-}) => {
-  return (
-    <>
-      {frames.map((frame) => {
-        const media = mediaItems[frame.data.mediaId];
-        if (!media || media.status !== "completed") return null;
-
-        const audioUrl = resolveMediaUrl(media);
-        if (!audioUrl) return null;
-
-        return (
-          <Sequence
-            key={frame.id}
-            from={Math.floor(frame.timestamp / (1000 / FPS))}
           >
             <Audio src={audioUrl} />
           </Sequence>
@@ -211,7 +185,7 @@ export default function VideoPreview() {
       .map((f) => f.data.mediaId);
     Object.values(mediaItems)
       .filter(
-        (media) => media.status === "completed" && mediaIds.includes(media.id),
+        (media) => media.status === "completed" && mediaIds.includes(media.id)
       )
       .forEach((media) => {
         const mediaUrl = resolveMediaUrl(media);
@@ -243,14 +217,14 @@ export default function VideoPreview() {
   const duration = calculateDuration();
 
   const setPlayerCurrentTimestamp = useVideoProjectStore(
-    (s) => s.setPlayerCurrentTimestamp,
+    (s) => s.setPlayerCurrentTimestamp
   );
 
   const setPlayerState = useVideoProjectStore((s) => s.setPlayerState);
   // Frame updates are super frequent, so we throttle the updates to the timestamp
   const updatePlayerCurrentTimestamp = useCallback(
     throttle(64, setPlayerCurrentTimestamp),
-    [],
+    []
   );
 
   // Register events on the player
@@ -274,7 +248,7 @@ export default function VideoPreview() {
   }, []);
 
   const setExportDialogOpen = useVideoProjectStore(
-    (s) => s.setExportDialogOpen,
+    (s) => s.setExportDialogOpen
   );
 
   return (
