@@ -36,7 +36,7 @@ interface VideoCompositionProps {
   mediaItems: Record<string, MediaItem>;
 }
 
-const FPS = 25;
+const FPS = 30;
 const DEFAULT_DURATION = 5;
 const VIDEO_WIDTH = 1024;
 const VIDEO_HEIGHT = 720;
@@ -117,14 +117,13 @@ const VideoTrackSequence: React.FC<TrackSequenceProps> = ({
         const mediaUrl = resolveMediaUrl(media);
         if (!mediaUrl) return null;
 
-        const fps = media.metadata?.fps || FPS;
         const duration = frame.duration || media.metadata?.duration || 5000;
-        const durationInFrames = Math.floor(duration / (1000 / fps));
+        const durationInFrames = Math.floor(duration / (1000 / FPS));
 
         return (
           <Sequence
             key={frame.id}
-            from={Math.floor(frame.timestamp / (1000 / fps))}
+            from={Math.floor(frame.timestamp / (1000 / FPS))}
             durationInFrames={durationInFrames}
           >
             {media.mediaType === "video" && <Video src={mediaUrl} />}
@@ -151,14 +150,13 @@ const AudioTrackSequence: React.FC<TrackSequenceProps> = ({
         const audioUrl = resolveMediaUrl(media);
         if (!audioUrl) return null;
 
-        const fps = media.metadata?.fps || FPS;
         const duration = frame.duration || media.metadata?.duration || 5000;
-        const durationInFrames = Math.floor(duration / (1000 / fps));
+        const durationInFrames = Math.floor(duration / (1000 / FPS));
 
         return (
           <Sequence
             key={frame.id}
-            from={Math.floor(frame.timestamp / (1000 / fps))}
+            from={Math.floor(frame.timestamp / (1000 / FPS))}
             durationInFrames={durationInFrames}
           >
             <Audio src={audioUrl} />
