@@ -33,15 +33,25 @@ export function VideoTrackRow({ data, ...props }: VideoTrackRowProps) {
     queryKey: ["frames", data],
     queryFn: () => db.keyFrames.keyFramesByTrack(data.id),
   });
+
+  const mediaType = useMemo(() => keyframes[0]?.data.type, [keyframes]);
+
   return (
     <div
-      className="flex flex-row relative w-full h-full timeline-container"
+      className={cn(
+        "flex flex-row shrink-0 relative w-full timeline-container",
+        "flex flex-col select-none rounded overflow-hidden group shrink-0",
+        {
+          "min-h-[64px]": mediaType,
+          "min-h-[56px]": !mediaType,
+        }
+      )}
       {...props}
     >
       {keyframes.map((frame) => (
         <VideoTrackView
           key={frame.id}
-          className="absolute top-0 bottom-0 h-[4.5rem]"
+          className="absolute top-0 bottom-0"
           style={{
             left: (frame.timestamp / 10 / 30).toFixed(2) + "%",
             width: (frame.duration / 10 / 30).toFixed(2) + "%",
@@ -73,7 +83,7 @@ function AudioWaveform({ data }: AudioWaveformProps) {
             samples_per_second: 48,
             precision: 3,
           },
-        },
+        }
       );
       await db.media.update(data.id, {
         ...data,
@@ -143,7 +153,7 @@ export function VideoTrackView({
   };
 
   const isSelected = useVideoProjectStore((state) =>
-    state.selectedKeyframes.includes(frame.id),
+    state.selectedKeyframes.includes(frame.id)
   );
   const selectKeyframe = useVideoProjectStore((state) => state.selectKeyframe);
   const handleOnClick: MouseEventHandler = (e) => {
@@ -247,7 +257,7 @@ export function VideoTrackView({
 
   const handleResize = (
     e: React.MouseEvent<HTMLDivElement>,
-    direction: "left" | "right",
+    direction: "left" | "right"
   ) => {
     e.stopPropagation();
     const trackElement = trackRef.current;
@@ -304,8 +314,8 @@ export function VideoTrackView({
       aria-checked={isSelected}
       onClick={handleOnClick}
       className={cn(
-        "flex flex-col border border-transparent rounded-lg h-full",
-        className,
+        "flex flex-col border border-white/10 rounded-lg",
+        className
       )}
       {...props}
     >
@@ -313,23 +323,23 @@ export function VideoTrackView({
         className={cn(
           "flex flex-col select-none rounded overflow-hidden group h-full",
           {
-            "bg-gradient-to-t from-green-800 to-green-600":
-              track.type === "video",
-            "bg-gradient-to-t from-sky-800 to-sky-600": track.type === "music",
-            "bg-gradient-to-t from-violet-800 to-violet-600":
-              track.type === "voiceover",
-          },
+            "bg-[#2563EB]": track.type === "video",
+            "bg-[#22D3EE]":
+              track.type === "music" || track.type === "voiceover",
+          }
         )}
       >
         <div className="px-2 py-0.5 bg-black/10 flex flex-row items-center">
           <div className="flex flex-row gap-1 text-sm items-center font-semibold text-white/60 w-full">
-            <div className="flex flex-row gap-1 items-center">
+            <div className="flex flex-row truncate gap-1 items-center">
               {createElement(trackIcons[track.type], {
                 className: "w-3 h-3 opacity-70 stroke-[3px]",
               } as any)}
-              <span>{label}</span>
+              <span className="line-clamp-1 truncate w-full">
+                {media.input?.prompt || label}
+              </span>
             </div>
-            <div className="flex flex-row flex-1 items-center justify-end">
+            <div className="flex flex-row shrink-0 flex-1 items-center justify-end">
               <WithTooltip tooltip="Remove content">
                 <button
                   className="p-1 rounded hover:bg-black/5 group-hover:text-white"
@@ -341,16 +351,25 @@ export function VideoTrackView({
             </div>
           </div>
         </div>
-        <div className="p-px flex-1 items-center h-full relative">
-          {imageUrl && <img src={imageUrl} className="rounded h-8" alt="" />}
+        <div
+          className="p-px flex-1 items-center bg-repeat-x h-full relative"
+          style={
+            imageUrl
+              ? {
+                  background: `url(${imageUrl})`,
+                  backgroundSize: "auto 100%",
+                }
+              : undefined
+          }
+        >
           {(media.mediaType === "music" || media.mediaType === "voiceover") && (
             <AudioWaveform data={media} />
           )}
           <div
             className={cn(
-              "absolute right-0 top-0 bg-white/5 group-hover:bg-white/15",
-              "rounded-md bottom-0 w-2 m-1 p-px cursor-ew-resize text-white/30 group-hover:text-white/60",
-              "transition-colors flex flex-col items-center justify-center text-sm tracking-tighter",
+              "absolute right-0 z-50 top-0 bg-black/40",
+              "rounded-md bottom-0 w-2 m-1 p-px cursor-ew-resize backdrop-blur-md text-white/40",
+              "transition-colors flex flex-col items-center justify-center text-xs tracking-tighter"
             )}
             onMouseDown={(e) => handleResize(e, "right")}
           >
