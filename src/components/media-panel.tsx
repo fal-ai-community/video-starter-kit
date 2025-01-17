@@ -78,7 +78,7 @@ export function MediaItemRow({
                   extract_frames: true,
                 },
                 mode: "streaming",
-              },
+              }
             );
             await db.media.update(data.id, {
               ...media,
@@ -126,7 +126,7 @@ export function MediaItemRow({
     <div
       className={cn(
         "flex items-start space-x-2 py-2 w-full px-4 hover:bg-accent transition-all",
-        className,
+        className
       )}
       {...props}
       onClick={(e) => {
@@ -142,7 +142,7 @@ export function MediaItemRow({
             "flex items-center h-full cursor-grab text-muted-foreground",
             {
               "text-muted": data.status !== "completed",
-            },
+            }
           )}
         >
           <GripVerticalIcon className="w-4 h-4" />
@@ -191,7 +191,7 @@ export function MediaItemRow({
         )}
       </div>
       <div className="flex flex-col h-full gap-1 flex-1">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col items-start justify-center">
           <h3 className="text-sm font-medium flex flex-row gap-1 items-center">
             {createElement(trackIcons[data.mediaType], {
               className: "w-4 h-4 stroke-1",
@@ -199,6 +199,9 @@ export function MediaItemRow({
             <span>{data.kind === "generated" ? "Job" : "File"}</span>
             <code className="text-muted-foreground">#{mediaId}</code>
           </h3>
+          <p className="opacity-40 text-sm line-clamp-1 ">
+            {data.input?.prompt}
+          </p>
           {data.status !== "completed" && (
             <Badge
               variant="outline"
@@ -241,7 +244,7 @@ export function MediaItemPanel({
     <div
       className={cn(
         "flex flex-col overflow-hidden divide-y divide-border",
-        className,
+        className
       )}
     >
       {data
