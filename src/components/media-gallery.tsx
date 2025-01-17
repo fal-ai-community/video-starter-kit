@@ -80,7 +80,7 @@ function MediaPropertyItem({
     <div
       className={cn(
         "group relative flex flex-col gap-1 rounded bg-black/50 p-3 text-sm flex-wrap text-wrap overflow-hidden",
-        className
+        className,
       )}
     >
       <div className="absolute right-2 top-2 opacity-30 transition-opacity group-hover:opacity-70">
@@ -127,7 +127,7 @@ export function MediaGallerySheet({
   const setGenerateData = useVideoProjectStore((s) => s.setGenerateData);
   const setEndpointId = useVideoProjectStore((s) => s.setEndpointId);
   const setGenerateMediaType = useVideoProjectStore(
-    (s) => s.setGenerateMediaType
+    (s) => s.setGenerateMediaType,
   );
 
   const openGenerateDialog = useVideoProjectStore((s) => s.openGenerateDialog);
@@ -138,12 +138,20 @@ export function MediaGallerySheet({
     const image = selectedMedia.output?.images?.[0]?.url;
 
     const endpoint = AVAILABLE_ENDPOINTS.find(
-      (endpoint) => endpoint.category === "video"
+      (endpoint) => endpoint.category === "video",
     );
 
     setEndpointId(endpoint?.endpointId ?? AVAILABLE_ENDPOINTS[0].endpointId);
 
     setGenerateData({ image, duration: undefined });
+    setSelectedMediaId(null);
+  };
+
+  const handleVary = () => {
+    setGenerateMediaType(selectedMedia.mediaType);
+    setEndpointId(selectedMedia.endpointId as string);
+    setGenerateData(selectedMedia.input || {});
+    openGenerateDialog();
     setSelectedMediaId(null);
   };
 
@@ -157,7 +165,7 @@ export function MediaGallerySheet({
   };
   const mediaUrl = useMemo(
     () => resolveMediaUrl(selectedMedia),
-    [selectedMedia]
+    [selectedMedia],
   );
   const prompt = selectedMedia?.input?.prompt;
 
@@ -238,21 +246,23 @@ export function MediaGallerySheet({
             </div>
             <div className="flex flex-row gap-2">
               {selectedMedia?.mediaType === "image" && (
-                <>
-                  <Button
-                    onClick={handleOpenGenerateDialog}
-                    variant="secondary"
-                    disabled={deleteMedia.isPending}
-                  >
-                    <FilmIcon className="w-4 h-4 opacity-50" />
-                    Make Video
-                  </Button>
-                  <Button variant="secondary" disabled={deleteMedia.isPending}>
-                    <ImagesIcon className="w-4 h-4 opacity-50" />
-                    Vary
-                  </Button>
-                </>
+                <Button
+                  onClick={handleOpenGenerateDialog}
+                  variant="secondary"
+                  disabled={deleteMedia.isPending}
+                >
+                  <FilmIcon className="w-4 h-4 opacity-50" />
+                  Make Video
+                </Button>
               )}
+              <Button
+                onClick={handleVary}
+                variant="secondary"
+                disabled={deleteMedia.isPending}
+              >
+                <ImagesIcon className="w-4 h-4 opacity-50" />
+                Vary
+              </Button>
               <Button
                 variant="secondary"
                 disabled={deleteMedia.isPending}
