@@ -125,6 +125,7 @@ const VideoTrackSequence: React.FC<TrackSequenceProps> = ({
             key={frame.id}
             from={Math.floor(frame.timestamp / (1000 / FPS))}
             durationInFrames={durationInFrames}
+            premountFor={3000}
           >
             {media.mediaType === "video" && <Video src={mediaUrl} />}
             {media.mediaType === "image" && (
@@ -158,6 +159,7 @@ const AudioTrackSequence: React.FC<TrackSequenceProps> = ({
             key={frame.id}
             from={Math.floor(frame.timestamp / (1000 / FPS))}
             durationInFrames={durationInFrames}
+            premountFor={3000}
           >
             <Audio src={audioUrl} />
           </Sequence>
@@ -183,7 +185,7 @@ export default function VideoPreview() {
       .map((f) => f.data.mediaId);
     Object.values(mediaItems)
       .filter(
-        (media) => media.status === "completed" && mediaIds.includes(media.id),
+        (media) => media.status === "completed" && mediaIds.includes(media.id)
       )
       .forEach((media) => {
         const mediaUrl = resolveMediaUrl(media);
@@ -215,14 +217,14 @@ export default function VideoPreview() {
   const duration = calculateDuration();
 
   const setPlayerCurrentTimestamp = useVideoProjectStore(
-    (s) => s.setPlayerCurrentTimestamp,
+    (s) => s.setPlayerCurrentTimestamp
   );
 
   const setPlayerState = useVideoProjectStore((s) => s.setPlayerState);
   // Frame updates are super frequent, so we throttle the updates to the timestamp
   const updatePlayerCurrentTimestamp = useCallback(
     throttle(64, setPlayerCurrentTimestamp),
-    [],
+    []
   );
 
   // Register events on the player
@@ -246,7 +248,7 @@ export default function VideoPreview() {
   }, []);
 
   const setExportDialogOpen = useVideoProjectStore(
-    (s) => s.setExportDialogOpen,
+    (s) => s.setExportDialogOpen
   );
 
   return (
