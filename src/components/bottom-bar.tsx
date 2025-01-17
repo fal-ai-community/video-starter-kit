@@ -22,7 +22,7 @@ export default function BottomBar() {
   const queryClient = useQueryClient();
   const projectId = useProjectId();
   const playerCurrentTimestamp = useVideoProjectStore(
-    (s) => s.playerCurrentTimestamp,
+    (s) => s.playerCurrentTimestamp
   );
   const formattedTimestamp =
     (playerCurrentTimestamp < 10 ? "0" : "") +
@@ -65,7 +65,7 @@ export default function BottomBar() {
               return frame;
             return acc;
           },
-          { timestamp: 0, duration: 0 },
+          { timestamp: 0, duration: 0 }
         );
 
       const duration = media.metadata?.duration
@@ -97,7 +97,7 @@ export default function BottomBar() {
     queryFn: async () => {
       const result = await db.tracks.tracksByProject(projectId);
       return result.toSorted(
-        (a, b) => TRACK_TYPE_ORDER[a.type] - TRACK_TYPE_ORDER[b.type],
+        (a, b) => TRACK_TYPE_ORDER[a.type] - TRACK_TYPE_ORDER[b.type]
       );
     },
   });
@@ -149,8 +149,7 @@ export default function BottomBar() {
 
   return (
     <div className="border-t pb-2 border-border flex flex-col bg-background-light ">
-      <div className="border-b border-border bg-background-dark px-2 flex flex-row gap-8 py-2 justify-center items-center flex-1">
-        <VideoControls />
+      <div className="border-b border-border bg-background-dark px-2 flex flex-row gap-8 py-2 justify-between items-center flex-1">
         <div className="h-full flex flex-col justify-center px-4 bg-muted/50 rounded-md font-mono cursor-default select-none shadow-inner">
           <div className="flex flex-row items-baseline font-thin tabular-nums">
             <span className="text-muted-foreground">00:</span>
@@ -161,13 +160,14 @@ export default function BottomBar() {
             </span>
           </div>
         </div>
+        <VideoControls />
       </div>
       <div
         className={cn(
           "min-h-64  max-h-72 h-full flex flex-row overflow-y-scroll transition-colors",
           {
             "bg-white/5": dragOverTracks,
-          },
+          }
         )}
         onDragOver={handleOnDragOver}
         onDragLeave={() => setDragOverTracks(false)}
@@ -193,7 +193,7 @@ export default function BottomBar() {
                 />
               ) : (
                 <div className="flex flex-row relative w-full h-full timeline-container"></div>
-              ),
+              )
             )}
           </div>
         </div>
