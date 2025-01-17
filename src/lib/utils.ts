@@ -31,29 +31,6 @@ export const trackIcons: Record<
   image: ImageIcon,
 };
 
-export function resolveDuration(item: MediaItem): number | null {
-  if (!item) return null;
-
-  const metadata = item.metadata;
-  if (
-    metadata &&
-    "duration" in metadata &&
-    typeof metadata.duration === "number"
-  ) {
-    return metadata.duration * 1000;
-  }
-
-  const data = item.output;
-  if (!data) return null;
-  if ("seconds_total" in data) {
-    return data.seconds_total * 1000;
-  }
-  if ("audio" in data && "duration" in data.audio) {
-    return data.audio.duration * 1000;
-  }
-  return null;
-}
-
 /**
  * Depending on the output type of the job, the URL of the audio/image/video
  * might be represented by different properties. This utility function resolves
@@ -82,7 +59,7 @@ export function resolveMediaUrl(item: MediaItem | undefined): string | null {
     audio_url: 1,
   };
   const property = Object.keys(data).find(
-    (key) => key in fileProperties && "url" in data[key],
+    (key) => key in fileProperties && "url" in data[key]
   );
   if (property) {
     return data[property].url;
