@@ -82,7 +82,7 @@ export function resolveMediaUrl(item: MediaItem | undefined): string | null {
     audio_url: 1,
   };
   const property = Object.keys(data).find(
-    (key) => key in fileProperties && "url" in data[key]
+    (key) => key in fileProperties && "url" in data[key],
   );
   if (property) {
     return data[property].url;
