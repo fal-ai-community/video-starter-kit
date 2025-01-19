@@ -5,7 +5,7 @@ import {
   type VideoTrack,
 } from "@/data/schema";
 import { useProjectId, useVideoProjectStore } from "@/data/store";
-import { cn } from "@/lib/utils";
+import { cn, resolveDuration } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type DragEventHandler, useMemo, useState } from "react";
 import { VideoControls } from "./video-controls";
@@ -17,7 +17,7 @@ export default function BottomBar() {
   const queryClient = useQueryClient();
   const projectId = useProjectId();
   const playerCurrentTimestamp = useVideoProjectStore(
-    (s) => s.playerCurrentTimestamp,
+    (s) => s.playerCurrentTimestamp
   );
   const formattedTimestamp =
     (playerCurrentTimestamp < 10 ? "0" : "") +
@@ -60,12 +60,11 @@ export default function BottomBar() {
               return frame;
             return acc;
           },
-          { timestamp: 0, duration: 0 },
+          { timestamp: 0, duration: 0 }
         );
 
-      const duration = media.metadata?.duration
-        ? media.metadata.duration * 1000
-        : 5000;
+      const duration = resolveDuration(media) ?? 5000;
+
       const newId = await db.keyFrames.create({
         trackId: track.id,
         data: {
@@ -92,7 +91,7 @@ export default function BottomBar() {
     queryFn: async () => {
       const result = await db.tracks.tracksByProject(projectId);
       return result.toSorted(
-        (a, b) => TRACK_TYPE_ORDER[a.type] - TRACK_TYPE_ORDER[b.type],
+        (a, b) => TRACK_TYPE_ORDER[a.type] - TRACK_TYPE_ORDER[b.type]
       );
     },
   });
@@ -162,7 +161,7 @@ export default function BottomBar() {
           "min-h-64  max-h-72 h-full flex flex-row overflow-y-scroll transition-colors",
           {
             "bg-white/5": dragOverTracks,
-          },
+          }
         )}
         onDragOver={handleOnDragOver}
         onDragLeave={() => setDragOverTracks(false)}
@@ -188,7 +187,7 @@ export default function BottomBar() {
                 />
               ) : (
                 <div className="flex flex-row relative w-full h-full timeline-container"></div>
-              ),
+              )
             )}
           </div>
         </div>
