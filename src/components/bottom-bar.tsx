@@ -17,7 +17,7 @@ export default function BottomBar() {
   const queryClient = useQueryClient();
   const projectId = useProjectId();
   const playerCurrentTimestamp = useVideoProjectStore(
-    (s) => s.playerCurrentTimestamp
+    (s) => s.playerCurrentTimestamp,
   );
   const formattedTimestamp =
     (playerCurrentTimestamp < 10 ? "0" : "") +
@@ -60,7 +60,7 @@ export default function BottomBar() {
               return frame;
             return acc;
           },
-          { timestamp: 0, duration: 0 }
+          { timestamp: 0, duration: 0 },
         );
 
       const duration = resolveDuration(media) ?? 5000;
@@ -91,7 +91,7 @@ export default function BottomBar() {
     queryFn: async () => {
       const result = await db.tracks.tracksByProject(projectId);
       return result.toSorted(
-        (a, b) => TRACK_TYPE_ORDER[a.type] - TRACK_TYPE_ORDER[b.type]
+        (a, b) => TRACK_TYPE_ORDER[a.type] - TRACK_TYPE_ORDER[b.type],
       );
     },
   });
@@ -161,7 +161,7 @@ export default function BottomBar() {
           "min-h-64  max-h-72 h-full flex flex-row overflow-y-scroll transition-colors",
           {
             "bg-white/5": dragOverTracks,
-          }
+          },
         )}
         onDragOver={handleOnDragOver}
         onDragLeave={() => setDragOverTracks(false)}
@@ -187,7 +187,7 @@ export default function BottomBar() {
                 />
               ) : (
                 <div className="flex flex-row relative w-full h-full timeline-container"></div>
-              )
+              ),
             )}
           </div>
         </div>
