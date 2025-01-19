@@ -44,7 +44,7 @@ export function VideoTrackRow({ data, ...props }: VideoTrackRowProps) {
         {
           "min-h-[64px]": mediaType,
           "min-h-[56px]": !mediaType,
-        },
+        }
       )}
       {...props}
     >
@@ -83,7 +83,7 @@ function AudioWaveform({ data }: AudioWaveformProps) {
             samples_per_second: 48,
             precision: 3,
           },
-        },
+        }
       );
       await db.media.update(data.id, {
         ...data,
@@ -153,7 +153,7 @@ export function VideoTrackView({
   };
 
   const isSelected = useVideoProjectStore((state) =>
-    state.selectedKeyframes.includes(frame.id),
+    state.selectedKeyframes.includes(frame.id)
   );
   const selectKeyframe = useVideoProjectStore((state) => state.selectKeyframe);
   const handleOnClick: MouseEventHandler = (e) => {
@@ -257,7 +257,7 @@ export function VideoTrackView({
 
   const handleResize = (
     e: React.MouseEvent<HTMLDivElement>,
-    direction: "left" | "right",
+    direction: "left" | "right"
   ) => {
     e.stopPropagation();
     const trackElement = trackRef.current;
@@ -315,7 +315,7 @@ export function VideoTrackView({
       onClick={handleOnClick}
       className={cn(
         "flex flex-col border border-white/10 rounded-lg",
-        className,
+        className
       )}
       {...props}
     >
@@ -326,7 +326,7 @@ export function VideoTrackView({
             "bg-[#2563EB]": track.type === "video",
             "bg-[#22D3EE]":
               track.type === "music" || track.type === "voiceover",
-          },
+          }
         )}
       >
         <div className="p-0.5 pl-1 bg-black/10 flex flex-row items-center">
@@ -369,13 +369,13 @@ export function VideoTrackView({
             className={cn(
               "absolute right-0 z-50 top-0 bg-black/40",
               "rounded-md bottom-0 w-2 m-1 p-px cursor-ew-resize backdrop-blur-md text-white/40",
-              "transition-colors flex flex-col items-center justify-center text-xs tracking-tighter",
+              "transition-colors flex flex-col items-center justify-center text-xs tracking-tighter"
             )}
             onMouseDown={(e) => handleResize(e, "right")}
           >
             <span className="flex gap-[1px]">
-              <span className="w-[1px] h-2 rounded bg-white/40"></span>
-              <span className="w-[1px] h-2 rounded bg-white/40"></span>
+              <span className="w-px h-2 rounded bg-white/40"></span>
+              <span className="w-px h-2 rounded bg-white/40"></span>
             </span>
           </div>
         </div>
