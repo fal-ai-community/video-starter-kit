@@ -39,7 +39,6 @@ import { resolveMediaUrl } from "@/lib/utils";
 
 export default function LeftPanel() {
   const projectId = useProjectId();
-  // const [projectTitle, setProjectTitle] = useState("");
   const { data: project = PROJECT_PLACEHOLDER } = useProject(projectId);
   const projectUpdate = useProjectUpdater(projectId);
   const [mediaType, setMediaType] = useState("all");
