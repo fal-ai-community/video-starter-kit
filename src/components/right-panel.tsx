@@ -76,7 +76,7 @@ function ModelEndpointPicker({
   const endpoints = useMemo(
     () =>
       AVAILABLE_ENDPOINTS.filter((endpoint) => endpoint.category === mediaType),
-    [mediaType]
+    [mediaType],
   );
   return (
     <Select {...props}>
@@ -123,7 +123,7 @@ export default function RightPanel({
   const projectId = useProjectId();
   const openGenerateDialog = useVideoProjectStore((s) => s.openGenerateDialog);
   const closeGenerateDialog = useVideoProjectStore(
-    (s) => s.closeGenerateDialog
+    (s) => s.closeGenerateDialog,
   );
   const handleOnOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
@@ -164,14 +164,14 @@ export default function RightPanel({
   const endpoint = useMemo(
     () =>
       AVAILABLE_ENDPOINTS.find(
-        (endpoint) => endpoint.endpointId === endpointId
+        (endpoint) => endpoint.endpointId === endpointId,
       ),
-    [endpointId]
+    [endpointId],
   );
   const handleMediaTypeChange = (mediaType: string) => {
     setMediaType(mediaType as MediaType);
     const endpoint = AVAILABLE_ENDPOINTS.find(
-      (endpoint) => endpoint.category === mediaType
+      (endpoint) => endpoint.category === mediaType,
     );
 
     if (
@@ -299,7 +299,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("image")}
               className={cn(
                 mediaType === "image" && "bg-[#1F1F1F]",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
               )}
             >
               <ImageIcon className="w-4 h-4 opacity-50" />
@@ -310,7 +310,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("video")}
               className={cn(
                 mediaType === "video" && "bg-[#1F1F1F]",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
               )}
             >
               <VideoIcon className="w-4 h-4 opacity-50" />
@@ -321,7 +321,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("voiceover")}
               className={cn(
                 mediaType === "voiceover" && "bg-[#1F1F1F]",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
               )}
             >
               <MicIcon className="w-4 h-4 opacity-50" />
@@ -332,7 +332,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("music")}
               className={cn(
                 mediaType === "music" && "bg-[#1F1F1F]",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
               )}
             >
               <MusicIcon className="w-4 h-4 opacity-50" />
@@ -383,7 +383,7 @@ export default function RightPanel({
                       if (file) {
                         setGenerateData({
                           [getAssetKey(asset) ??
-                          assetKeyMap[getAssetType(asset)]]: file,
+                            assetKeyMap[getAssetType(asset)]]: file,
                         });
                       }
                     }}
@@ -424,7 +424,7 @@ export default function RightPanel({
                           onClick={() =>
                             setGenerateData({
                               [getAssetKey(asset) ??
-                              assetKeyMap[getAssetType(asset)]]: undefined,
+                                assetKeyMap[getAssetType(asset)]]: undefined,
                             })
                           }
                         >
