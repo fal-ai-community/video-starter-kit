@@ -47,13 +47,8 @@ export default function LeftPanel() {
 
   const { data: mediaItems = [], isLoading } = useProjectMediaItems(projectId);
   const setProjectDialogOpen = useVideoProjectStore(
-    (s) => s.setProjectDialogOpen,
+    (s) => s.setProjectDialogOpen
   );
-  const openGenerateDialog = useVideoProjectStore((s) => s.openGenerateDialog);
-
-  const handleOpenGenerateDialog = () => {
-    openGenerateDialog();
-  };
 
   const { startUpload, isUploading } = useUploadThing("fileUploader");
 
@@ -78,7 +73,7 @@ export default function LeftPanel() {
   const handleUploadComplete = async (
     files: ClientUploadedFileData<{
       uploadedBy: string;
-    }>[],
+    }>[]
   ) => {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -105,7 +100,7 @@ export default function LeftPanel() {
               media_url: resolveMediaUrl(media),
             },
             mode: "streaming",
-          },
+          }
         );
         await db.media
           .update(media.id, {
@@ -196,11 +191,7 @@ export default function LeftPanel() {
           </Button>
           {/* Temporary disabled */}
           {false && mediaItems.length > 0 && (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleOpenGenerateDialog}
-            >
+            <Button variant="secondary" size="sm">
               <SparklesIcon className="w-4 h-4 opacity-50" />
               Generate...
             </Button>
@@ -212,14 +203,13 @@ export default function LeftPanel() {
               Create your image, audio and voiceover collection to compose your
               videos
             </p>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleOpenGenerateDialog}
-            >
-              <ImagePlusIcon className="w-4 h-4 opacity-50" />
-              Generate...
-            </Button>
+            {/* Temporary disabled */}
+            {false && (
+              <Button variant="secondary" size="sm">
+                <ImagePlusIcon className="w-4 h-4 opacity-50" />
+                Generate...
+              </Button>
+            )}
           </div>
         )}
         <div className="flex justify-end pt-4 w-full px-4 border-t border-border">

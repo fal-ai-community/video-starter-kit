@@ -76,7 +76,7 @@ function ModelEndpointPicker({
   const endpoints = useMemo(
     () =>
       AVAILABLE_ENDPOINTS.filter((endpoint) => endpoint.category === mediaType),
-    [mediaType],
+    [mediaType]
   );
   return (
     <Select {...props}>
@@ -120,7 +120,7 @@ export default function RightPanel({
   const projectId = useProjectId();
   const openGenerateDialog = useVideoProjectStore((s) => s.openGenerateDialog);
   const closeGenerateDialog = useVideoProjectStore(
-    (s) => s.closeGenerateDialog,
+    (s) => s.closeGenerateDialog
   );
   const handleOnOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
@@ -161,14 +161,14 @@ export default function RightPanel({
   const endpoint = useMemo(
     () =>
       AVAILABLE_ENDPOINTS.find(
-        (endpoint) => endpoint.endpointId === endpointId,
+        (endpoint) => endpoint.endpointId === endpointId
       ),
-    [endpointId],
+    [endpointId]
   );
   const handleMediaTypeChange = (mediaType: string) => {
     setMediaType(mediaType as MediaType);
     const endpoint = AVAILABLE_ENDPOINTS.find(
-      (endpoint) => endpoint.category === mediaType,
+      (endpoint) => endpoint.category === mediaType
     );
 
     if (
@@ -292,7 +292,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("image")}
               className={cn(
                 mediaType === "image" && "bg-[#1F1F1F]",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
               )}
             >
               <ImageIcon className="w-4 h-4 opacity-50" />
@@ -303,7 +303,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("video")}
               className={cn(
                 mediaType === "video" && "bg-[#1F1F1F]",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
               )}
             >
               <VideoIcon className="w-4 h-4 opacity-50" />
@@ -314,7 +314,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("voiceover")}
               className={cn(
                 mediaType === "voiceover" && "bg-[#1F1F1F]",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
               )}
             >
               <MicIcon className="w-4 h-4 opacity-50" />
@@ -325,7 +325,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("music")}
               className={cn(
                 mediaType === "music" && "bg-[#1F1F1F]",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
               )}
             >
               <MusicIcon className="w-4 h-4 opacity-50" />
@@ -359,7 +359,7 @@ export default function RightPanel({
           )}
         </div>
         {tab === "generation" && (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 relative">
             {endpoint?.inputAsset?.map((asset) => (
               <div className="flex w-full">
                 <div className="flex flex-col w-full" key={getAssetType(asset)}>
@@ -376,7 +376,7 @@ export default function RightPanel({
                       if (file) {
                         setGenerateData({
                           [getAssetKey(asset) ??
-                            assetKeyMap[getAssetType(asset)]]: file,
+                          assetKeyMap[getAssetType(asset)]]: file,
                         });
                       }
                     }}
@@ -417,7 +417,7 @@ export default function RightPanel({
                           onClick={() =>
                             setGenerateData({
                               [getAssetKey(asset) ??
-                                assetKeyMap[getAssetType(asset)]]: undefined,
+                              assetKeyMap[getAssetType(asset)]]: undefined,
                             })
                           }
                         >
@@ -437,13 +437,32 @@ export default function RightPanel({
                 </div>
               </div>
             ))}
-            <Textarea
-              className="text-base placeholder:text-base w-full resize-none"
-              placeholder="Imagine..."
-              value={generateData.prompt}
-              rows={3}
-              onChange={(e) => setGenerateData({ prompt: e.target.value })}
-            />
+            <div className="relative bg-border rounded-lg pb-10 placeholder:text-base w-full  resize-none">
+              <Textarea
+                className="text-base shadow-none focus:!ring-0 placeholder:text-base w-full h-32 resize-none"
+                placeholder="Imagine..."
+                value={generateData.prompt}
+                rows={3}
+                onChange={(e) => setGenerateData({ prompt: e.target.value })}
+              />
+              <WithTooltip tooltip="Enhance your prompt with AI-powered suggestions.">
+                <div className="absolute bottom-2 right-2">
+                  <Button
+                    variant="secondary"
+                    disabled={enhance.isPending}
+                    className="bg-purple-400/10 text-purple-400 text-xs rounded-full h-6 px-3"
+                    onClick={() => enhance.mutate()}
+                  >
+                    {enhance.isPending ? (
+                      <LoadingIcon />
+                    ) : (
+                      <WandSparklesIcon className="opacity-50" />
+                    )}
+                    Enhance Prompt
+                  </Button>
+                </div>
+              </WithTooltip>
+            </div>
           </div>
         )}
         {tab === "asset" && (
@@ -500,21 +519,8 @@ export default function RightPanel({
               )}
             </div>
             <div className="flex flex-row gap-2 mt-2">
-              <WithTooltip tooltip="Enhance your prompt with AI-powered suggestions.">
-                <Button
-                  variant="secondary"
-                  disabled={enhance.isPending}
-                  onClick={() => enhance.mutate()}
-                >
-                  {enhance.isPending ? (
-                    <LoadingIcon />
-                  ) : (
-                    <WandSparklesIcon className="opacity-50" />
-                  )}
-                  Enhance
-                </Button>
-              </WithTooltip>
               <Button
+                className="w-full"
                 disabled={enhance.isPending || createJob.isPending}
                 onClick={handleOnGenerate}
               >
