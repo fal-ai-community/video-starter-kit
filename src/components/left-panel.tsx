@@ -47,7 +47,7 @@ export default function LeftPanel() {
 
   const { data: mediaItems = [], isLoading } = useProjectMediaItems(projectId);
   const setProjectDialogOpen = useVideoProjectStore(
-    (s) => s.setProjectDialogOpen
+    (s) => s.setProjectDialogOpen,
   );
   const openGenerateDialog = useVideoProjectStore((s) => s.openGenerateDialog);
 
@@ -78,7 +78,7 @@ export default function LeftPanel() {
   const handleUploadComplete = async (
     files: ClientUploadedFileData<{
       uploadedBy: string;
-    }>[]
+    }>[],
   ) => {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -105,7 +105,7 @@ export default function LeftPanel() {
               media_url: resolveMediaUrl(media),
             },
             mode: "streaming",
-          }
+          },
         );
         await db.media
           .update(media.id, {
