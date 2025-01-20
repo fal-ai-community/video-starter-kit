@@ -17,6 +17,7 @@ import { MediaGallerySheet } from "./media-gallery";
 import { ToastProvider } from "./ui/toast";
 import { Toaster } from "./ui/toaster";
 import { ExportDialog } from "./export-dialog";
+import LeftPanel from "./left-panel";
 
 type AppProps = {
   projectId: string;
@@ -27,17 +28,17 @@ export function App({ projectId }: AppProps) {
   const projectStore = useRef(
     createVideoProjectStore({
       projectId,
-    }),
+    })
   ).current;
   const projectDialogOpen = useStore(projectStore, (s) => s.projectDialogOpen);
   const generateDialogOpen = useStore(
     projectStore,
-    (s) => s.generateDialogOpen,
+    (s) => s.generateDialogOpen
   );
   const selectedMediaId = useStore(projectStore, (s) => s.selectedMediaId);
   const setSelectedMediaId = useStore(
     projectStore,
-    (s) => s.setSelectedMediaId,
+    (s) => s.setSelectedMediaId
   );
   const handleOnSheetOpenChange = (open: boolean) => {
     if (!open) {
@@ -47,7 +48,7 @@ export function App({ projectId }: AppProps) {
   const isExportDialogOpen = useStore(projectStore, (s) => s.exportDialogOpen);
   const setExportDialogOpen = useStore(
     projectStore,
-    (s) => s.setExportDialogOpen,
+    (s) => s.setExportDialogOpen
   );
   return (
     <ToastProvider>
@@ -56,6 +57,7 @@ export function App({ projectId }: AppProps) {
           <div className="flex flex-col h-screen bg-background">
             <Header />
             <main className="flex overflow-hidden h-full">
+              <LeftPanel />
               <div className="flex flex-col flex-1">
                 <VideoPreview />
                 <BottomBar />
