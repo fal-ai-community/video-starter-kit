@@ -38,7 +38,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useUploadThing } from "@/lib/uploadthing";
 import { ClientUploadedFileData } from "uploadthing/types";
 import { db } from "@/data/db";
@@ -76,7 +76,7 @@ function ModelEndpointPicker({
   const endpoints = useMemo(
     () =>
       AVAILABLE_ENDPOINTS.filter((endpoint) => endpoint.category === mediaType),
-    [mediaType],
+    [mediaType]
   );
   return (
     <Select {...props}>
@@ -107,20 +107,23 @@ export default function RightPanel({
 }: {
   onOpenChange?: (open: boolean) => void;
 }) {
+  const videoProjectStore = useVideoProjectStore((s) => s);
   const {
     generateData,
     setGenerateData,
     resetGenerateData,
     endpointId,
     setEndpointId,
-  } = useVideoProjectStore((s) => s);
+  } = videoProjectStore;
+
+  console.log({ generateData });
 
   const [tab, setTab] = useState<"generation" | "asset">("generation");
   const [assetMediaType, setAssetMediaType] = useState("all");
   const projectId = useProjectId();
   const openGenerateDialog = useVideoProjectStore((s) => s.openGenerateDialog);
   const closeGenerateDialog = useVideoProjectStore(
-    (s) => s.closeGenerateDialog,
+    (s) => s.closeGenerateDialog
   );
   const handleOnOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
@@ -161,14 +164,14 @@ export default function RightPanel({
   const endpoint = useMemo(
     () =>
       AVAILABLE_ENDPOINTS.find(
-        (endpoint) => endpoint.endpointId === endpointId,
+        (endpoint) => endpoint.endpointId === endpointId
       ),
-    [endpointId],
+    [endpointId]
   );
   const handleMediaTypeChange = (mediaType: string) => {
     setMediaType(mediaType as MediaType);
     const endpoint = AVAILABLE_ENDPOINTS.find(
-      (endpoint) => endpoint.category === mediaType,
+      (endpoint) => endpoint.category === mediaType
     );
 
     if (
@@ -253,6 +256,10 @@ export default function RightPanel({
     });
   };
 
+  useEffect(() => {
+    videoProjectStore.onGenerate = handleOnGenerate;
+  }, [handleOnGenerate]);
+
   const handleSelectMedia = (media: MediaItem) => {
     const asset = endpoint?.inputAsset?.find((item) => {
       const assetType = getAssetType(item);
@@ -292,7 +299,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("image")}
               className={cn(
                 mediaType === "image" && "bg-[#1F1F1F]",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
               )}
             >
               <ImageIcon className="w-4 h-4 opacity-50" />
@@ -303,7 +310,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("video")}
               className={cn(
                 mediaType === "video" && "bg-[#1F1F1F]",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
               )}
             >
               <VideoIcon className="w-4 h-4 opacity-50" />
@@ -314,7 +321,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("voiceover")}
               className={cn(
                 mediaType === "voiceover" && "bg-[#1F1F1F]",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
               )}
             >
               <MicIcon className="w-4 h-4 opacity-50" />
@@ -325,7 +332,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("music")}
               className={cn(
                 mediaType === "music" && "bg-[#1F1F1F]",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
               )}
             >
               <MusicIcon className="w-4 h-4 opacity-50" />
@@ -360,8 +367,8 @@ export default function RightPanel({
         </div>
         {tab === "generation" && (
           <div className="flex flex-col gap-2 relative">
-            {endpoint?.inputAsset?.map((asset) => (
-              <div className="flex w-full">
+            {endpoint?.inputAsset?.map((asset, index) => (
+              <div key={index} className="flex w-full">
                 <div className="flex flex-col w-full" key={getAssetType(asset)}>
                   <h4 className="capitalize text-[#808080] mb-2">
                     {getAssetType(asset)} Reference
@@ -376,7 +383,7 @@ export default function RightPanel({
                       if (file) {
                         setGenerateData({
                           [getAssetKey(asset) ??
-                            assetKeyMap[getAssetType(asset)]]: file,
+                          assetKeyMap[getAssetType(asset)]]: file,
                         });
                       }
                     }}
@@ -417,7 +424,7 @@ export default function RightPanel({
                           onClick={() =>
                             setGenerateData({
                               [getAssetKey(asset) ??
-                                assetKeyMap[getAssetType(asset)]]: undefined,
+                              assetKeyMap[getAssetType(asset)]]: undefined,
                             })
                           }
                         >
