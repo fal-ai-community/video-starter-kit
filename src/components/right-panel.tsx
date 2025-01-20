@@ -116,8 +116,6 @@ export default function RightPanel({
     setEndpointId,
   } = videoProjectStore;
 
-  console.log({ generateData });
-
   const [tab, setTab] = useState<"generation" | "asset">("generation");
   const [assetMediaType, setAssetMediaType] = useState("all");
   const projectId = useProjectId();
