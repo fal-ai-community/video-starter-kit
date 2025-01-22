@@ -58,52 +58,66 @@ export function MediaItemRow({
           queryKey: queryKeys.projectMediaItems(data.projectId),
         });
       }
-      if (queueStatus.status === "COMPLETED") {
-        try {
-          const result = await fal.queue.result(data.endpointId, {
-            requestId: data.requestId,
-          });
-          const media: MediaItem = {
-            ...data,
-            output: result.data,
-            status: "completed",
-          };
-          await db.media.update(data.id, media);
-          if (media.mediaType !== "image") {
-            const { data: mediaMetadata } = await fal.subscribe(
-              "drochetti/ffmpeg-api/metadata",
-              {
-                input: {
-                  media_url: resolveMediaUrl(media),
-                  extract_frames: true,
-                },
-                mode: "streaming",
-              },
-            );
-            await db.media.update(data.id, {
-              ...media,
-              metadata: mediaMetadata.media,
-            });
-          }
-          toast({
-            title: "Generation completed",
-            description: `Your ${data.mediaType} has been generated successfully.`,
-          });
-        } catch {
-          await db.media.update(data.id, {
-            ...data,
-            status: "failed",
-          });
-          toast({
-            title: "Generation failed",
-            description: `Failed to generate ${data.mediaType}.`,
-          });
-        } finally {
-          await queryClient.invalidateQueries({
-            queryKey: queryKeys.projectMediaItems(data.projectId),
-          });
-        }
+      let media: Partial<MediaItem> = {};
+
+      if (queueStatus.status !== "COMPLETED") return null;
+
+      try {
+        const result = await fal.queue.result(data.endpointId, {
+          requestId: data.requestId,
+        });
+        media = {
+          ...data,
+          output: result.data,
+          status: "completed",
+        };
+
+        await db.media.update(data.id, media);
+
+        toast({
+          title: "Generation completed",
+          description: `Your ${data.mediaType} has been generated successfully.`,
+        });
+      } catch {
+        await db.media.update(data.id, {
+          ...data,
+          status: "failed",
+        });
+        toast({
+          title: "Generation failed",
+          description: `Failed to generate ${data.mediaType}.`,
+        });
+      } finally {
+        await queryClient.invalidateQueries({
+          queryKey: queryKeys.projectMediaItems(data.projectId),
+        });
       }
+
+      if (media.mediaType === "image") return null;
+
+      try {
+        const { data: mediaMetadata } = await fal.subscribe(
+          "drochetti/ffmpeg-api/metadata",
+          {
+            input: {
+              media_url: resolveMediaUrl(media as MediaItem),
+              extract_frames: true,
+            },
+            mode: "streaming",
+          }
+        );
+        await db.media.update(data.id, {
+          ...media,
+          metadata: mediaMetadata.media,
+        });
+      } catch (error) {
+        console.error(error);
+      } finally {
+        await queryClient.invalidateQueries({
+          queryKey: queryKeys.projectMediaItems(data.projectId),
+        });
+      }
+
       return null;
     },
     enabled: !isDone && data.kind === "generated",
@@ -126,7 +140,7 @@ export function MediaItemRow({
     <div
       className={cn(
         "flex items-start space-x-2 py-2 w-full px-4 hover:bg-accent transition-all",
-        className,
+        className
       )}
       {...props}
       onClick={(e) => {
@@ -142,7 +156,7 @@ export function MediaItemRow({
             "flex items-center h-full cursor-grab text-muted-foreground",
             {
               "text-muted": data.status !== "completed",
-            },
+            }
           )}
         >
           <GripVerticalIcon className="w-4 h-4" />
@@ -246,7 +260,7 @@ export function MediaItemPanel({
     <div
       className={cn(
         "flex flex-col overflow-hidden divide-y divide-border",
-        className,
+        className
       )}
     >
       {data
