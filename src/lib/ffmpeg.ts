@@ -12,7 +12,7 @@ export async function getMediaMetadata(media: MediaItem) {
           extract_frames: true,
         },
         mode: "streaming",
-      }
+      },
     );
 
     return mediaMetadata;
