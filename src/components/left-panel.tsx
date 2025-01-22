@@ -46,7 +46,7 @@ export default function LeftPanel() {
 
   const { data: mediaItems = [], isLoading } = useProjectMediaItems(projectId);
   const setProjectDialogOpen = useVideoProjectStore(
-    (s) => s.setProjectDialogOpen,
+    (s) => s.setProjectDialogOpen
   );
 
   const { startUpload, isUploading } = useUploadThing("fileUploader");
@@ -72,7 +72,7 @@ export default function LeftPanel() {
   const handleUploadComplete = async (
     files: ClientUploadedFileData<{
       uploadedBy: string;
-    }>[],
+    }>[]
   ) => {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -99,7 +99,7 @@ export default function LeftPanel() {
               media_url: resolveMediaUrl(media),
             },
             mode: "streaming",
-          },
+          }
         );
         await db.media
           .update(media.id, {
@@ -164,30 +164,78 @@ export default function LeftPanel() {
           <h2 className="text-sm text-muted-foreground font-semibold flex-1">
             Media Gallery
           </h2>
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={isUploading}
-            className="cursor-pointer disabled:cursor-default disabled:opacity-50"
-            asChild
-          >
-            <label htmlFor="fileUploadButton">
-              <Input
-                id="fileUploadButton"
-                type="file"
-                className="hidden"
-                onChange={handleFileUpload}
-                multiple={false}
-                disabled={isUploading}
-                accept="image/*,audio/*,video/*"
-              />
-              {isUploading ? (
-                <LoaderCircleIcon className="w-4 h-4 opacity-50 animate-spin" />
-              ) : (
-                <CloudUploadIcon className="w-4 h-4 opacity-50" />
-              )}
-            </label>
-          </Button>
+          <div className="flex gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="px-2">
+                  <ListPlusIcon className="w-4 h-4 opacity-50" />
+                  <span className="capitalize">{mediaType}</span>
+                  <ChevronDown className="w-4 h-4 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="bottom" align="start">
+                <DropdownMenuItem
+                  className="text-sm"
+                  onClick={() => setMediaType("all")}
+                >
+                  <GalleryVerticalIcon className="w-4 h-4 opacity-50" />
+                  All
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-sm"
+                  onClick={() => setMediaType("image")}
+                >
+                  <ImageIcon className="w-4 h-4 opacity-50" />
+                  Image
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-sm"
+                  onClick={() => setMediaType("music")}
+                >
+                  <MusicIcon className="w-4 h-4 opacity-50" />
+                  Music
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-sm"
+                  onClick={() => setMediaType("voiceover")}
+                >
+                  <MicIcon className="w-4 h-4 opacity-50" />
+                  Voiceover
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-sm"
+                  onClick={() => setMediaType("video")}
+                >
+                  <FilmIcon className="w-4 h-4 opacity-50" />
+                  Video
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={isUploading}
+              className="cursor-pointer disabled:cursor-default disabled:opacity-50"
+              asChild
+            >
+              <label htmlFor="fileUploadButton">
+                <Input
+                  id="fileUploadButton"
+                  type="file"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                  multiple={false}
+                  disabled={isUploading}
+                  accept="image/*,audio/*,video/*"
+                />
+                {isUploading ? (
+                  <LoaderCircleIcon className="w-4 h-4 opacity-50 animate-spin" />
+                ) : (
+                  <CloudUploadIcon className="w-4 h-4 opacity-50" />
+                )}
+              </label>
+            </Button>
+          </div>
           {/* Temporary disabled */}
           {false && mediaItems.length > 0 && (
             <Button variant="secondary" size="sm">
@@ -211,54 +259,7 @@ export default function LeftPanel() {
             )}
           </div>
         )}
-        <div className="flex justify-end pt-4 w-full px-4 border-t border-border">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="px-2">
-                <ListPlusIcon className="w-4 h-4 opacity-50" />
-                <span className="capitalize">{mediaType}</span>
-                <ChevronDown className="w-4 h-4 opacity-50" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent side="bottom" align="start">
-              <DropdownMenuItem
-                className="text-sm"
-                onClick={() => setMediaType("all")}
-              >
-                <GalleryVerticalIcon className="w-4 h-4 opacity-50" />
-                All
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-sm"
-                onClick={() => setMediaType("image")}
-              >
-                <ImageIcon className="w-4 h-4 opacity-50" />
-                Image
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-sm"
-                onClick={() => setMediaType("music")}
-              >
-                <MusicIcon className="w-4 h-4 opacity-50" />
-                Music
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-sm"
-                onClick={() => setMediaType("voiceover")}
-              >
-                <MicIcon className="w-4 h-4 opacity-50" />
-                Voiceover
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-sm"
-                onClick={() => setMediaType("video")}
-              >
-                <FilmIcon className="w-4 h-4 opacity-50" />
-                Video
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+
         {mediaItems.length > 0 && (
           <MediaItemPanel
             data={mediaItems}
