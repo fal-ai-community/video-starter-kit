@@ -20,6 +20,7 @@ export type ApiInfo = {
   cost: string;
   inferenceTime?: string;
   inputAsset?: InputAsset[];
+  initialInput?: Record<string, any>;
   category: "image" | "video" | "music" | "voiceover";
 };
 
@@ -128,6 +129,9 @@ export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
     description: "Fluent and faithful speech with flow matching",
     cost: "",
     category: "voiceover",
+    initialInput: {
+      voice: "Dexter (English (US)/American)",
+    },
   },
   {
     endpointId: "fal-ai/f5-tts",
