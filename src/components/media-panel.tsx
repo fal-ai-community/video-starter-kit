@@ -104,7 +104,7 @@ export function MediaItemRow({
               extract_frames: true,
             },
             mode: "streaming",
-          }
+          },
         );
         await db.media.update(data.id, {
           ...media,
@@ -140,7 +140,7 @@ export function MediaItemRow({
     <div
       className={cn(
         "flex items-start space-x-2 py-2 w-full px-4 hover:bg-accent transition-all",
-        className
+        className,
       )}
       {...props}
       onClick={(e) => {
@@ -156,7 +156,7 @@ export function MediaItemRow({
             "flex items-center h-full cursor-grab text-muted-foreground",
             {
               "text-muted": data.status !== "completed",
-            }
+            },
           )}
         >
           <GripVerticalIcon className="w-4 h-4" />
@@ -260,7 +260,7 @@ export function MediaItemPanel({
     <div
       className={cn(
         "flex flex-col overflow-hidden divide-y divide-border",
-        className
+        className,
       )}
     >
       {data
