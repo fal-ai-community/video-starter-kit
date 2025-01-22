@@ -25,7 +25,7 @@ any extra content and/or explanation. **DO NOT ADD markdown** or quotes, return 
 
 export async function enhancePrompt(
   prompt: string,
-  options: EnhancePromptOptions = { type: "video" },
+  options: EnhancePromptOptions = { type: "video" }
 ) {
   const { type, project } = options;
   const projectInfo = !project

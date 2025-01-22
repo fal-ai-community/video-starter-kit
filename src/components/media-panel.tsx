@@ -24,6 +24,7 @@ import {
 import { Badge } from "./ui/badge";
 import { LoadingIcon } from "./ui/icons";
 import { useToast } from "@/hooks/use-toast";
+import { getMediaMetadata } from "@/lib/ffmpeg";
 
 type MediaItemRowProps = {
   data: MediaItem;
@@ -95,28 +96,16 @@ export function MediaItemRow({
 
       if (media.mediaType === "image") return null;
 
-      try {
-        const { data: mediaMetadata } = await fal.subscribe(
-          "drochetti/ffmpeg-api/metadata",
-          {
-            input: {
-              media_url: resolveMediaUrl(media as MediaItem),
-              extract_frames: true,
-            },
-            mode: "streaming",
-          },
-        );
-        await db.media.update(data.id, {
-          ...media,
-          metadata: mediaMetadata.media,
-        });
-      } catch (error) {
-        console.error(error);
-      } finally {
-        await queryClient.invalidateQueries({
-          queryKey: queryKeys.projectMediaItems(data.projectId),
-        });
-      }
+      const mediaMetadata = await getMediaMetadata(media as MediaItem);
+
+      await db.media.update(data.id, {
+        ...media,
+        metadata: mediaMetadata?.media || {},
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.projectMediaItems(data.projectId),
+      });
 
       return null;
     },
@@ -140,7 +129,7 @@ export function MediaItemRow({
     <div
       className={cn(
         "flex items-start space-x-2 py-2 w-full px-4 hover:bg-accent transition-all",
-        className,
+        className
       )}
       {...props}
       onClick={(e) => {
@@ -156,7 +145,7 @@ export function MediaItemRow({
             "flex items-center h-full cursor-grab text-muted-foreground",
             {
               "text-muted": data.status !== "completed",
-            },
+            }
           )}
         >
           <GripVerticalIcon className="w-4 h-4" />
@@ -260,7 +249,7 @@ export function MediaItemPanel({
     <div
       className={cn(
         "flex flex-col overflow-hidden divide-y divide-border",
-        className,
+        className
       )}
     >
       {data
