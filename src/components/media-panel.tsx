@@ -61,51 +61,51 @@ export function MediaItemRow({
       }
       let media: Partial<MediaItem> = {};
 
-      if (queueStatus.status !== "COMPLETED") return null;
+      if (queueStatus.status === "COMPLETED") {
+        try {
+          const result = await fal.queue.result(data.endpointId, {
+            requestId: data.requestId,
+          });
+          media = {
+            ...data,
+            output: result.data,
+            status: "completed",
+          };
 
-      try {
-        const result = await fal.queue.result(data.endpointId, {
-          requestId: data.requestId,
-        });
-        media = {
-          ...data,
-          output: result.data,
-          status: "completed",
-        };
+          await db.media.update(data.id, media);
 
-        await db.media.update(data.id, media);
+          toast({
+            title: "Generation completed",
+            description: `Your ${data.mediaType} has been generated successfully.`,
+          });
+        } catch {
+          await db.media.update(data.id, {
+            ...data,
+            status: "failed",
+          });
+          toast({
+            title: "Generation failed",
+            description: `Failed to generate ${data.mediaType}.`,
+          });
+        } finally {
+          await queryClient.invalidateQueries({
+            queryKey: queryKeys.projectMediaItems(data.projectId),
+          });
+        }
+      }
 
-        toast({
-          title: "Generation completed",
-          description: `Your ${data.mediaType} has been generated successfully.`,
-        });
-      } catch {
+      if (media.mediaType !== "image") {
+        const mediaMetadata = await getMediaMetadata(media as MediaItem);
+
         await db.media.update(data.id, {
-          ...data,
-          status: "failed",
+          ...media,
+          metadata: mediaMetadata?.media || {},
         });
-        toast({
-          title: "Generation failed",
-          description: `Failed to generate ${data.mediaType}.`,
-        });
-      } finally {
+
         await queryClient.invalidateQueries({
           queryKey: queryKeys.projectMediaItems(data.projectId),
         });
       }
-
-      if (media.mediaType === "image") return null;
-
-      const mediaMetadata = await getMediaMetadata(media as MediaItem);
-
-      await db.media.update(data.id, {
-        ...media,
-        metadata: mediaMetadata?.media || {},
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.projectMediaItems(data.projectId),
-      });
 
       return null;
     },
@@ -129,7 +129,7 @@ export function MediaItemRow({
     <div
       className={cn(
         "flex items-start space-x-2 py-2 w-full px-4 hover:bg-accent transition-all",
-        className,
+        className
       )}
       {...props}
       onClick={(e) => {
@@ -145,7 +145,7 @@ export function MediaItemRow({
             "flex items-center h-full cursor-grab text-muted-foreground",
             {
               "text-muted": data.status !== "completed",
-            },
+            }
           )}
         >
           <GripVerticalIcon className="w-4 h-4" />
@@ -249,7 +249,7 @@ export function MediaItemPanel({
     <div
       className={cn(
         "flex flex-col overflow-hidden divide-y divide-border",
-        className,
+        className
       )}
     >
       {data
