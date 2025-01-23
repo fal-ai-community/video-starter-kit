@@ -1,11 +1,11 @@
 # AI Video Starting Kit
 
-![AI Video Starting Kit](https://github.com/fal-ai-community/video-starter-kit/blob/main/src/app/opengraph-image.png?raw=true)
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![fal.ai](https://img.shields.io/badge/fal.ai-latest-purple)](https://fal.ai)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org)
 [![Remotion](https://img.shields.io/badge/Remotion-latest-blue)](https://remotion.dev)
+
+![AI Video Starting Kit](https://github.com/fal-ai-community/video-starter-kit/blob/main/src/app/opengraph-image.png?raw=true)
 
 A powerful starting kit for building AI-powered video applications. Built with Next.js, Remotion, and fal.ai, this toolkit simplifies the complexities of working with AI video models in the browser.
 
