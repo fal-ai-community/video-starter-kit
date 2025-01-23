@@ -1,10 +1,10 @@
 import type { MediaItem, VideoTrack } from "@/data/schema";
-import { LAST_PROJECT_ID_KEY } from "@/data/store";
+import { GenerateData, LAST_PROJECT_ID_KEY } from "@/data/store";
 import { type ClassValue, clsx } from "clsx";
 import { ImageIcon, MicIcon, MusicIcon, VideoIcon } from "lucide-react";
 import type { FunctionComponent } from "react";
 import { twMerge } from "tailwind-merge";
-import { InputAsset } from "./fal";
+import type { InputAsset } from "./fal";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -94,6 +94,14 @@ export function getAssetType(asset: InputAsset): "image" | "video" | "audio" {
   return typeof asset === "string" ? asset : asset.type;
 }
 
+export const assetKeyMap: Record<"image" | "video" | "audio", string> = {
+  image: "image",
+  video: "video_url",
+  audio: "audio_url",
+};
+
 export function getAssetKey(asset: InputAsset): string {
-  return typeof asset === "string" ? asset : asset.key;
+  return typeof asset === "string"
+    ? assetKeyMap[asset]
+    : asset.key || assetKeyMap[asset.type];
 }
