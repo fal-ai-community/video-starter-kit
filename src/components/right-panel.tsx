@@ -19,6 +19,8 @@ import {
   ArrowLeft,
   TrashIcon,
   WandSparklesIcon,
+  CrossIcon,
+  XIcon,
 } from "lucide-react";
 import { MediaItemRow } from "./media-panel";
 import { Button } from "./ui/button";
@@ -102,6 +104,7 @@ export default function RightPanel({
   const [assetMediaType, setAssetMediaType] = useState("all");
   const projectId = useProjectId();
   const openGenerateDialog = useVideoProjectStore((s) => s.openGenerateDialog);
+  const generateDialogOpen = useVideoProjectStore((s) => s.generateDialogOpen);
   const closeGenerateDialog = useVideoProjectStore(
     (s) => s.closeGenerateDialog,
   );
@@ -333,12 +336,24 @@ export default function RightPanel({
   };
 
   return (
-    <div className="flex flex-col border-l border-border w-96">
+    <div
+      className={cn(
+        "flex flex-col border-l border-border w-96 z-50 transition-all duration-300 absolute top-0 h-full bg-background",
+        generateDialogOpen ? "right-0" : "-right-96",
+      )}
+    >
       <div className="flex-1 p-4 flex flex-col gap-4 border-b border-border h-full overflow-hidden relative">
-        <div className="flex flex-row items-start">
+        <div className="flex flex-row items-center justify-between">
           <h2 className="text-sm text-muted-foreground font-semibold flex-1">
             Generate Media
           </h2>
+          <Button
+            variant="ghost"
+            onClick={() => handleOnOpenChange(false)}
+            className="flex items-center gap-2"
+          >
+            <XIcon className="w-6 h-6" />
+          </Button>
         </div>
         <div className="w-full flex flex-col">
           <div className="flex w-full gap-2">

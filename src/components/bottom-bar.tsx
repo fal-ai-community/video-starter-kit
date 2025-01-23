@@ -22,7 +22,7 @@ export default function BottomBar() {
   const formattedTimestamp =
     (playerCurrentTimestamp < 10 ? "0" : "") +
     playerCurrentTimestamp.toFixed(2);
-  const minTrackWidth = ((2 / 30) * 100).toFixed(2) + "%";
+  const minTrackWidth = `${((2 / 30) * 100).toFixed(2)}%`;
   const [dragOverTracks, setDragOverTracks] = useState(false);
 
   const handleOnDragOver: DragEventHandler<HTMLDivElement> = (event) => {
@@ -129,7 +129,7 @@ export default function BottomBar() {
           projectId: projectId,
         } as VideoTrack),
     };
-  }, [tracks]);
+  }, [tracks, projectId]);
 
   const handleOnDrop: DragEventHandler<HTMLDivElement> = (event) => {
     event.preventDefault();
@@ -171,9 +171,9 @@ export default function BottomBar() {
           <div
             className="absolute z-[32] top-6 bottom-0 w-[2px] bg-white/30 ms-4"
             style={{
-              left: ((playerCurrentTimestamp / 30) * 100).toFixed(2) + "%",
+              left: `${((playerCurrentTimestamp / 30) * 100).toFixed(2)}%`,
             }}
-          ></div>
+          />
           <TimelineRuler className="z-30 pointer-events-none" />
           <div className="flex timeline-container flex-col h-full mx-4 mt-10 gap-2 z-[31] pb-2">
             {Object.values(trackObj).map((track, index) =>
@@ -186,18 +186,14 @@ export default function BottomBar() {
                   }}
                 />
               ) : (
-                <div className="flex flex-row relative w-full h-full timeline-container"></div>
+                <div
+                  key={`empty-track-${index}`}
+                  className="flex flex-row relative w-full h-full timeline-container"
+                />
               ),
             )}
           </div>
         </div>
-        {/* <div className="flex flex-col gap-2 items-center justify-center h-full text-sm">
-          <span className="text-muted-foreground">No tracks added</span>
-          <Button variant="outline" className="ml-2">
-            <ListPlusIcon className="w-4 h-4 opacity-50" />
-            Add first track
-          </Button>
-        </div> */}
       </div>
     </div>
   );

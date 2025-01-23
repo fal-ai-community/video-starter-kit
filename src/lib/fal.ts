@@ -63,7 +63,7 @@ export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
   },
   {
     endpointId: "fal-ai/hunyuan-video",
-    label: "Hunyan",
+    label: "Hunyuan",
     description: "High visual quality, motion diversity and text alignment",
     cost: "",
     category: "video",

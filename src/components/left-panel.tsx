@@ -51,6 +51,7 @@ export default function LeftPanel() {
   const setProjectDialogOpen = useVideoProjectStore(
     (s) => s.setProjectDialogOpen,
   );
+  const openGenerateDialog = useVideoProjectStore((s) => s.openGenerateDialog);
 
   const { startUpload, isUploading } = useUploadThing("fileUploader");
 
@@ -232,9 +233,12 @@ export default function LeftPanel() {
               </label>
             </Button>
           </div>
-          {/* Temporary disabled */}
-          {false && mediaItems.length > 0 && (
-            <Button variant="secondary" size="sm">
+          {mediaItems.length > 0 && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => openGenerateDialog()}
+            >
               <SparklesIcon className="w-4 h-4 opacity-50" />
               Generate...
             </Button>
@@ -246,13 +250,14 @@ export default function LeftPanel() {
               Create your image, audio and voiceover collection to compose your
               videos
             </p>
-            {/* Temporary disabled */}
-            {false && (
-              <Button variant="secondary" size="sm">
-                <ImagePlusIcon className="w-4 h-4 opacity-50" />
-                Generate...
-              </Button>
-            )}
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => openGenerateDialog()}
+            >
+              <ImagePlusIcon className="w-4 h-4 opacity-50" />
+              Generate...
+            </Button>
           </div>
         )}
 

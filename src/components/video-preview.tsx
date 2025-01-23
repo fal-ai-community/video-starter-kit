@@ -179,17 +179,15 @@ export default function VideoPreview() {
     isLoading: isCompositionLoading,
   } = useVideoComposition(projectId);
   const { tracks = [], frames = {}, mediaItems = {} } = composition;
+
   useEffect(() => {
     const mediaIds = Object.values(frames)
-      .flatMap((f) => f)
-      .map((f) => f.data.mediaId);
-    Object.values(mediaItems)
-      .filter(
-        (media) => media.status === "completed" && mediaIds.includes(media.id),
-      )
-      .forEach((media) => {
+      .flat()
+      .flatMap((f) => f.data.mediaId);
+    for (const media of Object.values(mediaItems)) {
+      if (media.status === "completed" && mediaIds.includes(media.id)) {
         const mediaUrl = resolveMediaUrl(media);
-        if (!mediaUrl) return;
+        if (!mediaUrl) continue;
         if (media.mediaType === "video") {
           preloadVideo(mediaUrl);
         }
@@ -199,17 +197,18 @@ export default function VideoPreview() {
         ) {
           preloadAudio(mediaUrl);
         }
-      });
-  }, [frames]);
+      }
+    }
+  }, [frames, mediaItems]);
 
   // Calculate the effective duration based on the latest keyframe
   const calculateDuration = useCallback(() => {
     let maxTimestamp = 0;
-    Object.values(frames).forEach((trackFrames) => {
-      trackFrames.forEach((frame) => {
+    for (const trackFrames of Object.values(frames)) {
+      for (const frame of trackFrames) {
         maxTimestamp = Math.max(maxTimestamp, frame.timestamp);
-      });
-    });
+      }
+    }
     // Add 5 seconds padding after the last frame
     return Math.max(DEFAULT_DURATION, Math.ceil((maxTimestamp + 5000) / 1000));
   }, [frames]);
@@ -228,24 +227,27 @@ export default function VideoPreview() {
   );
 
   // Register events on the player
-  const playerRef = useCallback((player: PlayerRef) => {
-    if (!player) return;
-    setPlayer(player);
-    player.addEventListener("play", (e) => {
-      setPlayerState("playing");
-    });
-    player.addEventListener("pause", (e) => {
-      setPlayerState("paused");
-    });
-    player.addEventListener("seeked", (e) => {
-      const currentFrame = e.detail.frame;
-      updatePlayerCurrentTimestamp(currentFrame / FPS);
-    });
-    player.addEventListener("frameupdate", (e) => {
-      const currentFrame = e.detail.frame;
-      updatePlayerCurrentTimestamp(currentFrame / FPS);
-    });
-  }, []);
+  const playerRef = useCallback(
+    (player: PlayerRef) => {
+      if (!player) return;
+      setPlayer(player);
+      player.addEventListener("play", (e) => {
+        setPlayerState("playing");
+      });
+      player.addEventListener("pause", (e) => {
+        setPlayerState("paused");
+      });
+      player.addEventListener("seeked", (e) => {
+        const currentFrame = e.detail.frame;
+        updatePlayerCurrentTimestamp(currentFrame / FPS);
+      });
+      player.addEventListener("frameupdate", (e) => {
+        const currentFrame = e.detail.frame;
+        updatePlayerCurrentTimestamp(currentFrame / FPS);
+      });
+    },
+    [setPlayer, setPlayerState, updatePlayerCurrentTimestamp],
+  );
 
   const setExportDialogOpen = useVideoProjectStore(
     (s) => s.setExportDialogOpen,

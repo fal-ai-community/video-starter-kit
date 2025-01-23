@@ -9,9 +9,7 @@ import {
 } from "lucide-react";
 import { Button } from "./ui/button";
 
-type VideoControlsProps = {};
-
-export function VideoControls({}: VideoControlsProps) {
+export function VideoControls() {
   const player = useVideoProjectStore((s) => s.player);
   const playerState = useVideoProjectStore((s) => s.playerState);
   const handleTogglePlay = () => {
@@ -42,24 +40,20 @@ export function VideoControls({}: VideoControlsProps) {
   return (
     <div className="flex flex-row justify-center items-center">
       <Button variant="ghost" size="icon" onClick={onSeekToStart}>
-        <ChevronFirstIcon className="stroke-2" />
+        <ChevronFirstIcon />
       </Button>
       <Button variant="ghost" size="icon" onClick={onSeekBackward}>
-        <ChevronLeftIcon className="stroke-2" />
+        <ChevronLeftIcon />
       </Button>
       <Button variant="ghost" size="icon" onClick={handleTogglePlay}>
-        {playerState === "paused" && (
-          <PlayIcon className="stroke-1 fill-current" />
-        )}
-        {playerState === "playing" && (
-          <PauseIcon className="stroke-1 fill-current" />
-        )}
+        {playerState === "paused" && <PlayIcon className="fill-current" />}
+        {playerState === "playing" && <PauseIcon className="fill-current" />}
       </Button>
       <Button variant="ghost" size="icon" onClick={onSeekForward}>
-        <ChevronRightIcon className="stroke-2" />
+        <ChevronRightIcon />
       </Button>
       <Button variant="ghost" size="icon" onClick={onSeekToEnd}>
-        <ChevronLastIcon className="stroke-2" />
+        <ChevronLastIcon />
       </Button>
     </div>
   );

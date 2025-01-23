@@ -15,7 +15,7 @@ import {
 import { TrashIcon } from "lucide-react";
 import {
   type HTMLAttributes,
-  MouseEventHandler,
+  type MouseEventHandler,
   createElement,
   useMemo,
   useRef,
@@ -53,8 +53,8 @@ export function VideoTrackRow({ data, ...props }: VideoTrackRowProps) {
           key={frame.id}
           className="absolute top-0 bottom-0"
           style={{
-            left: (frame.timestamp / 10 / 30).toFixed(2) + "%",
-            width: (frame.duration / 10 / 30).toFixed(2) + "%",
+            left: `${(frame.timestamp / 10 / 30).toFixed(2)}%`,
+            width: `${(frame.duration / 10 / 30).toFixed(2)}%`,
           }}
           track={data}
           frame={frame}
@@ -76,7 +76,7 @@ function AudioWaveform({ data }: AudioWaveformProps) {
         return data.metadata.waveform;
       }
       const { data: waveformInfo } = await fal.subscribe(
-        "drochetti/ffmpeg-api/waveform",
+        "fal-ai/ffmpeg-api/waveform",
         {
           input: {
             media_url: resolveMediaUrl(data),
@@ -95,7 +95,7 @@ function AudioWaveform({ data }: AudioWaveformProps) {
       return waveformInfo.waveform as number[];
     },
     placeholderData: keepPreviousData,
-    staleTime: Infinity,
+    staleTime: Number.POSITIVE_INFINITY,
   });
 
   const svgWidth = waveform.length * 3;
@@ -109,6 +109,7 @@ function AudioWaveform({ data }: AudioWaveformProps) {
         viewBox={`0 0 ${svgWidth} ${svgHeight}`}
         preserveAspectRatio="none"
       >
+        <title>Audio Waveform</title>
         {waveform.map((v, index) => {
           const amplitude = Math.abs(v);
           const height = Math.max(amplitude * svgHeight, 2);
@@ -171,6 +172,7 @@ export function VideoTrackView({
   if (!media) return null;
 
   const mediaUrl = resolveMediaUrl(media);
+
   const imageUrl = useMemo(() => {
     if (media.mediaType === "image") {
       return mediaUrl;
@@ -183,7 +185,8 @@ export function VideoTrackView({
       );
     }
     return undefined;
-  }, [media]);
+  }, [media, mediaUrl]);
+
   const label = media.mediaType ?? "unknown";
 
   const trackRef = useRef<HTMLDivElement>(null);
@@ -269,7 +272,7 @@ export function VideoTrackView({
       const deltaX = moveEvent.clientX - startX;
       let newWidth = startWidth + (direction === "right" ? deltaX : -deltaX);
 
-      const minDuration = 3000;
+      const minDuration = 1000;
       const maxDuration: number = resolveDuration(media) ?? 5000;
 
       const timelineElement = trackElement.closest(".timeline-container");
@@ -310,7 +313,6 @@ export function VideoTrackView({
       ref={trackRef}
       onMouseDown={handleMouseDown}
       onContextMenu={(e) => e.preventDefault()}
-      role="checkbox"
       aria-checked={isSelected}
       onClick={handleOnClick}
       className={cn(
@@ -333,8 +335,10 @@ export function VideoTrackView({
           <div className="flex flex-row gap-1 text-sm items-center font-semibold text-white/60 w-full">
             <div className="flex flex-row truncate gap-1 items-center">
               {createElement(trackIcons[track.type], {
-                className: "w-5 h-5 opacity-70",
-              } as any)}
+                className: "w-5 h-5 text-white",
+              } as React.ComponentProps<
+                (typeof trackIcons)[typeof track.type]
+              >)}
               <span className="line-clamp-1 truncate text-sm mb-[2px] w-full ">
                 {media.input?.prompt || label}
               </span>
@@ -342,10 +346,11 @@ export function VideoTrackView({
             <div className="flex flex-row shrink-0 flex-1 items-center justify-end">
               <WithTooltip tooltip="Remove content">
                 <button
+                  type="button"
                   className="p-1 rounded hover:bg-black/5 group-hover:text-white"
                   onClick={handleOnDelete}
                 >
-                  <TrashIcon className="w-3 h-3 stroke-2" />
+                  <TrashIcon className="w-3 h-3 text-white" />
                 </button>
               </WithTooltip>
             </div>
@@ -374,8 +379,8 @@ export function VideoTrackView({
             onMouseDown={(e) => handleResize(e, "right")}
           >
             <span className="flex gap-[1px]">
-              <span className="w-px h-2 rounded bg-white/40"></span>
-              <span className="w-px h-2 rounded bg-white/40"></span>
+              <span className="w-px h-2 rounded bg-white/40" />
+              <span className="w-px h-2 rounded bg-white/40" />
             </span>
           </div>
         </div>

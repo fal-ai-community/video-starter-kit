@@ -24,7 +24,7 @@ import {
   FilmIcon,
 } from "lucide-react";
 import { Input } from "./ui/input";
-import { ShareVideoParams } from "@/lib/share";
+import type { ShareVideoParams } from "@/lib/share";
 import { PROJECT_PLACEHOLDER } from "@/data/schema";
 import { useRouter } from "next/navigation";
 
@@ -55,7 +55,7 @@ export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
       if (videoData.length === 0) {
         throw new Error("No tracks to export");
       }
-      const { data } = await fal.subscribe("drochetti/ffmpeg-api/compose", {
+      const { data } = await fal.subscribe("fal-ai/ffmpeg-api/compose", {
         input: {
           tracks: videoData,
         },
