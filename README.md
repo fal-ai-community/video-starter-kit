@@ -1,5 +1,7 @@
 # AI Video Starting Kit
 
+![AI Video Starting Kit](https://github.com/fal-ai-community/video-starter-kit/blob/main/src/app/opengraph-image.png?raw=true)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![fal.ai](https://img.shields.io/badge/fal.ai-latest-purple)](https://fal.ai)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org)
@@ -37,12 +39,14 @@ A powerful starting kit for building AI-powered video applications. Built with N
 ## Quick Start
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/fal-ai-community/video-starter-kit
 cd video-starter-kit
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 # or
@@ -52,11 +56,13 @@ pnpm install
 ```
 
 3. Set up your environment variables:
+
 ```bash
 cp .env.example .env.local
 ```
 
 4. Start the development server:
+
 ```bash
 npm run dev
 # or
