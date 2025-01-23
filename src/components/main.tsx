@@ -27,17 +27,17 @@ export function App({ projectId }: AppProps) {
   const projectStore = useRef(
     createVideoProjectStore({
       projectId,
-    })
+    }),
   ).current;
   const projectDialogOpen = useStore(projectStore, (s) => s.projectDialogOpen);
   const generateDialogOpen = useStore(
     projectStore,
-    (s) => s.generateDialogOpen
+    (s) => s.generateDialogOpen,
   );
   const selectedMediaId = useStore(projectStore, (s) => s.selectedMediaId);
   const setSelectedMediaId = useStore(
     projectStore,
-    (s) => s.setSelectedMediaId
+    (s) => s.setSelectedMediaId,
   );
   const handleOnSheetOpenChange = (open: boolean) => {
     if (!open) {
@@ -47,7 +47,7 @@ export function App({ projectId }: AppProps) {
   const isExportDialogOpen = useStore(projectStore, (s) => s.exportDialogOpen);
   const setExportDialogOpen = useStore(
     projectStore,
-    (s) => s.setExportDialogOpen
+    (s) => s.setExportDialogOpen,
   );
   return (
     <ToastProvider>
