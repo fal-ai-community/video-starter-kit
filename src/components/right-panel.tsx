@@ -2,55 +2,36 @@
 
 import { useJobCreator, useProjectUpdater } from "@/data/mutations";
 import { queryKeys, useProject, useProjectMediaItems } from "@/data/queries";
-import { MediaItem, PROJECT_PLACEHOLDER } from "@/data/schema";
+import type { MediaItem } from "@/data/schema";
 import {
-  GenerateData,
-  MediaType,
+  type GenerateData,
+  type MediaType,
   useProjectId,
   useVideoProjectStore,
 } from "@/data/store";
-import { AVAILABLE_ENDPOINTS, fal, InputAsset } from "@/lib/fal";
+import { AVAILABLE_ENDPOINTS, type InputAsset } from "@/lib/fal";
 import {
-  ChevronDown,
-  FilmIcon,
-  FolderOpenIcon,
-  GalleryVerticalIcon,
   ImageIcon,
-  ImagePlusIcon,
-  ListPlusIcon,
   MicIcon,
   MusicIcon,
   LoaderCircleIcon,
-  CloudUploadIcon,
-  SparklesIcon,
   VideoIcon,
   ArrowLeft,
   TrashIcon,
   WandSparklesIcon,
 } from "lucide-react";
-import { MediaItemPanel, MediaItemRow } from "./media-panel";
+import { MediaItemRow } from "./media-panel";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+
 import { useEffect, useMemo, useState } from "react";
 import { useUploadThing } from "@/lib/uploadthing";
-import { ClientUploadedFileData } from "uploadthing/types";
+import type { ClientUploadedFileData } from "uploadthing/types";
 import { db } from "@/data/db";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast, useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { cn, getAssetKey, getAssetType, resolveMediaUrl } from "@/lib/utils";
-import {
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "./ui/dialog";
 import {
   Select,
   SelectContent,
@@ -63,7 +44,7 @@ import { WithTooltip } from "./ui/tooltip";
 import { Label } from "./ui/label";
 import { VoiceSelector } from "./playht/voice-selector";
 import { LoadingIcon } from "./ui/icons";
-import { ToggleGroup } from "./ui/toggle-group";
+import { getMediaMetadata } from "@/lib/ffmpeg";
 
 type ModelEndpointPickerProps = {
   mediaType: string;
@@ -77,7 +58,7 @@ function ModelEndpointPicker({
   const endpoints = useMemo(
     () =>
       AVAILABLE_ENDPOINTS.filter((endpoint) => endpoint.category === mediaType),
-    [mediaType],
+    [mediaType]
   );
   return (
     <Select {...props}>
@@ -122,8 +103,10 @@ export default function RightPanel({
   const projectId = useProjectId();
   const openGenerateDialog = useVideoProjectStore((s) => s.openGenerateDialog);
   const closeGenerateDialog = useVideoProjectStore(
-    (s) => s.closeGenerateDialog,
+    (s) => s.closeGenerateDialog
   );
+  const queryClient = useQueryClient();
+
   const handleOnOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
       closeGenerateDialog();
@@ -163,14 +146,14 @@ export default function RightPanel({
   const endpoint = useMemo(
     () =>
       AVAILABLE_ENDPOINTS.find(
-        (endpoint) => endpoint.endpointId === endpointId,
+        (endpoint) => endpoint.endpointId === endpointId
       ),
-    [endpointId],
+    [endpointId]
   );
   const handleMediaTypeChange = (mediaType: string) => {
     setMediaType(mediaType as MediaType);
     const endpoint = AVAILABLE_ENDPOINTS.find(
-      (endpoint) => endpoint.category === mediaType,
+      (endpoint) => endpoint.category === mediaType
     );
 
     const initialInput = endpoint?.initialInput || {};
@@ -214,16 +197,16 @@ export default function RightPanel({
   };
 
   if (generateData.image) {
-    input["image_url"] = generateData.image;
+    input.image_url = generateData.image;
   }
   if (generateData.video_url) {
-    input["video_url"] = generateData.video_url;
+    input.video_url = generateData.video_url;
   }
   if (generateData.audio_url) {
-    input["audio_url"] = generateData.audio_url;
+    input.audio_url = generateData.audio_url;
   }
   if (generateData.reference_audio_url) {
-    input["reference_audio_url"] = generateData.reference_audio_url;
+    input.reference_audio_url = generateData.reference_audio_url;
   }
 
   const extraInput =
@@ -272,9 +255,8 @@ export default function RightPanel({
         (media.mediaType === "voiceover" || media.mediaType === "music")
       ) {
         return true;
-      } else {
-        return assetType === media.mediaType;
       }
+      return assetType === media.mediaType;
     });
 
     if (!asset) {
@@ -285,6 +267,71 @@ export default function RightPanel({
     const key = getAssetKey(asset) || getAssetType(asset);
     setGenerateData({ [key]: resolveMediaUrl(media) });
     setTab("generation");
+  };
+
+  const { startUpload, isUploading } = useUploadThing("fileUploader");
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log({ e });
+    const files = e.target.files;
+    if (!files) return;
+
+    try {
+      const uploadedFiles = await startUpload(Array.from(files));
+      if (uploadedFiles) {
+        await handleUploadComplete(uploadedFiles);
+      }
+    } catch (err) {
+      console.warn(`ERROR! ${err}`);
+      toast({
+        title: "Failed to upload file",
+        description: "Please try again",
+      });
+    }
+  };
+
+  const handleUploadComplete = async (
+    files: ClientUploadedFileData<{
+      uploadedBy: string;
+    }>[]
+  ) => {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const mediaType = file.type.split("/")[0];
+      const outputType = mediaType === "audio" ? "music" : mediaType;
+
+      const data: Omit<MediaItem, "id"> = {
+        projectId,
+        kind: "uploaded",
+        createdAt: Date.now(),
+        mediaType: outputType as MediaType,
+        status: "completed",
+        url: file.url,
+      };
+
+      setGenerateData({
+        ...generateData,
+        [assetKeyMap[outputType as keyof typeof assetKeyMap]]: file.url,
+      });
+
+      const mediaId = await db.media.create(data);
+      const media = await db.media.find(mediaId as string);
+
+      if (media && media.mediaType !== "image") {
+        const mediaMetadata = await getMediaMetadata(media as MediaItem);
+
+        await db.media
+          .update(media.id, {
+            ...media,
+            metadata: mediaMetadata?.media || {},
+          })
+          .finally(() => {
+            queryClient.invalidateQueries({
+              queryKey: queryKeys.projectMediaItems(projectId),
+            });
+          });
+      }
+    }
   };
 
   return (
@@ -302,7 +349,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("image")}
               className={cn(
                 mediaType === "image" && "bg-white/10",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
               )}
             >
               <ImageIcon className="w-4 h-4 opacity-50" />
@@ -313,7 +360,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("video")}
               className={cn(
                 mediaType === "video" && "bg-white/10",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
               )}
             >
               <VideoIcon className="w-4 h-4 opacity-50" />
@@ -324,7 +371,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("voiceover")}
               className={cn(
                 mediaType === "voiceover" && "bg-white/10",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
               )}
             >
               <MicIcon className="w-4 h-4 opacity-50" />
@@ -335,7 +382,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("music")}
               className={cn(
                 mediaType === "music" && "bg-white/10",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
               )}
             >
               <MusicIcon className="w-4 h-4 opacity-50" />
@@ -356,7 +403,7 @@ export default function RightPanel({
         </div>
         <div className="flex flex-col gap-2 relative">
           {endpoint?.inputAsset?.map((asset, index) => (
-            <div key={index} className="flex w-full">
+            <div key={getAssetType(asset)} className="flex w-full">
               <div className="flex flex-col w-full" key={getAssetType(asset)}>
                 <div className="flex justify-between">
                   <h4 className="capitalize text-muted-foreground mb-2">
@@ -377,7 +424,7 @@ export default function RightPanel({
                     {!generateData[
                       getAssetKey(asset) ?? assetKeyMap[getAssetType(asset)]
                     ] && (
-                      <div className="flex flex-col justify-between">
+                      <div className="flex flex-col gap-2 justify-between">
                         <Button
                           variant="ghost"
                           onClick={() => {
@@ -390,6 +437,32 @@ export default function RightPanel({
                             Select
                           </span>
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={isUploading}
+                          className="cursor-pointer min-h-[30px] flex flex-col items-center justify-center border border-dashed border-border rounded-md px-4"
+                          asChild
+                        >
+                          <label htmlFor="assetUploadButton">
+                            <Input
+                              id="assetUploadButton"
+                              type="file"
+                              className="hidden"
+                              onChange={handleFileUpload}
+                              multiple={false}
+                              disabled={isUploading}
+                              accept="image/*,audio/*,video/*"
+                            />
+                            {isUploading ? (
+                              <LoaderCircleIcon className="w-4 h-4 opacity-50 animate-spin" />
+                            ) : (
+                              <span className="text-muted-foreground text-xs text-center text-nowrap">
+                                Upload
+                              </span>
+                            )}
+                          </label>
+                        </Button>
                       </div>
                     )}
                     {generateData[
@@ -398,11 +471,12 @@ export default function RightPanel({
                       <div className="cursor-pointer overflow-hidden relative w-full flex flex-col items-center justify-center border border-dashed border-border rounded-md">
                         <WithTooltip tooltip="Remove media">
                           <button
+                            type="button"
                             className="p-1 rounded hover:bg-black/50 absolute top-1 z-50 bg-black/80 right-1 group-hover:text-white"
                             onClick={() =>
                               setGenerateData({
                                 [getAssetKey(asset) ??
-                                  assetKeyMap[getAssetType(asset)]]: undefined,
+                                assetKeyMap[getAssetType(asset)]]: undefined,
                               })
                             }
                           >
@@ -491,7 +565,9 @@ export default function RightPanel({
                       type="number"
                       value={generateData.duration}
                       onChange={(e) =>
-                        setGenerateData({ duration: parseInt(e.target.value) })
+                        setGenerateData({
+                          duration: Number.parseInt(e.target.value),
+                        })
                       }
                     />
                     <span>s</span>
@@ -545,7 +621,6 @@ const SelectedAssetPreview = ({
               ? URL.createObjectURL(data[assetKey])
               : data[assetKey] || ""
           }
-          className=""
           controls={true}
         />
       )}
@@ -556,7 +631,6 @@ const SelectedAssetPreview = ({
               ? URL.createObjectURL(data[assetKey])
               : data[assetKey] || ""
           }
-          className=""
           controls={false}
           style={{ pointerEvents: "none" }}
         />
@@ -569,8 +643,7 @@ const SelectedAssetPreview = ({
               ? URL.createObjectURL(data[assetKey])
               : data[assetKey] || ""
           }
-          className=""
-          alt="Image Preview"
+          alt="Media Preview"
         />
       )}
     </>

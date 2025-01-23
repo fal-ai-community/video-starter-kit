@@ -2,8 +2,12 @@
 
 import { useProjectUpdater } from "@/data/mutations";
 import { queryKeys, useProject, useProjectMediaItems } from "@/data/queries";
-import { MediaItem, PROJECT_PLACEHOLDER } from "@/data/schema";
-import { useProjectId, useVideoProjectStore } from "@/data/store";
+import { type MediaItem, PROJECT_PLACEHOLDER } from "@/data/schema";
+import {
+  type MediaType,
+  useProjectId,
+  useVideoProjectStore,
+} from "@/data/store";
 import {
   ChevronDown,
   FilmIcon,
@@ -30,7 +34,7 @@ import {
 } from "./ui/dropdown-menu";
 import { useState } from "react";
 import { useUploadThing } from "@/lib/uploadthing";
-import { ClientUploadedFileData } from "uploadthing/types";
+import type { ClientUploadedFileData } from "uploadthing/types";
 import { db } from "@/data/db";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
@@ -45,7 +49,7 @@ export default function LeftPanel() {
 
   const { data: mediaItems = [], isLoading } = useProjectMediaItems(projectId);
   const setProjectDialogOpen = useVideoProjectStore(
-    (s) => s.setProjectDialogOpen,
+    (s) => s.setProjectDialogOpen
   );
 
   const { startUpload, isUploading } = useUploadThing("fileUploader");
@@ -71,7 +75,7 @@ export default function LeftPanel() {
   const handleUploadComplete = async (
     files: ClientUploadedFileData<{
       uploadedBy: string;
-    }>[],
+    }>[]
   ) => {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -82,7 +86,7 @@ export default function LeftPanel() {
         projectId,
         kind: "uploaded",
         createdAt: Date.now(),
-        mediaType: outputType as any,
+        mediaType: outputType as MediaType,
         status: "completed",
         url: file.url,
       };
