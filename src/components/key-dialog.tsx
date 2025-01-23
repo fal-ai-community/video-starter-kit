@@ -18,22 +18,15 @@ type KeyDialogProps = {} & Parameters<typeof Dialog>[0];
 
 export function KeyDialog({ onOpenChange, open, ...props }: KeyDialogProps) {
   const [falKey, setFalKey] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const handleOnOpenChange = (isOpen: boolean) => {
-    if (loading) return;
     onOpenChange?.(isOpen);
   };
 
   const handleSave = () => {
-    setLoading(true);
     localStorage.setItem("falKey", falKey);
-    setTimeout(() => {
-      location.reload();
-      handleOnOpenChange(false);
-      setFalKey("");
-      setLoading(false);
-    }, 1000);
+    handleOnOpenChange(false);
+    setFalKey("");
   };
 
   return (
@@ -48,16 +41,13 @@ export function KeyDialog({ onOpenChange, open, ...props }: KeyDialogProps) {
           </h2>
           <div className="flex flex-col gap-4">
             <Input
-              disabled={loading}
               placeholder="Your FAL Key"
               value={falKey}
               onChange={(e) => setFalKey(e.target.value)}
             />
           </div>
           <div className="flex-1 flex flex-row items-end justify-center gap-2">
-            <Button disabled={loading} onClick={handleSave}>
-              Save
-            </Button>
+            <Button onClick={handleSave}>Save</Button>
           </div>
         </div>
 
