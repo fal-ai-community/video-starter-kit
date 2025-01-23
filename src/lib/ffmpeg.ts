@@ -1,11 +1,11 @@
-import { MediaItem } from "@/data/schema";
+import type { MediaItem } from "@/data/schema";
 import { fal } from "./fal";
 import { resolveMediaUrl } from "./utils";
 
 export async function getMediaMetadata(media: MediaItem) {
   try {
     const { data: mediaMetadata } = await fal.subscribe(
-      "drochetti/ffmpeg-api/metadata",
+      "fal-ai/ffmpeg-api/metadata",
       {
         input: {
           media_url: resolveMediaUrl(media),

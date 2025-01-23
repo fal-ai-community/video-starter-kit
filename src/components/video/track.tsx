@@ -76,7 +76,7 @@ function AudioWaveform({ data }: AudioWaveformProps) {
         return data.metadata.waveform;
       }
       const { data: waveformInfo } = await fal.subscribe(
-        "drochetti/ffmpeg-api/waveform",
+        "fal-ai/ffmpeg-api/waveform",
         {
           input: {
             media_url: resolveMediaUrl(data),
@@ -95,7 +95,7 @@ function AudioWaveform({ data }: AudioWaveformProps) {
       return waveformInfo.waveform as number[];
     },
     placeholderData: keepPreviousData,
-    staleTime: Infinity,
+    staleTime: Number.POSITIVE_INFINITY,
   });
 
   const svgWidth = waveform.length * 3;
@@ -109,6 +109,7 @@ function AudioWaveform({ data }: AudioWaveformProps) {
         viewBox={`0 0 ${svgWidth} ${svgHeight}`}
         preserveAspectRatio="none"
       >
+        <title>Audio Waveform</title>
         {waveform.map((v, index) => {
           const amplitude = Math.abs(v);
           const height = Math.max(amplitude * svgHeight, 2);
