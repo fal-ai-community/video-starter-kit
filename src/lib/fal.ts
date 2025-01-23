@@ -1,6 +1,9 @@
+"use client";
+
 import { createFalClient } from "@fal-ai/client";
 
 export const fal = createFalClient({
+  credentials: localStorage.getItem("falKey") as string,
   proxyUrl: "/api/fal",
 });
 
