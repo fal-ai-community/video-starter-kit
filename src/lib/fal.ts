@@ -20,7 +20,7 @@ export type ApiInfo = {
   cost: string;
   inferenceTime?: string;
   inputAsset?: InputAsset[];
-  initialInput?: Record<string, any>;
+  initialInput?: Record<string, unknown>;
   category: "image" | "video" | "music" | "voiceover";
 };
 
@@ -139,5 +139,12 @@ export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
     description: "Fluent and faithful speech with flow matching",
     cost: "",
     category: "voiceover",
+    initialInput: {
+      ref_audio_url:
+        "https://github.com/SWivid/F5-TTS/raw/21900ba97d5020a5a70bcc9a0575dc7dec5021cb/tests/ref_audio/test_en_1_ref_short.wav",
+      ref_text: "Some call me nature, others call me mother nature.",
+      model_type: "F5-TTS",
+      remove_silence: true,
+    },
   },
 ];
