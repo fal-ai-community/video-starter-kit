@@ -216,14 +216,14 @@ export default function VideoPreview() {
   const duration = calculateDuration();
 
   const setPlayerCurrentTimestamp = useVideoProjectStore(
-    (s) => s.setPlayerCurrentTimestamp,
+    (s) => s.setPlayerCurrentTimestamp
   );
 
   const setPlayerState = useVideoProjectStore((s) => s.setPlayerState);
   // Frame updates are super frequent, so we throttle the updates to the timestamp
   const updatePlayerCurrentTimestamp = useCallback(
     throttle(64, setPlayerCurrentTimestamp),
-    [],
+    []
   );
 
   // Register events on the player
@@ -246,17 +246,17 @@ export default function VideoPreview() {
         updatePlayerCurrentTimestamp(currentFrame / FPS);
       });
     },
-    [setPlayer, setPlayerState, updatePlayerCurrentTimestamp],
+    [setPlayer, setPlayerState, updatePlayerCurrentTimestamp]
   );
 
   const setExportDialogOpen = useVideoProjectStore(
-    (s) => s.setExportDialogOpen,
+    (s) => s.setExportDialogOpen
   );
 
   return (
     <div className="flex-grow flex-1 h-full flex items-center justify-center bg-background-dark dark:bg-background-light relative">
       <Button
-        className="absolute top-4 right-4"
+        className="absolute top-4 right-4 z-40"
         variant="default"
         onClick={() => setExportDialogOpen(true)}
         disabled={isCompositionLoading || tracks.length === 0}
