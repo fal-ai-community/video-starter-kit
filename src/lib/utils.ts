@@ -23,7 +23,7 @@ export function rememberLastProjectId(projectId: string) {
 
 export function mapInputKey(
   input: Record<string, unknown>,
-  inputMap: Record<string, string>
+  inputMap: Record<string, string>,
 ): Record<string, unknown> {
   if (typeof input !== "object" || input === null) return input;
   const newInput: Record<string, unknown> = {};
@@ -99,7 +99,7 @@ export function resolveMediaUrl(item: MediaItem | undefined): string | null {
     audio_url: 1,
   };
   const property = Object.keys(data).find(
-    (key) => key in fileProperties && "url" in data[key]
+    (key) => key in fileProperties && "url" in data[key],
   );
   if (property) {
     return data[property].url;
