@@ -216,14 +216,14 @@ export default function VideoPreview() {
   const duration = calculateDuration();
 
   const setPlayerCurrentTimestamp = useVideoProjectStore(
-    (s) => s.setPlayerCurrentTimestamp
+    (s) => s.setPlayerCurrentTimestamp,
   );
 
   const setPlayerState = useVideoProjectStore((s) => s.setPlayerState);
   // Frame updates are super frequent, so we throttle the updates to the timestamp
   const updatePlayerCurrentTimestamp = useCallback(
     throttle(64, setPlayerCurrentTimestamp),
-    []
+    [],
   );
 
   // Register events on the player
@@ -246,11 +246,11 @@ export default function VideoPreview() {
         updatePlayerCurrentTimestamp(currentFrame / FPS);
       });
     },
-    [setPlayer, setPlayerState, updatePlayerCurrentTimestamp]
+    [setPlayer, setPlayerState, updatePlayerCurrentTimestamp],
   );
 
   const setExportDialogOpen = useVideoProjectStore(
-    (s) => s.setExportDialogOpen
+    (s) => s.setExportDialogOpen,
   );
 
   return (
