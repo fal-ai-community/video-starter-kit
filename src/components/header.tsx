@@ -5,7 +5,7 @@ import { SettingsIcon } from "lucide-react";
 export default function Header({
   openKeyDialog,
 }: {
-  openKeyDialog: () => void;
+  openKeyDialog?: () => void;
 }) {
   return (
     <header className="px-4 py-2 flex justify-between items-center border-b border-border">
@@ -27,7 +27,7 @@ export default function Header({
             GitHub
           </a>
         </Button>
-        {process.env.NEXT_PUBLIC_CUSTOM_KEY && (
+        {process.env.NEXT_PUBLIC_CUSTOM_KEY && openKeyDialog && (
           <Button variant="ghost" size="icon" onClick={openKeyDialog}>
             <SettingsIcon className="w-6 h-6" />
           </Button>
