@@ -92,19 +92,19 @@ export function MediaItemRow({
             queryKey: queryKeys.projectMediaItems(data.projectId),
           });
         }
-      }
 
-      if (media.mediaType !== "image") {
-        const mediaMetadata = await getMediaMetadata(media as MediaItem);
+        if (media.mediaType !== "image") {
+          const mediaMetadata = await getMediaMetadata(media as MediaItem);
 
-        await db.media.update(data.id, {
-          ...media,
-          metadata: mediaMetadata?.media || {},
-        });
+          await db.media.update(data.id, {
+            ...media,
+            metadata: mediaMetadata?.media || {},
+          });
 
-        await queryClient.invalidateQueries({
-          queryKey: queryKeys.projectMediaItems(data.projectId),
-        });
+          await queryClient.invalidateQueries({
+            queryKey: queryKeys.projectMediaItems(data.projectId),
+          });
+        }
       }
 
       return null;
@@ -129,7 +129,7 @@ export function MediaItemRow({
     <div
       className={cn(
         "flex items-start space-x-2 py-2 w-full px-4 hover:bg-accent transition-all",
-        className,
+        className
       )}
       {...props}
       onClick={(e) => {
@@ -145,7 +145,7 @@ export function MediaItemRow({
             "flex items-center h-full cursor-grab text-muted-foreground",
             {
               "text-muted": data.status !== "completed",
-            },
+            }
           )}
         >
           <GripVerticalIcon className="w-4 h-4" />
@@ -199,9 +199,7 @@ export function MediaItemRow({
             <h3 className="text-sm font-medium flex flex-row gap-1 items-center">
               {createElement(trackIcons[data.mediaType], {
                 className: "w-4 h-4 stroke-1",
-              } as React.ComponentProps<
-                (typeof trackIcons)[keyof typeof trackIcons]
-              >)}
+              } as React.ComponentProps<(typeof trackIcons)[keyof typeof trackIcons]>)}
               <span>{data.kind === "generated" ? "Job" : "File"}</span>
               <code className="text-muted-foreground">#{mediaId}</code>
             </h3>
@@ -251,7 +249,7 @@ export function MediaItemPanel({
     <div
       className={cn(
         "flex flex-col overflow-hidden divide-y divide-border",
-        className,
+        className
       )}
     >
       {data

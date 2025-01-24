@@ -78,7 +78,7 @@ const DEFAULT_PROPS: VideoProjectProps = {
 type VideoProjectStore = ReturnType<typeof createVideoProjectStore>;
 
 export const createVideoProjectStore = (
-  initProps?: Partial<VideoProjectProps>,
+  initProps?: Partial<VideoProjectProps>
 ) => {
   return createStore<VideoProjectState>()((set, state) => ({
     ...DEFAULT_PROPS,
@@ -136,11 +136,11 @@ export const createVideoProjectStore = (
 };
 
 export const VideoProjectStoreContext = createContext<VideoProjectStore>(
-  createVideoProjectStore(),
+  createVideoProjectStore()
 );
 
 export function useVideoProjectStore<T>(
-  selector: (state: VideoProjectState) => T,
+  selector: (state: VideoProjectState) => T
 ): T {
   const store = useContext(VideoProjectStoreContext);
   return useStore(store, selector);

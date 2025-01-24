@@ -2,7 +2,7 @@ import Header from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { fetchSharedVideo } from "@/lib/share";
 import { DownloadIcon } from "lucide-react";
-import { Metadata, ResolvingMetadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 
 type PageParams = {
@@ -15,7 +15,7 @@ type PageProps = {
 
 export async function generateMetadata(
   { params }: PageProps,
-  parent: ResolvingMetadata,
+  parent: ResolvingMetadata
 ): Promise<Metadata> {
   const video = await fetchSharedVideo(params.id);
   if (!video) {
@@ -28,7 +28,7 @@ export async function generateMetadata(
 
   return {
     title: video.title,
-    description: video.description || `Watch on Video AI Studio`,
+    description: video.description || "Watch on Video AI Studio",
 
     // Open Graph metadata
     openGraph: {

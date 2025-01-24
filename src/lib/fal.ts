@@ -3,7 +3,7 @@
 import { createFalClient } from "@fal-ai/client";
 
 export const fal = createFalClient({
-  credentials: () => localStorage.getItem("falKey") as string,
+  credentials: () => localStorage?.getItem("falKey") as string,
   proxyUrl: "/api/fal",
 });
 
@@ -22,6 +22,7 @@ export type ApiInfo = {
   description: string;
   cost: string;
   inferenceTime?: string;
+  inputMap?: Record<string, string>;
   inputAsset?: InputAsset[];
   initialInput?: Record<string, unknown>;
   category: "image" | "video" | "music" | "voiceover";
@@ -134,6 +135,29 @@ export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
     category: "voiceover",
     initialInput: {
       voice: "Dexter (English (US)/American)",
+    },
+  },
+  {
+    endpointId: "fal-ai/playai/tts/dialog",
+    label: "PlayAI Text-to-Speech Dialog",
+    description:
+      "Generate natural-sounding multi-speaker dialogues. Perfect for expressive outputs, storytelling, games, animations, and interactive media.",
+    cost: "",
+    category: "voiceover",
+    inputMap: {
+      prompt: "input",
+    },
+    initialInput: {
+      voices: [
+        {
+          voice: "Jennifer (English (US)/American)",
+          turn_prefix: "Speaker 1: ",
+        },
+        {
+          voice: "Furio (English (IT)/Italian)",
+          turn_prefix: "Speaker 2: ",
+        },
+      ],
     },
   },
   {
