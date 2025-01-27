@@ -39,6 +39,12 @@ import { db } from "@/data/db";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { getMediaMetadata } from "@/lib/ffmpeg";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "./ui/accordion";
 
 export default function LeftPanel() {
   const projectId = useProjectId();
@@ -49,7 +55,7 @@ export default function LeftPanel() {
 
   const { data: mediaItems = [], isLoading } = useProjectMediaItems(projectId);
   const setProjectDialogOpen = useVideoProjectStore(
-    (s) => s.setProjectDialogOpen,
+    (s) => s.setProjectDialogOpen
   );
   const openGenerateDialog = useVideoProjectStore((s) => s.openGenerateDialog);
 
@@ -76,7 +82,7 @@ export default function LeftPanel() {
   const handleUploadComplete = async (
     files: ClientUploadedFileData<{
       uploadedBy: string;
-    }>[],
+    }>[]
   ) => {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -114,52 +120,68 @@ export default function LeftPanel() {
 
   return (
     <div className="flex flex-col border-r border-border w-96">
-      <div className="p-4 flex flex-col gap-4 border-b border-border">
-        <div className="flex flex-row items-start">
-          <h2 className="text-sm text-muted-foreground font-semibold flex-1">
-            Project Settings
-          </h2>
+      <div className="p-4 flex items-center gap-4 border-b border-border">
+        <div className="flex w-full">
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="item-1" className="border-b-0">
+              <AccordionTrigger className="py-4 h-10">
+                <div className="flex flex-row items-center">
+                  <h2 className="text-sm text-muted-foreground font-semibold flex-1">
+                    {project?.title || "Project Settings"}
+                  </h2>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="border-b-0">
+                <div className="flex flex-col gap-4">
+                  <Input
+                    id="projectName"
+                    name="name"
+                    placeholder="untitled"
+                    value={project.title}
+                    onChange={(e) =>
+                      projectUpdate.mutate({ title: e.target.value })
+                    }
+                    onBlur={(e) =>
+                      projectUpdate.mutate({ title: e.target.value.trim() })
+                    }
+                  />
+
+                  <Textarea
+                    id="projectDescription"
+                    name="description"
+                    placeholder="Describe your video"
+                    className="resize-none"
+                    value={project.description}
+                    rows={6}
+                    onChange={(e) =>
+                      projectUpdate.mutate({ description: e.target.value })
+                    }
+                    onBlur={(e) =>
+                      projectUpdate.mutate({
+                        description: e.target.value.trim(),
+                      })
+                    }
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+        <div className="self-start">
           <Button
+            className="mt-2"
             variant="secondary"
             size="sm"
             onClick={() => setProjectDialogOpen(true)}
           >
             <FolderOpenIcon className="w-4 h-4 opacity-50" />
-            Open...
           </Button>
-        </div>
-        <div className="flex flex-col gap-4">
-          <Input
-            id="projectName"
-            name="name"
-            placeholder="untitled"
-            value={project.title}
-            onChange={(e) => projectUpdate.mutate({ title: e.target.value })}
-            onBlur={(e) =>
-              projectUpdate.mutate({ title: e.target.value.trim() })
-            }
-          />
-
-          <Textarea
-            id="projectDescription"
-            name="description"
-            placeholder="Describe your video"
-            className="resize-none"
-            value={project.description}
-            rows={6}
-            onChange={(e) =>
-              projectUpdate.mutate({ description: e.target.value })
-            }
-            onBlur={(e) =>
-              projectUpdate.mutate({ description: e.target.value.trim() })
-            }
-          />
         </div>
       </div>
       <div className="flex-1 py-4 flex flex-col gap-4 border-b border-border h-full overflow-hidden relative">
         <div className="flex flex-row items-center gap-2 px-4">
           <h2 className="text-sm text-muted-foreground font-semibold flex-1">
-            Media Gallery
+            Gallery
           </h2>
           <div className="flex gap-2">
             <DropdownMenu>
