@@ -15,7 +15,7 @@ type PageProps = {
 
 export async function generateMetadata(
   { params }: PageProps,
-  parent: ResolvingMetadata,
+  parent: ResolvingMetadata
 ): Promise<Metadata> {
   const video = await fetchSharedVideo(params.id);
   if (!video) {
