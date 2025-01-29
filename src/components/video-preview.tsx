@@ -233,14 +233,14 @@ export default function VideoPreview() {
   const duration = calculateDuration();
 
   const setPlayerCurrentTimestamp = useVideoProjectStore(
-    (s) => s.setPlayerCurrentTimestamp,
+    (s) => s.setPlayerCurrentTimestamp
   );
 
   const setPlayerState = useVideoProjectStore((s) => s.setPlayerState);
   // Frame updates are super frequent, so we throttle the updates to the timestamp
   const updatePlayerCurrentTimestamp = useCallback(
     throttle(64, setPlayerCurrentTimestamp),
-    [],
+    []
   );
 
   // Register events on the player
@@ -263,11 +263,11 @@ export default function VideoPreview() {
         updatePlayerCurrentTimestamp(currentFrame / FPS);
       });
     },
-    [setPlayer, setPlayerState, updatePlayerCurrentTimestamp],
+    [setPlayer, setPlayerState, updatePlayerCurrentTimestamp]
   );
 
   const setExportDialogOpen = useVideoProjectStore(
-    (s) => s.setExportDialogOpen,
+    (s) => s.setExportDialogOpen
   );
 
   let width = VIDEO_WIDTH;
@@ -292,18 +292,15 @@ export default function VideoPreview() {
         <DownloadIcon className="w-4 h-4" />
         Export
       </Button>
-      <div
-        className={cn(
-          "w-full flex items-center justify-center mx-6  max-h-[calc(100vh-25rem)]",
-          project.aspectRatio === "16:9" ? "aspect-[16/9]" : "aspect-[9/16]",
-        )}
-      >
+      <div className="w-full h-full flex items-center justify-center mx-6  max-h-[calc(100vh-25rem)]">
         <Player
           className={cn(
-            "[&_video]:shadow-2xl inline-flex items-center justify-center mx-auto",
-            project.aspectRatio === "16:9"
-              ? "[&_video]:aspect-[16/9]"
-              : "[&_video]:aspect-[9/16]",
+            "[&_video]:shadow-2xl inline-flex items-center justify-center mx-auto w-full h-full max-h-[500px] 3xl:max-h-[800px]",
+            {
+              "aspect-[16/9]": project.aspectRatio === "16:9",
+              "aspect-[9/16]": project.aspectRatio === "9:16",
+              "aspect-[1/1]": project.aspectRatio === "1:1",
+            }
           )}
           ref={playerRef}
           component={MainComposition}
