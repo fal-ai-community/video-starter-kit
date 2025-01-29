@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
-import { resolveMediaUrl } from "@/lib/utils";
+import { cn, resolveMediaUrl } from "@/lib/utils";
 import {
   EMPTY_VIDEO_COMPOSITION,
   useProject,
@@ -66,7 +66,7 @@ export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
     },
   });
   const setExportDialogOpen = useVideoProjectStore(
-    (s) => s.setExportDialogOpen,
+    (s) => s.setExportDialogOpen
   );
   const handleOnOpenChange = (open: boolean) => {
     setExportDialogOpen(open);
@@ -118,14 +118,23 @@ export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
             <FilmIcon className="w-6 h-6 opacity-50" />
             Export video
           </DialogTitle>
-          <DialogDescription></DialogDescription>
+          <DialogDescription />
         </DialogHeader>
         <div className="text-muted-foreground">
           <p>This may take a while, sit back and relax.</p>
         </div>
-        <div>
+        <div
+          className={cn(
+            "w-full h-[500px] mx-auto",
+            project?.aspectRatio === "16:9" ? "aspect-[16/9]" : "aspect-[9/16]"
+          )}
+        >
           {exportVideo.isPending || exportVideo.data === undefined ? (
-            <div className="aspect-video bg-accent/30 flex flex-col items-center justify-center">
+            <div
+              className={cn(
+                "bg-accent/30 flex flex-col items-center justify-center w-full h-full"
+              )}
+            >
               {exportVideo.isPending ? (
                 <LoadingIcon className="w-24 h-24" />
               ) : (
