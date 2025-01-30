@@ -46,6 +46,7 @@
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.54.0",
+    "react-hotkeys-hook": "^4.6.1",
     "remotion": "4.0.249",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",

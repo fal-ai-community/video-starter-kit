@@ -30,13 +30,13 @@ export function App({ projectId }: AppProps) {
   const projectStore = useRef(
     createVideoProjectStore({
       projectId,
-    }),
+    })
   ).current;
   const projectDialogOpen = useStore(projectStore, (s) => s.projectDialogOpen);
   const selectedMediaId = useStore(projectStore, (s) => s.selectedMediaId);
   const setSelectedMediaId = useStore(
     projectStore,
-    (s) => s.setSelectedMediaId,
+    (s) => s.setSelectedMediaId
   );
   const handleOnSheetOpenChange = (open: boolean) => {
     if (!open) {
@@ -46,22 +46,22 @@ export function App({ projectId }: AppProps) {
   const isExportDialogOpen = useStore(projectStore, (s) => s.exportDialogOpen);
   const setExportDialogOpen = useStore(
     projectStore,
-    (s) => s.setExportDialogOpen,
+    (s) => s.setExportDialogOpen
   );
   return (
     <ToastProvider>
       <QueryClientProvider client={queryClient}>
         <VideoProjectStoreContext.Provider value={projectStore}>
-          <div className="flex flex-col h-screen bg-background">
+          <div className="flex flex-col relative overflow-x-hidden h-screen bg-background">
             <Header openKeyDialog={() => setKeyDialog(true)} />
-            <main className="flex overflow-hidden h-full">
+            <main className="flex overflow-hidden h-full w-screen">
               <LeftPanel />
               <div className="flex flex-col flex-1">
                 <VideoPreview />
                 <BottomBar />
               </div>
-              <RightPanel />
             </main>
+            <RightPanel />
           </div>
           <Toaster />
           <ProjectDialog open={projectDialogOpen} />
