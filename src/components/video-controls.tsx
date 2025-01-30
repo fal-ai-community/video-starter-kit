@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { Button } from "./ui/button";
 
+const FPS = 30;
+
 export function VideoControls() {
   const player = useVideoProjectStore((s) => s.player);
   const playerState = useVideoProjectStore((s) => s.playerState);
@@ -33,11 +35,11 @@ export function VideoControls() {
   const onSeekBackward = () => {
     if (!player) return;
     player.pause();
-    player.seekTo(player.getCurrentFrame() - 5);
+    player.seekTo(player.getCurrentFrame() - FPS);
   };
   const onSeekForward = () => {
     if (!player) return;
-    player.seekTo(player.getCurrentFrame() + 5);
+    player.seekTo(player.getCurrentFrame() + FPS);
   };
 
   useHotkeys("space", handleTogglePlay, [player]);
