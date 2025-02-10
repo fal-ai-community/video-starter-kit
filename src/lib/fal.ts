@@ -25,6 +25,7 @@ export type ApiInfo = {
   inputMap?: Record<string, string>;
   inputAsset?: InputAsset[];
   initialInput?: Record<string, unknown>;
+  cameraControl?: boolean;
   category: "image" | "video" | "music" | "voiceover";
 };
 
@@ -79,6 +80,15 @@ export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
     cost: "",
     category: "video",
     inputAsset: ["image"],
+  },
+  {
+    endpointId: "fal-ai/kling-video/v1/standard/text-to-video",
+    label: "Kling 1.0 Standard",
+    description: "High quality video",
+    cost: "",
+    category: "video",
+    inputAsset: [],
+    cameraControl: true,
   },
   {
     endpointId: "fal-ai/luma-dream-machine",
