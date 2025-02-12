@@ -79,7 +79,7 @@ function MediaPropertyItem({
     <div
       className={cn(
         "group relative flex flex-col gap-1 rounded bg-black/50 p-3 text-sm flex-wrap text-wrap overflow-hidden",
-        className,
+        className
       )}
     >
       <div className="absolute right-2 top-2 opacity-30 transition-opacity group-hover:opacity-70">
@@ -123,10 +123,11 @@ export function MediaGallerySheet({
     mediaItems.find((media) => media.id === selectedMediaId) ??
     MEDIA_PLACEHOLDER;
   const setSelectedMediaId = useVideoProjectStore((s) => s.setSelectedMediaId);
+  const openGenerateDialog = useVideoProjectStore((s) => s.openGenerateDialog);
   const setGenerateData = useVideoProjectStore((s) => s.setGenerateData);
   const setEndpointId = useVideoProjectStore((s) => s.setEndpointId);
   const setGenerateMediaType = useVideoProjectStore(
-    (s) => s.setGenerateMediaType,
+    (s) => s.setGenerateMediaType
   );
   const onGenerate = useVideoProjectStore((s) => s.onGenerate);
 
@@ -135,7 +136,7 @@ export function MediaGallerySheet({
     const image = selectedMedia.output?.images?.[0]?.url;
 
     const endpoint = AVAILABLE_ENDPOINTS.find(
-      (endpoint) => endpoint.category === "video",
+      (endpoint) => endpoint.category === "video"
     );
 
     setEndpointId(endpoint?.endpointId ?? AVAILABLE_ENDPOINTS[0].endpointId);
@@ -146,7 +147,7 @@ export function MediaGallerySheet({
       duration: undefined,
     });
     setSelectedMediaId(null);
-    onGenerate();
+    openGenerateDialog();
   };
 
   const handleVary = () => {
@@ -167,7 +168,7 @@ export function MediaGallerySheet({
   };
   const mediaUrl = useMemo(
     () => resolveMediaUrl(selectedMedia),
-    [selectedMedia],
+    [selectedMedia]
   );
   const prompt = selectedMedia?.input?.prompt;
 
