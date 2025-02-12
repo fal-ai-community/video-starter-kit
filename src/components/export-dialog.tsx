@@ -66,7 +66,7 @@ export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
     },
   });
   const setExportDialogOpen = useVideoProjectStore(
-    (s) => s.setExportDialogOpen,
+    (s) => s.setExportDialogOpen
   );
   const handleOnOpenChange = (open: boolean) => {
     setExportDialogOpen(open);
@@ -125,14 +125,14 @@ export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
         </div>
         <div
           className={cn(
-            "w-full h-[500px] mx-auto",
-            project?.aspectRatio === "16:9" ? "aspect-[16/9]" : "aspect-[9/16]",
+            "w-full max-h-[500px] mx-auto max-w-full",
+            project?.aspectRatio === "16:9" ? "aspect-[16/9]" : "aspect-[9/16]"
           )}
         >
           {exportVideo.isPending || exportVideo.data === undefined ? (
             <div
               className={cn(
-                "bg-accent/30 flex flex-col items-center justify-center w-full h-full",
+                "bg-accent/30 flex flex-col items-center justify-center w-full h-full"
               )}
             >
               {exportVideo.isPending ? (
