@@ -18,6 +18,7 @@ import { Toaster } from "./ui/toaster";
 import { ExportDialog } from "./export-dialog";
 import LeftPanel from "./left-panel";
 import { KeyDialog } from "./key-dialog";
+import { AnalyticsDialog } from "./analytics/analytics-dialog";
 
 type AppProps = {
   projectId: string;
@@ -48,6 +49,11 @@ export function App({ projectId }: AppProps) {
     projectStore,
     (s) => s.setExportDialogOpen,
   );
+  const generateDialogOpen = useStore(
+    projectStore,
+    (s) => s.generateDialogOpen,
+  );
+
   return (
     <ToastProvider>
       <QueryClientProvider client={queryClient}>
@@ -78,6 +84,7 @@ export function App({ projectId }: AppProps) {
             onOpenChange={handleOnSheetOpenChange}
             selectedMediaId={selectedMediaId ?? ""}
           />
+          <AnalyticsDialog onOpenChange={() => {}} />
         </VideoProjectStoreContext.Provider>
       </QueryClientProvider>
     </ToastProvider>
