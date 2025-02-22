@@ -184,4 +184,12 @@ export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
       remove_silence: true,
     },
   },
+  {
+    endpointId: "fal-ai/veo2",
+    label: "Veo 2",
+    description:
+      "Veo creates videos with realistic motion and high quality output, up to 4K.",
+    cost: "",
+    category: "video",
+  },
 ];
