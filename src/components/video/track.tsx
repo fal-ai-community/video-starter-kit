@@ -191,37 +191,40 @@ export function VideoTrackView({
 
   const trackRef = useRef<HTMLDivElement>(null);
 
-  const calculateBounds = () => {
-    const timelineElement = document.querySelector(".timeline-container");
+  const calculateBounds = (trackElement: HTMLElement) => {
+    const timelineElement = trackElement.closest(".timeline-container");
     const timelineRect = timelineElement?.getBoundingClientRect();
-    const trackElement = trackRef.current;
-    const trackRect = trackElement?.getBoundingClientRect();
+    const trackRect = trackElement.getBoundingClientRect();
+    const previousTrack = trackElement.previousElementSibling;
+    const nextTrack = trackElement.nextElementSibling;
 
-    if (!timelineRect || !trackRect || !trackElement)
-      return { left: 0, right: 0 };
+    if (!timelineElement || !timelineRect) return null;
 
-    const previousTrack = trackElement?.previousElementSibling;
-    const nextTrack = trackElement?.nextElementSibling;
-
-    const leftBound = previousTrack
-      ? previousTrack.getBoundingClientRect().right - (timelineRect?.left || 0)
+    const parentWidth = (timelineElement as HTMLElement).offsetWidth;
+    const leftBoundPixels = previousTrack
+      ? previousTrack.getBoundingClientRect().right - timelineRect.left
       : 0;
-    const rightBound = nextTrack
-      ? nextTrack.getBoundingClientRect().left -
-        (timelineRect?.left || 0) -
-        trackRect.width
+    const rightBoundPixels = nextTrack
+      ? nextTrack.getBoundingClientRect().left - timelineRect.left - trackRect.width
       : timelineRect.width - trackRect.width;
 
     return {
-      left: leftBound,
-      right: rightBound,
+      parentWidth,
+      timelineRect,
+      trackRect,
+      leftBoundPixels,
+      rightBoundPixels,
+      leftBoundPercent: (leftBoundPixels / parentWidth) * 100,
+      rightBoundPercent: (rightBoundPixels / parentWidth) * 100
     };
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     const trackElement = trackRef.current;
     if (!trackElement) return;
-    const bounds = calculateBounds();
+    const bounds = calculateBounds(trackElement);
+    if (!bounds) return;
+    
     const startX = e.clientX;
     const startLeft = trackElement.offsetLeft;
 
@@ -229,17 +232,13 @@ export function VideoTrackView({
       const deltaX = moveEvent.clientX - startX;
       let newLeft = startLeft + deltaX;
 
-      if (newLeft < bounds.left) {
-        newLeft = bounds.left;
-      } else if (newLeft > bounds.right) {
-        newLeft = bounds.right;
+      if (newLeft < bounds.leftBoundPixels) {
+        newLeft = bounds.leftBoundPixels;
+      } else if (newLeft > bounds.rightBoundPixels) {
+        newLeft = bounds.rightBoundPixels;
       }
 
-      const timelineElement = trackElement.closest(".timeline-container");
-      const parentWidth = timelineElement
-        ? (timelineElement as HTMLElement).offsetWidth
-        : 1;
-      const newTimestamp = (newLeft / parentWidth) * 30;
+      const newTimestamp = (newLeft / bounds.parentWidth) * 30;
       frame.timestamp = (newTimestamp < 0 ? 0 : newTimestamp) * 1000;
 
       trackElement.style.left = `${((frame.timestamp / 30) * 100) / 1000}%`;
@@ -265,41 +264,110 @@ export function VideoTrackView({
     e.stopPropagation();
     const trackElement = trackRef.current;
     if (!trackElement) return;
+    
+    const bounds = calculateBounds(trackElement);
+    if (!bounds) return;
+
     const startX = e.clientX;
     const startWidth = trackElement.offsetWidth;
+    const startLeft = trackElement.offsetLeft;
+    const startTimestamp = frame.timestamp;
+    const originalStartTime = frame.startTime || 0;
+    const originalDuration = frame.duration;
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
       let newWidth = startWidth + (direction === "right" ? deltaX : -deltaX);
+      let newLeft = startLeft;
 
       const minDuration = 1000;
       const maxDuration: number = resolveDuration(media) ?? 5000;
 
-      const timelineElement = trackElement.closest(".timeline-container");
-      const parentWidth = timelineElement
-        ? (timelineElement as HTMLElement).offsetWidth
-        : 1;
-      let newDuration = (newWidth / parentWidth) * 30 * 1000;
+      if (direction === "left") {
+        // Calculate new position and width while maintaining the end point
+        const endPoint = startLeft + startWidth;
+        
+        // Calculate new left position in percentage
+        const proposedLeftPercent = ((startLeft + deltaX) / bounds.parentWidth) * 100;
+        
+        // Ensure we don't go beyond the previous clip
+        const constrainedLeftPercent = Math.max(bounds.leftBoundPercent, proposedLeftPercent);
+        
+        // Calculate maximum left position based on minimum duration
+        const maxLeftPercent = ((endPoint - (minDuration / 1000 / 30) * bounds.parentWidth) / bounds.parentWidth) * 100;
+        
+        // Apply all constraints
+        newLeft = Math.min(maxLeftPercent, constrainedLeftPercent) * bounds.parentWidth / 100;
+        newWidth = endPoint - newLeft;
+        
+        // Update timestamp based on new position
+        const newTimestamp = (newLeft / bounds.parentWidth) * 30 * 1000;
+        frame.timestamp = Math.max(0, newTimestamp);
 
+        // Calculate how much of the original video we're trimming from the start
+        const trimAmount = startWidth - newWidth;
+        const trimTime = (trimAmount / bounds.parentWidth) * 30 * 1000;
+        frame.startTime = originalStartTime + trimTime;
+      }
+
+      let newDuration = (newWidth / bounds.parentWidth) * 30 * 1000;
+
+      // Enforce duration constraints
       if (newDuration < minDuration) {
-        newWidth = (minDuration / 1000 / 30) * parentWidth;
         newDuration = minDuration;
+        newWidth = (minDuration / 1000 / 30) * bounds.parentWidth;
+        if (direction === "left") {
+          const endPoint = startLeft + startWidth;
+          newLeft = endPoint - newWidth;
+          frame.timestamp = (newLeft / bounds.parentWidth) * 30 * 1000;
+          
+          // Recalculate startTime based on how much we trimmed
+          const trimAmount = startWidth - newWidth;
+          const trimTime = (trimAmount / bounds.parentWidth) * 30 * 1000;
+          frame.startTime = originalStartTime + trimTime;
+        }
       } else if (newDuration > maxDuration) {
-        newWidth = (maxDuration / 1000 / 30) * parentWidth;
         newDuration = maxDuration;
+        newWidth = (maxDuration / 1000 / 30) * bounds.parentWidth;
+        if (direction === "left") {
+          const endPoint = startLeft + startWidth;
+          newLeft = endPoint - newWidth;
+          frame.timestamp = (newLeft / bounds.parentWidth) * 30 * 1000;
+          
+          // Recalculate startTime based on how much we trimmed
+          const trimAmount = startWidth - newWidth;
+          const trimTime = (trimAmount / bounds.parentWidth) * 30 * 1000;
+          frame.startTime = originalStartTime + trimTime;
+        }
       }
 
       frame.duration = newDuration;
       trackElement.style.width = `${((frame.duration / 30) * 100) / 1000}%`;
+      
+      if (direction === "left") {
+        trackElement.style.left = `${(frame.timestamp / 30 / 10).toFixed(2)}%`;
+      }
     };
 
     const handleMouseUp = () => {
+      // Round values to prevent floating point imprecision
       frame.duration = Math.round(frame.duration / 100) * 100;
+      frame.timestamp = Math.round(frame.timestamp / 100) * 100;
+      frame.startTime = Math.round(frame.startTime / 100) * 100;
+      
+      // Update styles with rounded values
       trackElement.style.width = `${((frame.duration / 30) * 100) / 1000}%`;
-      db.keyFrames.update(frame.id, { duration: frame.duration });
+      trackElement.style.left = `${(frame.timestamp / 30 / 10).toFixed(2)}%`;
+      
+      db.keyFrames.update(frame.id, { 
+        duration: frame.duration,
+        timestamp: frame.timestamp,
+        startTime: frame.startTime
+      });
       queryClient.invalidateQueries({
         queryKey: queryKeys.projectPreview(projectId),
       });
+      
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
@@ -357,7 +425,9 @@ export function VideoTrackView({
           </div>
         </div>
         <div
-          className="p-px flex-1 items-center bg-repeat-x h-full max-h-full overflow-hidden relative"
+          className={cn(
+            "p-px flex-1 items-center bg-repeat-x h-full max-h-full overflow-hidden relative"
+          )}
           style={
             imageUrl
               ? {
@@ -370,6 +440,19 @@ export function VideoTrackView({
           {(media.mediaType === "music" || media.mediaType === "voiceover") && (
             <AudioWaveform data={media} />
           )}
+          <div
+            className={cn(
+              "absolute left-0 z-50 top-0 bg-black/20 group-hover:bg-black/40",
+              "rounded-md bottom-0 w-2 m-1 p-px cursor-ew-resize backdrop-blur-md text-white/40",
+              "transition-colors flex flex-col items-center justify-center text-xs tracking-tighter",
+            )}
+            onMouseDown={(e) => handleResize(e, "left")}
+          >
+            <span className="flex gap-[1px]">
+              <span className="w-px h-2 rounded bg-white/40" />
+              <span className="w-px h-2 rounded bg-white/40" />
+            </span>
+          </div>
           <div
             className={cn(
               "absolute right-0 z-50 top-0 bg-black/20 group-hover:bg-black/40",

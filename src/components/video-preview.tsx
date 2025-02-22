@@ -136,6 +136,8 @@ const VideoTrackSequence: React.FC<TrackSequenceProps> = ({
 
         const duration = frame.duration || resolveDuration(media) || 5000;
         const durationInFrames = Math.floor(duration / (1000 / FPS));
+        const startTime = frame.startTime || 0;
+        const startTimeInFrames = Math.floor(startTime / (1000 / FPS));
 
         return (
           <Sequence
@@ -144,7 +146,14 @@ const VideoTrackSequence: React.FC<TrackSequenceProps> = ({
             durationInFrames={durationInFrames}
             premountFor={3000}
           >
-            {media.mediaType === "video" && <Video src={mediaUrl} />}
+            {media.mediaType === "video" && (
+              <Sequence
+                from={-startTimeInFrames}  // Offset video to start from trimmed position
+                durationInFrames={durationInFrames}
+              >
+                <Video src={mediaUrl} />
+              </Sequence>
+            )}
             {media.mediaType === "image" && (
               <Img src={mediaUrl} style={{ objectFit: "cover" }} />
             )}
