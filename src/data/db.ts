@@ -96,6 +96,7 @@ export const db = {
       return db.put("keyFrames", {
         id: crypto.randomUUID(),
         ...keyFrame,
+        startOffset: keyFrame.startOffset ?? 0,
       });
     },
     async update(id: string, keyFrame: Partial<VideoKeyFrame>) {
