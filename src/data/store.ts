@@ -33,6 +33,9 @@ interface VideoProjectProps {
   generateData: GenerateData;
   exportDialogOpen: boolean;
   endpointId: string;
+  analyticsDialogOpen: boolean;
+  analyticsCategory: MediaType | "all";
+  analyticsModel: string | "all";
 }
 
 interface VideoProjectState extends VideoProjectProps {
@@ -51,6 +54,9 @@ interface VideoProjectState extends VideoProjectProps {
   setExportDialogOpen: (open: boolean) => void;
   setEndpointId: (endpointId: string) => void;
   onGenerate: () => void;
+  setAnalyticsDialogOpen: (open: boolean) => void;
+  setAnalyticsCategory: (category: MediaType | "all") => void;
+  setAnalyticsModel: (model: string | "all") => void;
 }
 
 const DEFAULT_PROPS: VideoProjectProps = {
@@ -73,6 +79,9 @@ const DEFAULT_PROPS: VideoProjectProps = {
     audio_url: null,
   },
   exportDialogOpen: false,
+  analyticsDialogOpen: false,
+  analyticsCategory: "all",
+  analyticsModel: "all",
 };
 
 type VideoProjectStore = ReturnType<typeof createVideoProjectStore>;
@@ -132,6 +141,12 @@ export const createVideoProjectStore = (
     },
     setExportDialogOpen: (exportDialogOpen: boolean) =>
       set({ exportDialogOpen }),
+    setAnalyticsDialogOpen: (analyticsDialogOpen: boolean) =>
+      set({ analyticsDialogOpen }),
+    setAnalyticsCategory: (analyticsCategory: MediaType | "all") =>
+      set({ analyticsCategory }),
+    setAnalyticsModel: (analyticsModel: string | "all") =>
+      set({ analyticsModel }),
   }));
 };
 
