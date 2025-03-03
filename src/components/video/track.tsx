@@ -264,7 +264,7 @@ export function VideoTrackView({
     e.stopPropagation();
     const trackElement = trackRef.current;
     if (!trackElement) return;
-    
+
     const bounds = calculateBounds(trackElement);
     if (!bounds) return;
 
@@ -274,77 +274,75 @@ export function VideoTrackView({
     const startTimestamp = frame.timestamp;
     const originalStartOffset = frame.startOffset || 0;
     const originalDuration = frame.duration;
+    const sourceVideoDuration = resolveDuration(media) ?? 5000;
+    
+    // Minimum duration can be adjusted or removed if not needed
+    const minDuration = 500; // Reduced to 0.5 seconds
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
-      let newWidth = startWidth + (direction === "right" ? deltaX : -deltaX);
-      let newLeft = startLeft;
-
-      const minDuration = 1000;
-      const maxDuration: number = resolveDuration(media) ?? 5000;
-
-      if (direction === "left") {
-        const endPoint = startLeft + startWidth;
-        
-        // Calculate new left position in percentage
-        const proposedLeftPercent = ((startLeft + deltaX) / bounds.parentWidth) * 100;
-        
-        // Ensure we don't go beyond the previous clip
-        const constrainedLeftPercent = Math.max(bounds.leftBoundPercent, proposedLeftPercent);
-        
-        // Calculate maximum left position based on minimum duration
-        const maxLeftPercent = ((endPoint - (minDuration / 1000 / 30) * bounds.parentWidth) / bounds.parentWidth) * 100;
-        
-        // Apply all constraints
-        newLeft = Math.min(maxLeftPercent, constrainedLeftPercent) * bounds.parentWidth / 100;
-        newWidth = endPoint - newLeft;
-        
-        // Update timestamp based on new position
-        const newTimestamp = (newLeft / bounds.parentWidth) * 30 * 1000;
-        frame.timestamp = Math.max(0, newTimestamp);
-
-        // Calculate how much of the original video we're trimming from the start
-        const trimAmount = startWidth - newWidth;
-        const trimTime = (trimAmount / bounds.parentWidth) * 30 * 1000;
-        frame.startOffset = originalStartOffset + trimTime;
-      }
-
-      let newDuration = (newWidth / bounds.parentWidth) * 30 * 1000;
-
-      // Enforce duration constraints
-      if (newDuration < minDuration) {
-        newDuration = minDuration;
-        newWidth = (minDuration / 1000 / 30) * bounds.parentWidth;
-        if (direction === "left") {
-          const endPoint = startLeft + startWidth;
-          newLeft = endPoint - newWidth;
-          frame.timestamp = (newLeft / bounds.parentWidth) * 30 * 1000;
-          
-          // Recalculate startOffset based on how much we trimmed
-          const trimAmount = startWidth - newWidth;
-          const trimTime = (trimAmount / bounds.parentWidth) * 30 * 1000;
-          frame.startOffset = originalStartOffset + trimTime;
-        }
-      } else if (newDuration > maxDuration) {
-        newDuration = maxDuration;
-        newWidth = (maxDuration / 1000 / 30) * bounds.parentWidth;
-        if (direction === "left") {
-          const endPoint = startLeft + startWidth;
-          newLeft = endPoint - newWidth;
-          frame.timestamp = (newLeft / bounds.parentWidth) * 30 * 1000;
-          
-          // Recalculate startOffset based on how much we trimmed
-          const trimAmount = startWidth - newWidth;
-          const trimTime = (trimAmount / bounds.parentWidth) * 30 * 1000;
-          frame.startOffset = originalStartOffset + trimTime;
-        }
-      }
-
-      frame.duration = newDuration;
-      trackElement.style.width = `${((frame.duration / 30) * 100) / 1000}%`;
       
       if (direction === "left") {
+        // ========== LEFT HANDLE DRAGGING LOGIC ==========
+        const endPoint = startLeft + startWidth;
+        
+        // Calculate how much we're trying to trim from the original position
+        const trimAmount = deltaX > 0 ? deltaX : 0; // Only allow trimming (dragging right)
+        const trimTimeMs = (trimAmount / bounds.parentWidth) * 30 * 1000;
+        
+        // Calculate proposed new startOffset
+        const proposedStartOffset = originalStartOffset + trimTimeMs;
+        
+        // CRITICAL CONSTRAINT: ensure startOffset doesn't exceed what would make 
+        // startOffset + duration > sourceVideoDuration
+        const maxAllowedStartOffset = Math.max(0, sourceVideoDuration - minDuration);
+        const constrainedStartOffset = Math.min(proposedStartOffset, maxAllowedStartOffset);
+        
+        // Calculate trimAmount based on the constrained startOffset
+        const actualTrimTime = constrainedStartOffset - originalStartOffset;
+        const actualTrimAmount = (actualTrimTime / 30 / 1000) * bounds.parentWidth;
+        
+        // Calculate new left position (in pixels) based on the constrained trim
+        let newLeft = startLeft + actualTrimAmount;
+        
+        // Ensure we don't go beyond the previous clip's boundary
+        const proposedLeftPercent = (newLeft / bounds.parentWidth) * 100;
+        const constrainedLeftPercent = Math.max(bounds.leftBoundPercent, proposedLeftPercent);
+        newLeft = (constrainedLeftPercent * bounds.parentWidth) / 100;
+        
+        // Calculate final width and timestamp
+        const newWidth = endPoint - newLeft;
+        const newTimestamp = (newLeft / bounds.parentWidth) * 30 * 1000;
+        
+        // Recalculate startOffset based on the final position
+        const finalTrimAmount = startWidth - newWidth;
+        const finalTrimTime = (finalTrimAmount / bounds.parentWidth) * 30 * 1000;
+        const newStartOffset = originalStartOffset + finalTrimTime;
+        
+        // Update values on the frame object
+        frame.startOffset = newStartOffset;
+        frame.timestamp = Math.max(0, newTimestamp);
+        frame.duration = Math.min(originalDuration - finalTrimTime, sourceVideoDuration - newStartOffset);
+        
+        // Update UI
+        trackElement.style.width = `${((frame.duration / 30) * 100) / 1000}%`;
         trackElement.style.left = `${(frame.timestamp / 30 / 10).toFixed(2)}%`;
+      } else {
+        // ========== RIGHT HANDLE DRAGGING LOGIC ==========
+        let newWidth = startWidth + deltaX;
+        
+        // Convert to duration in milliseconds
+        let newDuration = (newWidth / bounds.parentWidth) * 30 * 1000;
+        
+        // Constrain duration
+        newDuration = Math.max(minDuration, Math.min(newDuration, sourceVideoDuration - originalStartOffset));
+        
+        // Convert back to width
+        newWidth = (newDuration / 30 / 1000) * bounds.parentWidth;
+        
+        // Update frame and UI
+        frame.duration = newDuration;
+        trackElement.style.width = `${((newDuration / 30) * 100) / 1000}%`;
       }
     };
 
@@ -353,20 +351,26 @@ export function VideoTrackView({
       frame.duration = Math.round(frame.duration / 100) * 100;
       frame.timestamp = Math.round(frame.timestamp / 100) * 100;
       frame.startOffset = Math.round(frame.startOffset / 100) * 100;
-      
+
+      // Final safety check to ensure we don't exceed source video length
+      if (frame.startOffset + frame.duration > sourceVideoDuration) {
+        frame.duration = Math.max(minDuration, sourceVideoDuration - frame.startOffset);
+        trackElement.style.width = `${((frame.duration / 30) * 100) / 1000}%`;
+      }
+
       // Update styles with rounded values
       trackElement.style.width = `${((frame.duration / 30) * 100) / 1000}%`;
       trackElement.style.left = `${(frame.timestamp / 30 / 10).toFixed(2)}%`;
-      
-      db.keyFrames.update(frame.id, { 
+
+      db.keyFrames.update(frame.id, {
         duration: frame.duration,
         timestamp: frame.timestamp,
-        startOffset: frame.startOffset
+        startOffset: frame.startOffset,
       });
       queryClient.invalidateQueries({
         queryKey: queryKeys.projectPreview(projectId),
       });
-      
+
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
