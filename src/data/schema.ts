@@ -42,6 +42,7 @@ export type VideoKeyFrame = {
   id: string;
   timestamp: number;
   duration: number;
+  startOffset: number;
   trackId: string;
   data: KeyFrameData;
 };
