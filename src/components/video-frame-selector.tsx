@@ -75,40 +75,6 @@ export default function VideoFrameSelector({
     );
   };
 
-  // Sample image library
-  const imageLibrary: ImageLibraryItem[] = [
-    {
-      id: "img1",
-      src: "/placeholder.svg?height=150&width=200",
-      name: "Mountain View",
-    },
-    {
-      id: "img2",
-      src: "/placeholder.svg?height=150&width=200",
-      name: "Ocean Sunset",
-    },
-    {
-      id: "img3",
-      src: "/placeholder.svg?height=150&width=200",
-      name: "Forest Path",
-    },
-    {
-      id: "img4",
-      src: "/placeholder.svg?height=150&width=200",
-      name: "City Skyline",
-    },
-    {
-      id: "img5",
-      src: "/placeholder.svg?height=150&width=200",
-      name: "Desert Landscape",
-    },
-    {
-      id: "img6",
-      src: "/placeholder.svg?height=150&width=200",
-      name: "Winter Scene",
-    },
-  ];
-
   const addImageToTimeline = (libraryItem: ImageLibraryItem) => {
     const newImage: TimelineImage = {
       id: `timeline-${Date.now()}`,
@@ -125,13 +91,6 @@ export default function VideoFrameSelector({
     setImages(images.filter((img) => img.id !== id));
   };
 
-  const updateImagePosition = (id: string, startFrame: number) => {
-    setImages(
-      images.map((img) => (img.id === id ? { ...img, startFrame } : img)),
-    );
-  };
-
-  // Calculate frame position from mouse position
   const getFrameFromMousePosition = (clientX: number): number => {
     if (!timelineRef.current) return currentFrame;
 
@@ -141,23 +100,19 @@ export default function VideoFrameSelector({
     const framePosition =
       (relativeX / timelineRect.width) * (maxFrame - minFrame) + minFrame;
 
-    // Round to nearest multiple of 8
     const roundedFrame =
       Math.round(framePosition / frameMultiplier) * frameMultiplier;
 
     return Math.max(minFrame, Math.min(maxFrame, roundedFrame));
   };
 
-  // Handle timeline click to set current frame
   const handleTimelineClick = (e: React.MouseEvent) => {
-    // Don't set frame if we're clicking on an image
     if ((e.target as HTMLElement).closest('[draggable="true"]')) return;
 
     const newFrame = getFrameFromMousePosition(e.clientX);
     setCurrentFrame(newFrame);
   };
 
-  // Handle playhead drag start
   const handlePlayheadDragStart = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsDraggingPlayhead(true);
@@ -190,7 +145,6 @@ export default function VideoFrameSelector({
     const markers = [];
     const majorStep = Math.ceil((maxFrame - minFrame) / 12);
 
-    // Add major markers (with labels)
     for (let i = minFrame; i <= maxFrame; i += majorStep) {
       markers.push(
         <div
@@ -208,10 +162,8 @@ export default function VideoFrameSelector({
       );
     }
 
-    // Add minor markers (thin lines between major markers)
     const minorStep = Math.ceil(majorStep / 5);
     for (let i = minFrame; i <= maxFrame; i += minorStep) {
-      // Skip if this position already has a major marker
       if ((i - minFrame) % majorStep !== 0) {
         markers.push(
           <div
@@ -288,7 +240,6 @@ export default function VideoFrameSelector({
               onClick={handleTimelineClick}
               onDragOver={handleTimelineDragOver}
             >
-              {/* Current frame indicator (playhead) */}
               <div
                 className={cn(
                   "absolute h-[52px] -top-8 bottom-0 flex flex-col items-center z-20",
