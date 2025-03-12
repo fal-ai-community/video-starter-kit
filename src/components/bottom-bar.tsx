@@ -77,6 +77,7 @@ export default function BottomBar() {
           ? lastKeyframe.timestamp + 1 + lastKeyframe.duration
           : 0,
         duration,
+        startOffset: 0,
       });
       return db.keyFrames.find(newId.toString());
     },
