@@ -26,6 +26,7 @@ export type ApiInfo = {
   inputAsset?: InputAsset[];
   initialInput?: Record<string, unknown>;
   cameraControl?: boolean;
+  imageForFrame?: boolean;
   category: "image" | "video" | "music" | "voiceover";
 };
 
@@ -190,6 +191,14 @@ export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
     description:
       "Veo creates videos with realistic motion and high quality output, up to 4K.",
     cost: "",
+    category: "video",
+  },
+  {
+    endpointId: "fal-ai/ltx-video-v095/multiconditioning",
+    label: "LTX Video v0.95 Multiconditioning",
+    description: "...",
+    cost: "",
+    imageForFrame: true,
     category: "video",
   },
 ];

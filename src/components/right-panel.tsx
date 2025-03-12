@@ -55,6 +55,7 @@ import { VoiceSelector } from "./playht/voice-selector";
 import { LoadingIcon } from "./ui/icons";
 import { getMediaMetadata } from "@/lib/ffmpeg";
 import CameraMovement from "./camera-control";
+import VideoFrameSelector from "./video-frame-selector";
 
 type ModelEndpointPickerProps = {
   mediaType: string;
@@ -187,6 +188,10 @@ export default function RightPanel({
     voice?: string;
     input?: string;
     reference_audio_url?: File | string | null;
+    images?: {
+      start_frame_num: number;
+      image_url: string | File;
+    }[];
     advanced_camera_control?: {
       movement_value: number;
       movement_type: string;
@@ -234,6 +239,10 @@ export default function RightPanel({
 
   if (generateData.advanced_camera_control) {
     input.advanced_camera_control = generateData.advanced_camera_control;
+  }
+
+  if (generateData.images) {
+    input.images = generateData.images;
   }
 
   const extraInput =
@@ -371,8 +380,8 @@ export default function RightPanel({
   return (
     <div
       className={cn(
-        "flex flex-col border-l border-border w-96 z-50 transition-all duration-300 absolute top-0 h-full bg-background",
-        generateDialogOpen ? "right-0" : "-right-96",
+        "flex flex-col border-l border-border w-[450px] z-50 transition-all duration-300 absolute top-0 h-full bg-background",
+        generateDialogOpen ? "right-0" : "-right-[450px]",
       )}
     >
       <div className="flex-1 p-4 flex flex-col gap-4 border-b border-border h-full overflow-hidden relative">
@@ -597,9 +606,19 @@ export default function RightPanel({
             </WithTooltip>
           </div>
         </div>
-
         {tab === "generation" && (
           <div className="flex flex-col gap-2 mb-2">
+            {endpoint?.imageForFrame && (
+              <VideoFrameSelector
+                mediaItems={mediaItems}
+                onChange={(
+                  images: {
+                    start_frame_num: number;
+                    image_url: string | File;
+                  }[],
+                ) => setGenerateData({ images })}
+              />
+            )}
             {endpoint?.cameraControl && (
               <CameraMovement
                 value={generateData.advanced_camera_control}

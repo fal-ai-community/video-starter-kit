@@ -57,7 +57,7 @@ const CameraMovement = ({
   };
 
   return (
-    <div className="w-full mx-auto border-y border-neutral-800 py-3">
+    <div className="w-full mx-auto border-t border-neutral-800 py-3">
       {/* Header */}
       <div
         className="flex justify-between items-center select-none"
