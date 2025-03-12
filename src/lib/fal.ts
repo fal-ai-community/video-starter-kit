@@ -196,7 +196,7 @@ export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
   {
     endpointId: "fal-ai/ltx-video-v095/multiconditioning",
     label: "LTX Video v0.95 Multiconditioning",
-    description: "...",
+    description: "Generate videos from prompts,images using LTX Video-0.9.5",
     cost: "",
     imageForFrame: true,
     category: "video",
