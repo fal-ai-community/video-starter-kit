@@ -28,6 +28,7 @@ export type ApiInfo = {
   cameraControl?: boolean;
   imageForFrame?: boolean;
   category: "image" | "video" | "music" | "voiceover";
+  prompt?: boolean;
 };
 
 export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
@@ -200,5 +201,15 @@ export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
     cost: "",
     imageForFrame: true,
     category: "video",
+  },
+  {
+    endpointId: "fal-ai/topaz/upscale/video",
+    label: "Topaz Video Upscale",
+    description:
+      "Professional-grade video upscaling using Topaz technology. Enhance your videos with high-quality upscaling.",
+    cost: "",
+    category: "video",
+    prompt: false,
+    inputAsset: ["video"],
   },
 ];
