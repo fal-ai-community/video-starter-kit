@@ -69,7 +69,7 @@ function ModelEndpointPicker({
   const endpoints = useMemo(
     () =>
       AVAILABLE_ENDPOINTS.filter((endpoint) => endpoint.category === mediaType),
-    [mediaType]
+    [mediaType],
   );
   return (
     <Select {...props}>
@@ -109,7 +109,7 @@ export default function RightPanel({
   const openGenerateDialog = useVideoProjectStore((s) => s.openGenerateDialog);
   const generateDialogOpen = useVideoProjectStore((s) => s.generateDialogOpen);
   const closeGenerateDialog = useVideoProjectStore(
-    (s) => s.closeGenerateDialog
+    (s) => s.closeGenerateDialog,
   );
   const queryClient = useQueryClient();
 
@@ -152,14 +152,14 @@ export default function RightPanel({
   const endpoint = useMemo(
     () =>
       AVAILABLE_ENDPOINTS.find(
-        (endpoint) => endpoint.endpointId === endpointId
+        (endpoint) => endpoint.endpointId === endpointId,
       ),
-    [endpointId]
+    [endpointId],
   );
   const handleMediaTypeChange = (mediaType: string) => {
     setMediaType(mediaType as MediaType);
     const endpoint = AVAILABLE_ENDPOINTS.find(
-      (endpoint) => endpoint.category === mediaType
+      (endpoint) => endpoint.category === mediaType,
     );
 
     const initialInput = endpoint?.initialInput || {};
@@ -336,7 +336,7 @@ export default function RightPanel({
   const handleUploadComplete = async (
     files: ClientUploadedFileData<{
       uploadedBy: string;
-    }>[]
+    }>[],
   ) => {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -381,7 +381,7 @@ export default function RightPanel({
     <div
       className={cn(
         "flex flex-col border-l border-border w-[450px] z-50 transition-all duration-300 absolute top-0 h-full bg-background",
-        generateDialogOpen ? "right-0" : "-right-[450px]"
+        generateDialogOpen ? "right-0" : "-right-[450px]",
       )}
     >
       <div className="flex-1 p-4 flex flex-col gap-4 border-b border-border h-full overflow-hidden relative">
@@ -405,7 +405,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("image")}
               className={cn(
                 mediaType === "image" && "bg-white/10",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
               )}
             >
               <ImageIcon className="w-4 h-4 opacity-50" />
@@ -416,7 +416,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("video")}
               className={cn(
                 mediaType === "video" && "bg-white/10",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
               )}
             >
               <VideoIcon className="w-4 h-4 opacity-50" />
@@ -427,7 +427,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("voiceover")}
               className={cn(
                 mediaType === "voiceover" && "bg-white/10",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
               )}
             >
               <MicIcon className="w-4 h-4 opacity-50" />
@@ -438,7 +438,7 @@ export default function RightPanel({
               onClick={() => handleMediaTypeChange("music")}
               className={cn(
                 mediaType === "music" && "bg-white/10",
-                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center"
+                "h-14 flex flex-col justify-center w-1/4 rounded-md gap-2 items-center",
               )}
             >
               <MusicIcon className="w-4 h-4 opacity-50" />
@@ -455,7 +455,7 @@ export default function RightPanel({
                 setEndpointId(endpointId);
 
                 const endpoint = AVAILABLE_ENDPOINTS.find(
-                  (endpoint) => endpoint.endpointId === endpointId
+                  (endpoint) => endpoint.endpointId === endpointId,
                 );
 
                 const initialInput = endpoint?.initialInput || {};
@@ -617,7 +617,7 @@ export default function RightPanel({
                   images: {
                     start_frame_num: number;
                     image_url: string | File;
-                  }[]
+                  }[],
                 ) => setGenerateData({ images })}
               />
             )}
