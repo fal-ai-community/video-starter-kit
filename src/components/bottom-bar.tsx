@@ -7,7 +7,7 @@ import {
 import { useProjectId, useVideoProjectStore } from "@/data/store";
 import { cn, resolveDuration } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type DragEventHandler, useMemo, useState } from "react";
+import { type DragEventHandler, useMemo, useState, useEffect } from "react";
 import { VideoControls } from "./video-controls";
 import { TimelineRuler } from "./video/timeline";
 import { VideoTrackRow } from "./video/track";
@@ -24,6 +24,51 @@ export default function BottomBar() {
     playerCurrentTimestamp.toFixed(2);
   const minTrackWidth = `${((2 / 30) * 100).toFixed(2)}%`;
   const [dragOverTracks, setDragOverTracks] = useState(false);
+
+  const limitAllKeyframesToThirtySeconds = useMutation({
+    mutationFn: async () => {
+      const tracks = await db.tracks.tracksByProject(projectId);
+
+      let updatedCount = 0;
+
+      for (const track of tracks) {
+        const keyframes = await db.keyFrames.keyFramesByTrack(track.id);
+
+        for (const frame of keyframes) {
+          if (frame.duration > 30000) {
+            await db.keyFrames.update(frame.id, {
+              duration: 30000,
+            });
+            updatedCount++;
+          }
+        }
+      }
+
+      return updatedCount;
+    },
+    onSuccess: (updatedCount) => {
+      if (updatedCount > 0) {
+        refreshVideoCache(queryClient, projectId);
+      }
+    },
+  });
+
+  const { data: tracks = [] } = useQuery({
+    queryKey: queryKeys.projectTracks(projectId),
+    queryFn: async () => {
+      const result = await db.tracks.tracksByProject(projectId);
+      return result.toSorted(
+        (a, b) => TRACK_TYPE_ORDER[a.type] - TRACK_TYPE_ORDER[b.type],
+      );
+    },
+  });
+
+  // Automatically limit keyframes to 30 seconds whenever tracks change
+  useEffect(() => {
+    if (tracks.length > 0) {
+      limitAllKeyframesToThirtySeconds.mutate();
+    }
+  }, [tracks]);
 
   const handleOnDragOver: DragEventHandler<HTMLDivElement> = (event) => {
     event.preventDefault();
@@ -84,16 +129,6 @@ export default function BottomBar() {
     onSuccess: (data) => {
       if (!data) return;
       refreshVideoCache(queryClient, projectId);
-    },
-  });
-
-  const { data: tracks = [] } = useQuery({
-    queryKey: queryKeys.projectTracks(projectId),
-    queryFn: async () => {
-      const result = await db.tracks.tracksByProject(projectId);
-      return result.toSorted(
-        (a, b) => TRACK_TYPE_ORDER[a.type] - TRACK_TYPE_ORDER[b.type],
-      );
     },
   });
 
