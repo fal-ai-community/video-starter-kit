@@ -41,7 +41,6 @@ const CameraMovement = ({
   };
 
   const handleChange = (type: "movement" | "value", val: string | number) => {
-    console.log(type, val);
     if (type === "movement") {
       setMovement(val as string);
       setValue(0);

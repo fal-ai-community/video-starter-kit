@@ -72,6 +72,7 @@ function AudioWaveform({ data }: AudioWaveformProps) {
   const { data: waveform = [] } = useQuery({
     queryKey: ["media", "waveform", data.id],
     queryFn: async () => {
+
       if (data.metadata?.waveform && Array.isArray(data.metadata.waveform)) {
         return data.metadata.waveform;
       }
@@ -85,6 +86,7 @@ function AudioWaveform({ data }: AudioWaveformProps) {
           },
         },
       );
+
       await db.media.update(data.id, {
         ...data,
         metadata: {
@@ -102,33 +104,35 @@ function AudioWaveform({ data }: AudioWaveformProps) {
   const svgHeight = 100;
 
   return (
-    <div className="h-full flex items-center">
-      <svg
-        width="100%"
-        height="80%"
-        viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-        preserveAspectRatio="none"
-      >
-        <title>Audio Waveform</title>
-        {waveform.map((v, index) => {
-          const amplitude = Math.abs(v);
-          const height = Math.max(amplitude * svgHeight, 2);
-          const x = index * 3;
-          const y = (svgHeight - height) / 2;
+    <div className="h-full flex items-center overflow-hidden">
+      <div className="min-w-max">
+        <svg
+          width={`${svgWidth}px`}
+          height="80%"
+          viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+          preserveAspectRatio="xMinYMid meet"
+        >
+          <title>Audio Waveform</title>
+          {waveform.map((v, index) => {
+            const amplitude = Math.abs(v);
+            const height = Math.max(amplitude * svgHeight, 2);
+            const x = index * 3;
+            const y = (svgHeight - height) / 2;
 
-          return (
-            <rect
-              key={index}
-              x={x}
-              y={y}
-              width="2"
-              height={height}
-              className="fill-black/40"
-              rx="4"
-            />
-          );
-        })}
-      </svg>
+            return (
+              <rect
+                key={index}
+                x={x}
+                y={y}
+                width="2"
+                height={height}
+                className="fill-black/40"
+                rx="4"
+              />
+            );
+          })}
+        </svg>
+      </div>
     </div>
   );
 }
@@ -273,7 +277,8 @@ export function VideoTrackView({
       let newWidth = startWidth + (direction === "right" ? deltaX : -deltaX);
 
       const minDuration = 1000;
-      const maxDuration: number = resolveDuration(media) ?? 5000;
+      const mediaDuration = resolveDuration(media) ?? 5000;
+      const maxDuration = Math.min(mediaDuration, 30000);
 
       const timelineElement = trackElement.closest(".timeline-container");
       const parentWidth = timelineElement

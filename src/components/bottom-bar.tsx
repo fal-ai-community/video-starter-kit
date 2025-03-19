@@ -63,7 +63,8 @@ export default function BottomBar() {
           { timestamp: 0, duration: 0 },
         );
 
-      const duration = resolveDuration(media) ?? 5000;
+      const mediaDuration = resolveDuration(media) ?? 5000;
+      const duration = Math.min(mediaDuration, 30000);
 
       const newId = await db.keyFrames.create({
         trackId: track.id,

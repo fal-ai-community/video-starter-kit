@@ -133,7 +133,6 @@ export default function VideoFrameSelector({
   };
 
   const handleSelectMedia = (item: MediaItem) => {
-    console.log("Selected media item", item);
     addImageToTimeline({
       id: item.id,
       src: item.output?.images?.[0]?.url! || item.url,
