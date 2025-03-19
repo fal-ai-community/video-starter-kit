@@ -72,7 +72,6 @@ function AudioWaveform({ data }: AudioWaveformProps) {
   const { data: waveform = [] } = useQuery({
     queryKey: ["media", "waveform", data.id],
     queryFn: async () => {
-
       if (data.metadata?.waveform && Array.isArray(data.metadata.waveform)) {
         return data.metadata.waveform;
       }
