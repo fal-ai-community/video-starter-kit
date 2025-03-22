@@ -13,6 +13,8 @@ import {
   ImageIcon,
   MicIcon,
   MusicIcon,
+  ThumbsDownIcon,
+  ThumbsUpIcon,
   VideoIcon,
 } from "lucide-react";
 import {
@@ -125,6 +127,15 @@ export function MediaItemRow({
       ? data.metadata?.start_frame_url || data?.metadata?.end_frame_url
       : resolveMediaUrl(data);
 
+  const handleRating = async (rating: "positive" | "negative" | undefined) => {
+    // If clicking the same rating, clear it. Otherwise set the new rating
+    const newRating = data.rating === rating ? undefined : rating;
+    await db.media.updateRating(data.id, newRating);
+    await queryClient.invalidateQueries({
+      queryKey: queryKeys.projectMediaItems(projectId),
+    });
+  };
+
   return (
     <div
       className={cn(
@@ -222,10 +233,38 @@ export function MediaItemRow({
             {data.input?.prompt}
           </p>
         </div>
-        <div className="flex flex-row gap-2 justify-between">
+        <div className="flex flex-row gap-2 justify-between items-center w-full mt-1">
           <span className="text-xs text-muted-foreground">
             {formatDistanceToNow(data.createdAt, { addSuffix: true })}
           </span>
+          {data.status === "completed" && data.kind === "generated" && (
+            <div className="flex gap-1">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRating("positive");
+                }}
+                className={cn(
+                  "p-1 rounded hover:bg-accent-foreground/10 transition-colors",
+                  data.rating === "positive" && "text-green-500",
+                )}
+              >
+                <ThumbsUpIcon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRating("negative");
+                }}
+                className={cn(
+                  "p-1 rounded hover:bg-accent-foreground/10 transition-colors",
+                  data.rating === "negative" && "text-red-500",
+                )}
+              >
+                <ThumbsDownIcon className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

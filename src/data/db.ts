@@ -154,6 +154,14 @@ export const db = {
       await tx.done;
       return result;
     },
+    async updateRating(
+      id: string,
+      rating: "positive" | "negative" | undefined,
+    ) {
+      const existing = await this.find(id);
+      if (!existing || existing.kind !== "generated") return;
+      return this.update(id, { rating });
+    },
     async delete(id: string) {
       const db = await open();
       const media: MediaItem | null = await db.get("media_items", id);
