@@ -1,0 +1,132 @@
+{
+  "Header": {
+    "brand": "fal.ai",
+    "features": "Features",
+    "community": "Community",
+    "github": "GitHub",
+    "tryItNow": "Try it now",
+    "chinese": "中文",
+    "english": "English"
+  },
+  "Hero": {
+    "nowOpenSource": "Now Open Source",
+    "starOnGitHub": "Star on GitHub",
+    "aiVideoDeveloper": "AI Video Developer",
+    "starterKit": "Starter Kit",
+    "description": "A powerful, open-source AI video editor built for creators. Create stunning videos with our intuitive tools, or develop your own AI video product using our kit.",
+    "tryItNow": "Try it now",
+    "screenshotAlt": "Video Starter Kit interface"
+  },
+  "Features": {
+    "powerfulFeaturesTitle": "Powerful features for modern creators",
+    "powerfulFeaturesDescription": "Everything you need to create professional-quality videos, available to everyone.",
+    "preciseEditing": {
+      "title": "Precise Editing",
+      "description": "Frame-perfect cutting and editing tools for high-quality videos."
+    },
+    "aiGeneratedAssets": {
+      "title": "AI-Generated Assets",
+      "description": "Use AI to generate music, image, video and more for your videos."
+    },
+    "exportAnywhere": {
+      "title": "Export Anywhere",
+      "description": "Export to any format and share directly to social platforms."
+    },
+    "openSource": {
+      "title": "Open-Source",
+      "description": "Built on open-source technologies and available to everyone."
+    }
+  },
+  "Community": {
+    "joinOurCommunity": "Join our community",
+    "description": "AI Video Developer Starter Kit is built by developers, for developers. Join our growing community and help shape the future of video editing.",
+    "github": "GitHub",
+    "discord": "Discord",
+    "twitter": "Twitter"
+  },
+  "Footer": {
+    "openSourceDescription": "Open-source AI video developer",
+    "starterKit": "starter kit.",
+    "resources": "Resources",
+    "aiModels": "AI Models",
+    "apiReference": "API Reference",
+    "falBlog": "fal Blog",
+    "community": "Community",
+    "github": "GitHub",
+    "discord": "Discord",
+    "twitter": "Twitter"
+  },
+  "LocalSwitcher": {
+    "zh-CN": "中文",
+    "en": "English"
+  },
+  "SharePage": {
+    "download": "Download",
+    "startYourProject": "Start your project"
+  },
+  "rightPanel": {
+    "generateMedia": "Generate Media",
+    "image": "Image",
+    "video": "Video",
+    "voiceover": "Voiceover",
+    "music": "Music",
+    "using": "Using",
+    "select": "Select",
+    "upload": "Upload",
+    "removeMedia": "Remove Media",
+    "enhancePrompt": "Enhance Prompt",
+    "enhance": "Enhance",
+    "generate": "Generate",
+    "placeholderText": "Imagine..."
+  },
+  "LeftPanel": {
+    "uploadFailedTitle": "Failed to upload file",
+    "uploadFailedDescription": "Please try again",
+    "projectSettings": "Project Settings",
+    "untitled": "untitled",
+    "describeYourVideo": "Describe your video",
+    "gallery": "Gallery",
+    "all": "All",
+    "image": "Image",
+    "music": "Music",
+    "voiceover": "Voiceover",
+    "video": "Video",
+    "generate": "Generate...",
+    "createCollection": "Create your image, audio and voiceover collection to compose your videos"
+  },
+  "ExportDialog": {
+    "exportVideo": "Export video",
+    "noTracksToExport": "No tracks to export",
+    "noVideoToShare": "No video to share",
+    "failedToShareVideo": "Failed to share video",
+    "thisMayTakeAWhile": "This may take a while, sit back and relax.",
+    "videoUrlPlaceholder": "Video URL...",
+    "share": "Share",
+    "download": "Download",
+    "export": "Export"
+  },
+  "VideoPreview": {
+    "export": "Export"
+  },
+  "ProjectDialog": {
+    "newProjectTitle": "New Project",
+    "newProjectDescription": "Create or open a video project",
+    "createNewProject": "Create New Project",
+    "projectTitlePlaceholder": "Project Title",
+    "projectDescriptionPlaceholder": "Project Description",
+    "aspectRatioLabel": "Aspect Ratio",
+    "generateSuggestionTooltip": "Generate a project suggestion",
+    "generate": "Generate",
+    "createProject": "Create Project",
+    "creating": "Creating...",
+    "openExistingProject": "Open Existing Project",
+    "noProjectsFound": "No projects found",
+    "openSourceMessage": "This project is ",
+    "openSource": "open source",
+    "developedBy": " developed by ",
+    "andPartners": " and partners.",
+    "failedToCreateSuggestionTitle": "Failed to create suggestion",
+    "failedToCreateSuggestionDescription": "An error occurred while generating a project suggestion.",
+    "or": "or"
+  }
+}

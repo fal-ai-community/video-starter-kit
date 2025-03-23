@@ -45,8 +45,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "./ui/accordion";
+import { useTranslations } from 'next-intl';
 
 export default function LeftPanel() {
+  const t = useTranslations('LeftPanel'); // 定义翻译命名空间为 'LeftPanel'
   const projectId = useProjectId();
   const { data: project = PROJECT_PLACEHOLDER } = useProject(projectId);
   const projectUpdate = useProjectUpdater(projectId);
@@ -73,8 +75,8 @@ export default function LeftPanel() {
     } catch (err) {
       console.warn(`ERROR! ${err}`);
       toast({
-        title: "Failed to upload file",
-        description: "Please try again",
+        title: t('uploadFailedTitle'),
+        description: t('uploadFailedDescription'),
       });
     }
   };
@@ -127,7 +129,7 @@ export default function LeftPanel() {
               <AccordionTrigger className="py-4 h-10">
                 <div className="flex flex-row items-center">
                   <h2 className="text-sm text-muted-foreground font-semibold flex-1">
-                    {project?.title || "Project Settings"}
+                    {project?.title || t('projectSettings')}
                   </h2>
                 </div>
               </AccordionTrigger>
@@ -136,7 +138,7 @@ export default function LeftPanel() {
                   <Input
                     id="projectName"
                     name="name"
-                    placeholder="untitled"
+                    placeholder={t('untitled')}
                     value={project.title}
                     onChange={(e) =>
                       projectUpdate.mutate({ title: e.target.value })
@@ -149,7 +151,7 @@ export default function LeftPanel() {
                   <Textarea
                     id="projectDescription"
                     name="description"
-                    placeholder="Describe your video"
+                    placeholder={t('describeYourVideo')}
                     className="resize-none"
                     value={project.description}
                     rows={6}
@@ -181,14 +183,14 @@ export default function LeftPanel() {
       <div className="flex-1 py-4 flex flex-col gap-4 border-b border-border h-full overflow-hidden relative">
         <div className="flex flex-row items-center gap-2 px-4">
           <h2 className="text-sm text-muted-foreground font-semibold flex-1">
-            Gallery
+            {t('gallery')}
           </h2>
           <div className="flex gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="px-2">
                   <ListPlusIcon className="w-4 h-4 opacity-50" />
-                  <span className="capitalize">{mediaType}</span>
+                  <span className="capitalize">{t(mediaType)}</span>
                   <ChevronDown className="w-4 h-4 opacity-50" />
                 </Button>
               </DropdownMenuTrigger>
@@ -198,35 +200,35 @@ export default function LeftPanel() {
                   onClick={() => setMediaType("all")}
                 >
                   <GalleryVerticalIcon className="w-4 h-4 opacity-50" />
-                  All
+                  {t('all')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-sm"
                   onClick={() => setMediaType("image")}
                 >
                   <ImageIcon className="w-4 h-4 opacity-50" />
-                  Image
+                  {t('image')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-sm"
                   onClick={() => setMediaType("music")}
                 >
                   <MusicIcon className="w-4 h-4 opacity-50" />
-                  Music
+                  {t('music')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-sm"
                   onClick={() => setMediaType("voiceover")}
                 >
                   <MicIcon className="w-4 h-4 opacity-50" />
-                  Voiceover
+                  {t('voiceover')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-sm"
                   onClick={() => setMediaType("video")}
                 >
                   <FilmIcon className="w-4 h-4 opacity-50" />
-                  Video
+                  {t('video')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -262,15 +264,14 @@ export default function LeftPanel() {
               onClick={() => openGenerateDialog()}
             >
               <SparklesIcon className="w-4 h-4 opacity-50" />
-              Generate...
+              {t('generate')}
             </Button>
           )}
         </div>
         {!isLoading && mediaItems.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center gap-4 px-4">
             <p className="text-sm text-center">
-              Create your image, audio and voiceover collection to compose your
-              videos
+              {t('createCollection')}
             </p>
             <Button
               variant="secondary"
@@ -278,7 +279,7 @@ export default function LeftPanel() {
               onClick={() => openGenerateDialog()}
             >
               <ImagePlusIcon className="w-4 h-4 opacity-50" />
-              Generate...
+              {t('generate')}
             </Button>
           </div>
         )}

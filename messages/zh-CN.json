@@ -1,0 +1,132 @@
+{
+  "Header": {
+    "brand": "fal.ai",
+    "features": "特性",
+    "community": "社区",
+    "github": "GitHub",
+    "tryItNow": "立即试用",
+    "chinese": "中文",
+    "english": "英语"
+  },
+  "Hero": {
+    "nowOpenSource": "现在开源啦",
+    "starOnGitHub": "在 GitHub 上点个星",
+    "aiVideoDeveloper": "人工智能视频开发者",
+    "starterKit": "入门套件",
+    "description": "一款为创作者打造的强大开源人工智能视频编辑器。使用我们直观的工具创建令人惊叹的视频，或者使用我们的套件开发自己的人工智能视频产品。",
+    "tryItNow": "立即试用",
+    "screenshotAlt": "视频入门套件界面"
+  },
+  "Features": {
+    "powerfulFeaturesTitle": "为现代创作者打造的强大功能",
+    "powerfulFeaturesDescription": "创建专业品质视频所需的一切功能，人人可用。",
+    "preciseEditing": {
+      "title": "精准编辑",
+      "description": "具备逐帧精准切割和编辑工具，助力打造高质量视频。"
+    },
+    "aiGeneratedAssets": {
+      "title": "AI 生成素材",
+      "description": "利用 AI 为你的视频生成音乐、图像、视频等素材。"
+    },
+    "exportAnywhere": {
+      "title": "随处导出",
+      "description": "支持导出为任意格式，并可直接分享到社交平台。"
+    },
+    "openSource": {
+      "title": "开源项目",
+      "description": "基于开源技术构建，向所有人开放使用。"
+    }
+  },
+  "Community": {
+    "joinOurCommunity": "加入我们的社区",
+    "description": "AI 视频开发者入门套件是由开发者为开发者打造的。加入我们不断壮大的社区，共同塑造视频编辑的未来。",
+    "github": "GitHub",
+    "discord": "Discord",
+    "twitter": "Twitter"
+  },
+  "Footer": {
+    "openSourceDescription": "开源人工智能视频开发者",
+    "starterKit": "入门套件。",
+    "resources": "资源",
+    "aiModels": "人工智能模型",
+    "apiReference": "API 参考",
+    "falBlog": "fal 博客",
+    "community": "社区",
+    "github": "GitHub",
+    "discord": "Discord",
+    "twitter": "Twitter"
+  },
+  "LocalSwitcher": {
+    "zh-CN": "中文",
+    "en": "English"
+  },
+  "SharePage": {
+    "download": "下载",
+    "startYourProject": "开始你的项目"
+  },
+  "rightPanel": {
+    "generateMedia": "生成媒体",
+    "image": "图像",
+    "video": "视频",
+    "voiceover": "旁白",
+    "music": "音乐",
+    "using": "使用",
+    "select": "选择",
+    "upload": "上传",
+    "removeMedia": "移除媒体",
+    "enhancePrompt": "使用人工智能建议增强你的提示。",
+    "enhance": "增强提示",
+    "generate": "生成",
+    "placeholderText": "发挥想象..."
+  },
+  "LeftPanel": {
+    "uploadFailedTitle": "文件上传失败",
+    "uploadFailedDescription": "请重试",
+    "projectSettings": "项目设置",
+    "untitled": "无标题",
+    "describeYourVideo": "描述你的视频",
+    "gallery": "图库",
+    "all": "全部",
+    "image": "图片",
+    "music": "音乐",
+    "voiceover": "旁白",
+    "video": "视频",
+    "generate": "生成...",
+    "createCollection": "创建你的图片、音频和旁白素材库，用于制作视频"
+  },
+  "ProjectDialog": {
+    "newProjectTitle": "新项目",
+    "newProjectDescription": "创建一个新项目或打开一个现有项目",
+    "createNewProject": "创建新项目",
+    "projectTitlePlaceholder": "项目标题",
+    "projectDescriptionPlaceholder": "描述你的项目",
+    "aspectRatioLabel": "纵横比:",
+    "generateSuggestionTooltip": "没灵感了？生成一个新的随机项目。",
+    "generate": "生成",
+    "creating": "正在创建...",
+    "createProject": "创建项目",
+    "openExistingProject": "打开现有项目",
+    "noProjectsFound": "未找到项目",
+    "failedToCreateSuggestionTitle": "生成建议失败",
+    "failedToCreateSuggestionDescription": "生成建议时出现意外错误。请重试。",
+    "openSourceMessage": "这是一个 ",
+    "openSource": "开源",
+    "developedBy": " 项目，由 ",
+    "andPartners": " 及其合作伙伴开发。",
+    "or": "或"
+  },
+  "ExportDialog": {
+    "exportVideo": "导出视频",
+    "noTracksToExport": "没有轨道可导出",
+    "noVideoToShare": "没有视频可分享",
+    "failedToShareVideo": "分享视频失败",
+    "thisMayTakeAWhile": "这可能需要一些时间，请耐心等待。",
+    "videoUrlPlaceholder": "视频链接...",
+    "share": "分享",
+    "download": "下载",
+    "export": "导出"
+  },
+  "VideoPreview": {
+    "export": "导出"
+  }
+}
