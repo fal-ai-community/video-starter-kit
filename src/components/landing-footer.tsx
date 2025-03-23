@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { Video } from "lucide-react";
+import { useTranslations } from 'next-intl';
 
 export default function Footer() {
+  const t = useTranslations('Footer'); // 定义翻译命名空间为 'Footer'
+
   return (
     <footer className="border-t flex w-full border-white/10 py-12">
       <div className="container mx-auto px-4">
@@ -12,21 +15,21 @@ export default function Footer() {
               <span className="font-semibold">fal.ai</span>
             </div>
             <p className="text-sm text-gray-400">
-              Open-source AI video developer
+              {t('openSourceDescription')}
               <br />
-              starter kit.
+              {t('starterKit')}
             </p>
           </div>
 
           <div className="flex flex-col items-center text-center">
-            <h4 className="font-semibold mb-4">Resources</h4>
+            <h4 className="font-semibold mb-4">{t('resources')}</h4>
             <ul className="space-y-2 text-sm text-gray-400">
               <li>
                 <Link
                   href="https://fal.ai/models"
                   className="hover:text-white transition-colors"
                 >
-                  AI Models
+                  {t('aiModels')}
                 </Link>
               </li>
               <li>
@@ -34,7 +37,7 @@ export default function Footer() {
                   href="https://docs.fal.ai"
                   className="hover:text-white transition-colors"
                 >
-                  API Reference
+                  {t('apiReference')}
                 </Link>
               </li>
               <li>
@@ -42,21 +45,21 @@ export default function Footer() {
                   href="https://blog.fal.ai"
                   className="hover:text-white transition-colors"
                 >
-                  fal Blog
+                  {t('falBlog')}
                 </Link>
               </li>
             </ul>
           </div>
 
           <div className="flex flex-col items-center text-center">
-            <h4 className="font-semibold mb-4">Community</h4>
+            <h4 className="font-semibold mb-4">{t('community')}</h4>
             <ul className="space-y-2 text-sm text-gray-400">
               <li>
                 <Link
                   href="https://github.com/fal-ai-community/video-starter-kit"
                   className="hover:text-white transition-colors"
                 >
-                  GitHub
+                  {t('github')}
                 </Link>
               </li>
               <li>
@@ -64,7 +67,7 @@ export default function Footer() {
                   href="https://discord.gg/fal-ai"
                   className="hover:text-white transition-colors"
                 >
-                  Discord
+                  {t('discord')}
                 </Link>
               </li>
               <li>
@@ -73,7 +76,7 @@ export default function Footer() {
                   target="_blank"
                   className="hover:text-white transition-colors"
                 >
-                  Twitter
+                  {t('twitter')}
                 </Link>
               </li>
             </ul>

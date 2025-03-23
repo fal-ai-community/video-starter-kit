@@ -27,6 +27,7 @@ import { Input } from "./ui/input";
 import type { ShareVideoParams } from "@/lib/share";
 import { PROJECT_PLACEHOLDER } from "@/data/schema";
 import { useRouter } from "next/navigation";
+import { useTranslations } from 'next-intl';
 
 type ExportDialogProps = {} & Parameters<typeof Dialog>[0];
 
@@ -36,6 +37,7 @@ type ShareResult = {
 };
 
 export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
+  const t = useTranslations('ExportDialog'); // 定义翻译命名空间为 'ExportDialog'
   const projectId = useProjectId();
   const { data: composition = EMPTY_VIDEO_COMPOSITION } =
     useVideoComposition(projectId);
@@ -53,7 +55,7 @@ export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
         })),
       }));
       if (videoData.length === 0) {
-        throw new Error("No tracks to export");
+        throw new Error(t('noTracksToExport'));
       }
       const { data } = await fal.subscribe("fal-ai/ffmpeg-api/compose", {
         input: {
@@ -77,7 +79,7 @@ export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
   const share = useMutation({
     mutationFn: async () => {
       if (!exportVideo.data) {
-        throw new Error("No video to share");
+        throw new Error(t('noVideoToShare'));
       }
       const videoInfo = exportVideo.data;
       const response = await fetch("/api/share", {
@@ -97,7 +99,7 @@ export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
         } satisfies ShareVideoParams),
       });
       if (!response.ok) {
-        throw new Error("Failed to share video");
+        throw new Error(t('failedToShareVideo'));
       }
       return response.json();
     },
@@ -116,12 +118,12 @@ export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FilmIcon className="w-6 h-6 opacity-50" />
-            Export video
+            {t('exportVideo')}
           </DialogTitle>
           <DialogDescription />
         </DialogHeader>
         <div className="text-muted-foreground">
-          <p>This may take a while, sit back and relax.</p>
+          <p>{t('thisMayTakeAWhile')}</p>
         </div>
         <div
           className={cn(
@@ -153,7 +155,7 @@ export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
           <div className="flex flex-row gap-2 items-center">
             <Input
               value={exportVideo.data?.video_url ?? ""}
-              placeholder="Video URL..."
+              placeholder={t('videoUrlPlaceholder')}
               readOnly
               className="text-muted-foreground"
             />
@@ -176,7 +178,7 @@ export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
             disabled={actionsDisabled || !exportVideo.data}
           >
             <ShareIcon className="w-4 h-4 opacity-50" />
-            Share
+            {t('share')}
           </Button>
           <Button
             variant="secondary"
@@ -186,14 +188,14 @@ export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
           >
             <a href={exportVideo.data?.video_url ?? "#"} download>
               <DownloadIcon className="w-4 h-4" />
-              Download
+              {t('download')}
             </a>
           </Button>
           <Button
             onClick={() => exportVideo.mutate()}
             disabled={actionsDisabled}
           >
-            Export
+            {t('export')}
           </Button>
         </DialogFooter>
       </DialogContent>

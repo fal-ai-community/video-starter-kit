@@ -4,6 +4,7 @@ import { fetchSharedVideo } from "@/lib/share";
 import { DownloadIcon } from "lucide-react";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
+import { useTranslations } from 'next-intl';
 
 type PageParams = {
   id: string;
@@ -81,6 +82,7 @@ export async function generateMetadata(
 }
 
 export default async function SharePage({ params }: PageProps) {
+  const t = useTranslations('SharePage'); // 使用 useTranslations 钩子，命名空间为 SharePage
   const shareId = params.id;
   const shareData = await fetchSharedVideo(shareId);
   if (!shareData) {
@@ -109,11 +111,11 @@ export default async function SharePage({ params }: PageProps) {
               <Button variant="secondary" asChild size="lg">
                 <a href={shareData.videoUrl} download>
                   <DownloadIcon className="w-4 h-4 opacity-50" />
-                  Download
+                  {t('download')} {/* 使用翻译函数替换静态文本 */}
                 </a>
               </Button>
               <Button variant="secondary" size="lg" asChild>
-                <a href="/">Start your project</a>
+                <a href="/">{t('startYourProject')} {/* 使用翻译函数替换静态文本 */}</a>
               </Button>
             </div>
           </div>

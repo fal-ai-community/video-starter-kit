@@ -28,6 +28,7 @@ import {
 import { throttle } from "throttle-debounce";
 import { Button } from "./ui/button";
 import { DownloadIcon } from "lucide-react";
+import { useTranslations } from 'next-intl';
 
 interface VideoCompositionProps {
   project: VideoProject;
@@ -187,6 +188,7 @@ const AudioTrackSequence: React.FC<TrackSequenceProps> = ({
 };
 
 export default function VideoPreview() {
+  const t = useTranslations('VideoPreview'); // 定义翻译命名空间为 'VideoPreview'
   const projectId = useProjectId();
   const setPlayer = useVideoProjectStore((s) => s.setPlayer);
 
@@ -290,7 +292,7 @@ export default function VideoPreview() {
         disabled={isCompositionLoading || tracks.length === 0}
       >
         <DownloadIcon className="w-4 h-4" />
-        Export
+        {t('export')}
       </Button>
       <div className="w-full h-full flex items-center justify-center mx-6  max-h-[calc(100vh-25rem)]">
         <Player
