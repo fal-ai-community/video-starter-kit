@@ -101,7 +101,8 @@ export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
   {
     endpointId: "fal-ai/kling-video/v2.1/master/image-to-video",
     label: "Kling 2.1 Master",
-    description: "Kling 2.1 Master: The premium endpoint for Kling 2.1, designed for top-tier image-to-video generation with unparalleled motion fluidity, cinematic visuals, and exceptional prompt precision.",
+    description:
+      "Kling 2.1 Master: The premium endpoint for Kling 2.1, designed for top-tier image-to-video generation with unparalleled motion fluidity, cinematic visuals, and exceptional prompt precision.",
     cost: "",
     category: "video",
     inputAsset: ["image"],
@@ -114,7 +115,7 @@ export const AVAILABLE_ENDPOINTS: ApiInfo[] = [
     category: "video",
     inputAsset: ["image"],
   },
-    {
+  {
     endpointId: "fal-ai/minimax/video-01-live",
     label: "Minimax Video 01 Live",
     description: "High quality video, realistic motion and physics",
