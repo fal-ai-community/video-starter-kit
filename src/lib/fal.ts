@@ -2,9 +2,30 @@
 
 import { createFalClient } from "@fal-ai/client";
 
-export const fal = createFalClient({
-  credentials: () => localStorage?.getItem("falKey") as string,
-  proxyUrl: "/api/fal",
+// Create a lazy fal client that only initializes when needed
+let falClient: ReturnType<typeof createFalClient> | null = null;
+
+const getFalClient = () => {
+  if (!falClient) {
+    falClient = createFalClient({
+      credentials: () => {
+        // Only access localStorage in browser environment
+        if (typeof window !== 'undefined' && window.localStorage) {
+          return localStorage.getItem("falKey") as string;
+        }
+        return "";
+      },
+      proxyUrl: "/api/fal",
+    });
+  }
+  return falClient;
+};
+
+export const fal = new Proxy({} as ReturnType<typeof createFalClient>, {
+  get(target, prop) {
+    const client = getFalClient();
+    return (client as any)[prop];
+  },
 });
 
 export type InputAsset =
