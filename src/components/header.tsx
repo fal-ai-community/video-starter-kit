@@ -1,45 +1,56 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Logo } from "./logo";
 import { SettingsIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { LanguageSwitcher } from "./language-switcher";
+import { Logo } from "./logo";
 
 export default function Header({
   openKeyDialog,
 }: {
   openKeyDialog?: () => void;
 }) {
+  const t = useTranslations("app.header");
+  const locale = useLocale();
+  const [showKeyWarning, setShowKeyWarning] = useState(false);
+
+  useEffect(() => {
+    // Check localStorage only on client side after hydration
+    const hasKey = localStorage?.getItem("falKey");
+    setShowKeyWarning(!hasKey);
+  }, []);
+
   return (
     <header className="px-4 py-2 flex justify-between items-center border-b border-border">
       <h1 className="text-lg font-medium">
-        <Logo />
+        <Link href={`/${locale}/app`}>
+          <Logo />
+        </Link>
       </h1>
       <nav className="flex flex-row items-center justify-end gap-1">
         <Button variant="ghost" size="sm" asChild>
-          <a href="https://fal.ai" target="_blank" rel="noopener noreferrer">
-            fal.ai
-          </a>
-        </Button>
-        <Button variant="ghost" size="sm" asChild>
           <a
-            href="https://github.com/fal-ai-community/video-starter-kit"
+            href="https://github.com/timoncool/videosos"
             target="_blank"
             rel="noopener noreferrer"
           >
-            GitHub
+            {t("github")}
           </a>
         </Button>
-        {process.env.NEXT_PUBLIC_CUSTOM_KEY && openKeyDialog && (
+        <LanguageSwitcher />
+        {openKeyDialog && (
           <Button
             variant="ghost"
             size="icon"
             className="relative"
             onClick={openKeyDialog}
           >
-            {typeof localStorage !== "undefined" &&
-              !localStorage?.getItem("falKey") && (
-                <span className="dark:bg-orange-400 bg-orange-600 w-2 h-2 rounded-full absolute top-1 right-1"></span>
-              )}
+            {showKeyWarning && (
+              <span className="dark:bg-orange-400 bg-orange-600 w-2 h-2 rounded-full absolute top-1 right-1" />
+            )}
             <SettingsIcon className="w-6 h-6" />
           </Button>
         )}

@@ -61,13 +61,41 @@ export function resolveDuration(item: MediaItem): number | null {
   }
 
   const data = item.output;
-  if (!data) return null;
-  if ("seconds_total" in data) {
+  if (!data) {
+    const input = item.input;
+    if (input) {
+      if (typeof input.seconds_total === "number") {
+        return input.seconds_total * 1000;
+      }
+      if (typeof input.duration === "number") {
+        return input.duration * 1000;
+      }
+    }
+    return null;
+  }
+  if ("seconds_total" in data && typeof data.seconds_total === "number") {
     return data.seconds_total * 1000;
   }
-  if ("audio" in data && "duration" in data.audio) {
-    return data.audio.duration * 1000;
+  if (
+    "audio" in data &&
+    typeof data.audio === "object" &&
+    data.audio !== null &&
+    "duration" in data.audio
+  ) {
+    const audio = data.audio as { duration: number };
+    return audio.duration * 1000;
   }
+
+  const input = item.input;
+  if (input) {
+    if (typeof input.seconds_total === "number") {
+      return input.seconds_total * 1000;
+    }
+    if (typeof input.duration === "number") {
+      return input.duration * 1000;
+    }
+  }
+
   return null;
 }
 
@@ -76,14 +104,71 @@ export function resolveDuration(item: MediaItem): number | null {
  * might be represented by different properties. This utility function resolves
  * the URL of the media based on the output data.
  */
+const blobUrlCache = new Map<string, string>();
+
+export function getOrCreateBlobUrl(mediaId: string, blob: Blob): string {
+  const cachedUrl = blobUrlCache.get(mediaId);
+  if (cachedUrl) {
+    return cachedUrl;
+  }
+
+  const url = URL.createObjectURL(blob);
+  blobUrlCache.set(mediaId, url);
+  return url;
+}
+
+export function revokeBlobUrl(mediaId: string): void {
+  const url = blobUrlCache.get(mediaId);
+  if (url) {
+    URL.revokeObjectURL(url);
+    blobUrlCache.delete(mediaId);
+  }
+}
+
+/**
+ * Downloads a URL and converts it to a Blob for persistent storage in IndexedDB.
+ * This is used to store Runware media locally instead of relying on temporary URLs.
+ */
+export async function downloadUrlAsBlob(url: string): Promise<Blob> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(
+      `Failed to download ${url}: ${response.status} ${response.statusText}`,
+    );
+  }
+  return await response.blob();
+}
+
 export function resolveMediaUrl(item: MediaItem | undefined): string | null {
   if (!item) return null;
+
+  // Always prefer blob over URLs (for both uploaded and generated media)
+  if (item.blob) {
+    return getOrCreateBlobUrl(item.id, item.blob);
+  }
 
   if (item.kind === "uploaded") {
     return item.url;
   }
+
   const data = item.output;
   if (!data) return null;
+
+  if (
+    item.provider === "runware" &&
+    typeof data === "object" &&
+    data !== null
+  ) {
+    const runwareData = data as {
+      imageURL?: string;
+      videoURL?: string;
+      audioURL?: string;
+    };
+    if (runwareData.imageURL) return runwareData.imageURL;
+    if (runwareData.videoURL) return runwareData.videoURL;
+    if (runwareData.audioURL) return runwareData.audioURL;
+  }
+
   if (
     "images" in data &&
     Array.isArray(data.images) &&
@@ -91,6 +176,7 @@ export function resolveMediaUrl(item: MediaItem | undefined): string | null {
   ) {
     return data.images[0].url;
   }
+
   const fileProperties = {
     image: 1,
     video: 1,
@@ -98,12 +184,24 @@ export function resolveMediaUrl(item: MediaItem | undefined): string | null {
     audio_file: 1,
     audio_url: 1,
   };
-  const property = Object.keys(data).find(
-    (key) => key in fileProperties && "url" in data[key],
-  );
-  if (property) {
-    return data[property].url;
+
+  if (typeof data === "object" && data !== null) {
+    const property = Object.keys(data).find((key) => {
+      const value = (data as Record<string, unknown>)[key];
+      return (
+        key in fileProperties &&
+        typeof value === "object" &&
+        value !== null &&
+        "url" in value
+      );
+    });
+
+    if (property) {
+      const propertyValue = (data as Record<string, { url: string }>)[property];
+      return propertyValue.url;
+    }
   }
+
   return null;
 }
 

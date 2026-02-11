@@ -1,4 +1,19 @@
+"use client";
+
+import {
+  EMPTY_VIDEO_COMPOSITION,
+  useProject,
+  useVideoComposition,
+} from "@/data/queries";
+import { PROJECT_PLACEHOLDER } from "@/data/schema";
+import { useProjectId, useVideoProjectStore } from "@/data/store";
+import { exportVideoClientSide } from "@/lib/ffmpeg";
+import { cn, resolveDuration, resolveMediaUrl } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
+import { DownloadIcon, FilmIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { Button } from "./ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,62 +22,100 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
-import { cn, resolveMediaUrl } from "@/lib/utils";
-import {
-  EMPTY_VIDEO_COMPOSITION,
-  useProject,
-  useVideoComposition,
-} from "@/data/queries";
-import { fal } from "@/lib/fal";
-import { Button } from "./ui/button";
-import { useProjectId, useVideoProjectStore } from "@/data/store";
 import { LoadingIcon } from "./ui/icons";
-import {
-  CopyIcon,
-  DownloadIcon,
-  Share2Icon as ShareIcon,
-  FilmIcon,
-} from "lucide-react";
-import { Input } from "./ui/input";
-import type { ShareVideoParams } from "@/lib/share";
-import { PROJECT_PLACEHOLDER } from "@/data/schema";
-import { useRouter } from "next/navigation";
 
 type ExportDialogProps = {} & Parameters<typeof Dialog>[0];
 
-type ShareResult = {
-  video_url: string;
-  thumbnail_url: string;
-};
-
 export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
+  const t = useTranslations("app.exportDialog");
   const projectId = useProjectId();
   const { data: composition = EMPTY_VIDEO_COMPOSITION } =
     useVideoComposition(projectId);
-  const router = useRouter();
+  const [exportProgress, setExportProgress] = useState(0);
   const exportVideo = useMutation({
     mutationFn: async () => {
       const mediaItems = composition.mediaItems;
-      const videoData = composition.tracks.map((track) => ({
-        id: track.id,
-        type: track.type === "video" ? "video" : "audio",
-        keyframes: composition.frames[track.id].map((frame) => ({
-          timestamp: frame.timestamp,
-          duration: frame.duration,
-          url: resolveMediaUrl(mediaItems[frame.data.mediaId]),
-        })),
-      }));
+
+      const videoData = composition.tracks
+        .map((track) => {
+          const rawFrames = composition.frames[track.id] ?? [];
+          const keyframes = rawFrames
+            .map((frame) => {
+              const media = mediaItems[frame.data.mediaId];
+              const url = resolveMediaUrl(media);
+              const duration = frame.duration ?? resolveDuration(media) ?? 0;
+
+              if (!media || !url || duration <= 0) {
+                console.warn(
+                  `Skipping invalid frame: mediaId=${frame.data.mediaId}, url=${url}, duration=${duration}`,
+                );
+                return null;
+              }
+
+              return {
+                timestamp: frame.timestamp,
+                duration: duration,
+                url: url,
+                mediaId: frame.data.mediaId,
+              };
+            })
+            .filter((k): k is NonNullable<typeof k> => k !== null);
+
+          return {
+            id: track.id,
+            type:
+              track.type === "video" ? ("video" as const) : ("audio" as const),
+            keyframes: keyframes,
+          };
+        })
+        .filter((track) => track.keyframes.length > 0);
+
       if (videoData.length === 0) {
-        throw new Error("No tracks to export");
+        throw new Error(
+          "No valid tracks to export. Please ensure all media items are loaded.",
+        );
       }
-      const { data } = await fal.subscribe("fal-ai/ffmpeg-api/compose", {
-        input: {
-          tracks: videoData,
-        },
-        mode: "polling",
-        pollInterval: 3000,
+
+      const maxEnd = Math.max(
+        0,
+        ...videoData.flatMap((t) =>
+          t.keyframes.map((k) => k.timestamp + k.duration),
+        ),
+      );
+      const totalDuration = maxEnd > 0 ? maxEnd + 1000 : 5000;
+
+      console.log(
+        `Export: ${videoData.length} tracks, totalDuration=${totalDuration}ms`,
+      );
+      videoData.forEach((track, i) => {
+        console.log(
+          `  Track ${i} (${track.type}): ${track.keyframes.length} keyframes`,
+        );
       });
-      return data as ShareResult;
+
+      const videoBlob = await exportVideoClientSide(
+        videoData,
+        mediaItems,
+        totalDuration,
+        project.aspectRatio,
+        (progress) => {
+          setExportProgress(progress);
+        },
+      );
+
+      const videoUrl = URL.createObjectURL(videoBlob);
+
+      return {
+        video_url: videoUrl,
+        thumbnail_url: "",
+        blob: videoBlob,
+      };
+    },
+    onError: (error) => {
+      console.error("Export failed:", error);
+      alert(
+        `Export failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
     },
   });
   const setExportDialogOpen = useVideoProjectStore(
@@ -74,41 +127,8 @@ export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
   };
 
   const { data: project = PROJECT_PLACEHOLDER } = useProject(projectId);
-  const share = useMutation({
-    mutationFn: async () => {
-      if (!exportVideo.data) {
-        throw new Error("No video to share");
-      }
-      const videoInfo = exportVideo.data;
-      const response = await fetch("/api/share", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: project.title,
-          description: project.description ?? "",
-          videoUrl: videoInfo.video_url,
-          thumbnailUrl: videoInfo.thumbnail_url,
-          createdAt: Date.now(),
-          // TODO parametrize this
-          width: 1920,
-          height: 1080,
-        } satisfies ShareVideoParams),
-      });
-      if (!response.ok) {
-        throw new Error("Failed to share video");
-      }
-      return response.json();
-    },
-  });
 
-  const handleOnShare = async () => {
-    const { id } = await share.mutateAsync();
-    router.push(`/share/${id}`);
-  };
-
-  const actionsDisabled = exportVideo.isPending || share.isPending;
+  const actionsDisabled = exportVideo.isPending;
 
   return (
     <Dialog onOpenChange={handleOnOpenChange} {...props}>
@@ -116,12 +136,12 @@ export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FilmIcon className="w-6 h-6 opacity-50" />
-            Export video
+            {t("title")}
           </DialogTitle>
           <DialogDescription />
         </DialogHeader>
         <div className="text-muted-foreground">
-          <p>This may take a while, sit back and relax.</p>
+          <p>{t("description")}</p>
         </div>
         <div
           className={cn(
@@ -136,7 +156,12 @@ export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
               )}
             >
               {exportVideo.isPending ? (
-                <LoadingIcon className="w-24 h-24" />
+                <>
+                  <LoadingIcon className="w-24 h-24" />
+                  <p className="mt-4 text-sm text-muted-foreground">
+                    {t("exporting")} {Math.round(exportProgress)}%
+                  </p>
+                </>
               ) : (
                 <FilmIcon className="w-24 h-24 opacity-50" />
               )}
@@ -146,38 +171,12 @@ export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
               src={exportVideo.data.video_url}
               controls
               className="w-full h-full"
-            />
+            >
+              <track kind="captions" />
+            </video>
           )}
         </div>
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-row gap-2 items-center">
-            <Input
-              value={exportVideo.data?.video_url ?? ""}
-              placeholder="Video URL..."
-              readOnly
-              className="text-muted-foreground"
-            />
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={() =>
-                navigator.clipboard.writeText(exportVideo.data?.video_url ?? "")
-              }
-              disabled={exportVideo.data === undefined}
-            >
-              <CopyIcon className="w-5 h-5" />
-            </Button>
-          </div>
-        </div>
         <DialogFooter>
-          <Button
-            onClick={handleOnShare}
-            variant="secondary"
-            disabled={actionsDisabled || !exportVideo.data}
-          >
-            <ShareIcon className="w-4 h-4 opacity-50" />
-            Share
-          </Button>
           <Button
             variant="secondary"
             disabled={actionsDisabled || !exportVideo.data}
@@ -186,14 +185,14 @@ export function ExportDialog({ onOpenChange, ...props }: ExportDialogProps) {
           >
             <a href={exportVideo.data?.video_url ?? "#"} download>
               <DownloadIcon className="w-4 h-4" />
-              Download
+              {t("download")}
             </a>
           </Button>
           <Button
             onClick={() => exportVideo.mutate()}
             disabled={actionsDisabled}
           >
-            Export
+            {t("export")}
           </Button>
         </DialogFooter>
       </DialogContent>

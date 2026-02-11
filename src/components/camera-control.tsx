@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -8,7 +6,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronUp, ChevronDown, FocusIcon } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { ChevronDown, ChevronUp, FocusIcon } from "lucide-react";
+import { useState } from "react";
 
 const CameraMovement = ({
   value: initialValue,
@@ -58,9 +58,9 @@ const CameraMovement = ({
   return (
     <div className="w-full mx-auto border-t border-neutral-800 py-3">
       {/* Header */}
-      <div
-        className="flex justify-between items-center select-none"
-        role="button"
+      <button
+        type="button"
+        className="flex justify-between items-center select-none w-full text-left"
         onClick={() => setOpen(!open)}
       >
         <div className="flex items-center gap-2">
@@ -73,7 +73,7 @@ const CameraMovement = ({
             <ChevronDown className="h-6 w-6" />
           )}
         </Button>
-      </div>
+      </button>
 
       {open && (
         <>

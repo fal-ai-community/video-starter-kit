@@ -4,16 +4,6 @@ import { Slider } from "@/components/ui/slider";
 
 import type React from "react";
 
-import { useState, useRef } from "react";
-import {
-  X,
-  Plus,
-  GripVertical,
-  UploadIcon,
-  PlusIcon,
-  ChevronUp,
-  ChevronDown,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,8 +12,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import type { MediaItem } from "@/data/schema";
 import { cn } from "@/lib/utils";
-import { MediaItem } from "@/data/schema";
+import {
+  ChevronDown,
+  ChevronUp,
+  GripVertical,
+  Plus,
+  PlusIcon,
+  UploadIcon,
+  X,
+} from "lucide-react";
+import { useRef, useState } from "react";
 import { MediaItemRow } from "./media-panel";
 
 interface TimelineImage {
@@ -135,7 +135,7 @@ export default function VideoFrameSelector({
   const handleSelectMedia = (item: MediaItem) => {
     addImageToTimeline({
       id: item.id,
-      src: item.output?.images?.[0]?.url! || item.url,
+      src: item.output?.images?.[0]?.url || item.url || "",
       name: item.output?.prompt || "Untitled",
     });
   };
@@ -155,7 +155,7 @@ export default function VideoFrameSelector({
             transform: "translateX(-50%)",
           }}
         >
-          <div className="h-6 w-0.5 bg-neutral-600"></div>
+          <div className="h-6 w-0.5 bg-neutral-600" />
           <span className="text-xs text-neutral-500">{i}</span>
         </div>,
       );
@@ -174,7 +174,7 @@ export default function VideoFrameSelector({
               transform: "translateX(-50%)",
             }}
           >
-            <div className="h-3 w-[1px] bg-neutral-500/50"></div>
+            <div className="h-3 w-[1px] bg-neutral-500/50" />
           </div>,
         );
       }
@@ -205,9 +205,9 @@ export default function VideoFrameSelector({
       )}
     >
       {/* Header */}
-      <div
-        className="flex mb-6 justify-between items-center select-none"
-        role="button"
+      <button
+        type="button"
+        className="flex mb-6 justify-between items-center select-none w-full text-left"
         onClick={() => setOpen(!open)}
       >
         <div className="flex items-center gap-2">
@@ -220,7 +220,7 @@ export default function VideoFrameSelector({
             <ChevronDown className="h-6 w-6" />
           )}
         </Button>
-      </div>
+      </button>
       {open && (
         <>
           <Slider
@@ -237,7 +237,17 @@ export default function VideoFrameSelector({
               ref={timelineRef}
               className="relative h-2 -mb-1 cursor-pointer"
               onClick={handleTimelineClick}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  handleTimelineClick(e as unknown as React.MouseEvent);
+                }
+              }}
               onDragOver={handleTimelineDragOver}
+              role="slider"
+              tabIndex={0}
+              aria-valuenow={currentFrame}
+              aria-valuemin={minFrame}
+              aria-valuemax={maxFrame}
             >
               <div
                 className={cn(
@@ -258,7 +268,7 @@ export default function VideoFrameSelector({
                 <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
                   <GripVertical className="w-3 h-3 text-white" />
                 </div>
-                <div className="w-0.5 h-full bg-red-500"></div>
+                <div className="w-0.5 h-full bg-red-500" />
               </div>
 
               {/* Images on timeline */}
@@ -274,22 +284,26 @@ export default function VideoFrameSelector({
                 return (
                   <div
                     key={image.id}
-                    className={`absolute mt-10 rounded-md bg-neutral-300 h-12 min-w-12 max-w-12 aspect-square top-2 flex flex-col items-center`}
+                    className={
+                      "absolute mt-10 rounded-md bg-neutral-300 h-12 min-w-12 max-w-12 aspect-square top-2 flex flex-col items-center"
+                    }
                     style={{
                       left: `${startPercent - widthPercent / 2}%`,
                       width: `${widthPercent}%`,
                     }}
                   >
                     <div className="w-full flex relative">
-                      <div className="w-3 h-3 rotate-45 absolute bg-neutral-300 left-1/2 -translate-x-1/2 -top-1"></div>
+                      <div className="w-3 h-3 rotate-45 absolute bg-neutral-300 left-1/2 -translate-x-1/2 -top-1" />
                     </div>
                     <div className="relative aspect-square w-full p-1 h-full overflow-hidden group">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={
                           typeof image?.src !== "string"
                             ? URL.createObjectURL(image.src)
                             : image.src || "/placeholder.svg"
                         }
+                        alt={image?.name || "Frame preview"}
                         className="w-full h-full object-cover"
                       />
                       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center">

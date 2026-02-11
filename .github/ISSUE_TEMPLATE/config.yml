@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/timoncool/videosos/discussions
+    about: Ask questions and discuss with the community
+  - name: 📖 Documentation
+    url: https://github.com/timoncool/videosos#readme
+    about: Read the documentation

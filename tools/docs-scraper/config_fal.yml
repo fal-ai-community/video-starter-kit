@@ -1,0 +1,37 @@
+site_name: fal
+base_url: https://docs.fal.ai
+docs_base_url: https://docs.fal.ai/model-apis
+sitemap_url: https://docs.fal.ai/sitemap.xml
+locale_filter: /model-apis
+
+# Content extraction
+content_selector: main > div:nth-of-type(2)
+nav_selector: div[devin-scrollable="true"] ul
+main_content_selector: main > div:nth-of-type(2) > div
+
+# Discovery method: sitemap | sidebar | bfs
+discovery_method: sitemap
+
+# Link rewriting
+internal_link_pattern: ^https://docs\.fal\.ai/model-apis
+external_link_pattern: ^https://
+
+# Models page
+models_url: https://fal.ai/explore/search
+models_api_url: null
+models_selector: main div > div > a[href^="/models/"]
+
+# OpenAPI JSON pattern
+openapi_pattern: https://fal.ai/api/openapi/queue/openapi.json?endpoint_id={endpoint_id}
+
+# Output paths (relative to repo root)
+output_dir: docs/fal
+pages_dir: docs/fal/pages
+models_dir: docs/fal/models
+openapi_dir: docs/fal/openapi
+toc_file: docs/fal/TOC.md
+
+# Incremental update settings
+manifest_file: tools/docs-scraper/manifest_fal.json
+check_etag: true
+check_last_modified: true

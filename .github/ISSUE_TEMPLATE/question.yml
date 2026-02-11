@@ -1,0 +1,53 @@
+name: ❓ Question
+description: Ask a question about using VideoSOS
+title: "[Question]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question? We're here to help!
+
+        **Note:** For general discussions, please use [GitHub Discussions](https://github.com/timoncool/videosos/discussions) instead.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: What would you like to know?
+      placeholder: How do I...?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Provide any relevant context or what you've tried so far
+      placeholder: |
+        I'm trying to...
+        I've already looked at...
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment (if relevant)
+      description: Provide information about your setup if it's relevant to the question
+      placeholder: |
+        - OS: [e.g. macOS, Windows, Linux]
+        - VideoSOS version: [e.g. 1.0.0]
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Please confirm you've done the following
+      options:
+        - label: I've searched existing issues and discussions
+          required: true
+        - label: I've checked the documentation
+          required: true

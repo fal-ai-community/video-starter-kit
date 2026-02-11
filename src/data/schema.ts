@@ -5,6 +5,7 @@ export type VideoProject = {
   title: string;
   description: string;
   aspectRatio: AspectRatio;
+  duration?: number;
 };
 
 export const PROJECT_PLACEHOLDER: VideoProject = {
@@ -12,6 +13,7 @@ export const PROJECT_PLACEHOLDER: VideoProject = {
   title: "",
   description: "",
   aspectRatio: "16:9",
+  duration: 30000,
 };
 
 export type VideoTrackType = "video" | "music" | "voiceover";
@@ -64,13 +66,25 @@ export type KeyFrameData = {
       prompt: string;
       url: string;
     }
+  | {
+      type: "voiceover";
+      prompt: string;
+      url: string;
+    }
+  | {
+      type: "music";
+      prompt: string;
+      url: string;
+    }
 );
 
 export type MediaItem = {
   id: string;
   kind: "generated" | "uploaded";
+  provider?: "fal" | "runware";
   endpointId?: string;
   requestId?: string;
+  taskUUID?: string;
   projectId: string;
   mediaType: "image" | "video" | "music" | "voiceover";
   status: "pending" | "running" | "completed" | "failed";
@@ -78,17 +92,22 @@ export type MediaItem = {
   input?: Record<string, any>;
   output?: Record<string, any>;
   url?: string;
-  metadata?: Record<string, any>; // TODO: Define the metadata schema
+  blob?: Blob;
+  thumbnailBlob?: Blob;
+  metadata?: Record<string, any>;
 } & (
   | {
       kind: "generated";
+      provider?: "fal" | "runware";
       endpointId: string;
-      requestId: string;
+      requestId?: string;
+      taskUUID?: string;
       input: Record<string, any>;
       output?: Record<string, any>;
     }
   | {
       kind: "uploaded";
       url: string;
+      blob?: Blob;
     }
 );

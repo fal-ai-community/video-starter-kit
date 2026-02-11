@@ -1,7 +1,6 @@
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react";
 
-import { cn } from "@/lib/utils";
-import { Button, ButtonProps } from "@/components/ui/button";
+import { Button, type ButtonProps } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -15,6 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { useState } from "react";
 
 const voices = [
@@ -100,7 +100,6 @@ export function VoiceSelector({
           variant="outline"
           {...props}
           className={cn("max-w-fit justify-between", className)}
-          role="combobox"
           aria-expanded={open}
         >
           {value ? voices.find((voice) => voice === value) : "Select voice..."}

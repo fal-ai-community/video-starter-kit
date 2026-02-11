@@ -1,0 +1,287 @@
+{
+  "landing": {
+    "header": {
+      "features": "Features",
+      "community": "Community",
+      "github": "GitHub",
+      "tryNow": "Try it now"
+    },
+    "hero": {
+      "badge": "Now Open Source",
+      "starGithub": "Star on GitHub",
+      "title": "VideoSOS",
+      "subtitle": "AI Video Editor",
+      "description": "A powerful, open-source AI video editor built for creators. Create stunning videos with our intuitive tools and 100+ AI models.",
+      "tryNow": "Try it now",
+      "imageAlt": "VideoSOS interface"
+    },
+    "features": {
+      "title": "Powerful features for modern creators",
+      "subtitle": "Everything you need to create professional-quality videos, available to everyone.",
+      "dualAI": {
+        "title": "Dual AI Provider Support",
+        "description": "Access 100+ state-of-the-art AI models through fal.ai and Runware.ai. Generate images with FLUX and Ideogram V3, create videos with Veo 3 and Kling, compose music with Stable Audio, and produce natural voiceovers. Switch between providers seamlessly or use both simultaneously for maximum flexibility."
+      },
+      "privacy": {
+        "title": "100% Privacy-First Architecture",
+        "description": "Everything runs locally in your browser. Your projects, media, and API keys are stored in IndexedDB on your device. No uploads, no tracking, no data collection."
+      },
+      "timeline": {
+        "title": "Timeline Editor",
+        "description": "Advanced multi-track video editing with drag-and-drop functionality, precise keyframe control, audio waveform visualization, and real-time preview. Support for multiple aspect ratios (16:9, 9:16, 1:1) perfect for social media platforms."
+      },
+      "multiModal": {
+        "title": "Multi-Modal Content Generation",
+        "description": "Create complete video projects with AI-generated images, videos, background music, and voiceovers. Advanced features include camera movement controls, video upscaling with Topaz, and automatic lip-sync for voiceovers."
+      },
+      "clientSide": {
+        "title": "Client-Side Video Processing",
+        "description": "Powered by FFmpeg.wasm and Remotion for high-quality video rendering entirely in the browser. No server uploads, no waiting in queues. Export videos with proper audio mixing and precise timing control."
+      },
+      "international": {
+        "title": "International & Accessible",
+        "description": "Full internationalization support (English/Russian) with keyboard shortcuts for power users. Intuitive UI designed for both beginners and professionals."
+      },
+      "costTracking": {
+        "title": "Cost Tracking & Project Statistics",
+        "description": "Built-in cost tracking and comprehensive project analytics help you stay within budget. Track generation costs per media item, view total project expenses, and get detailed breakdowns by media type, AI provider, and model usage."
+      },
+      "modelSelection": {
+        "title": "Advanced Model Selection",
+        "description": "Enhanced model selection interface with intelligent search, filtering by provider (FAL/Runware), and categorization by type. Real-time pricing display for FAL models helps you make informed decisions before generating content."
+      }
+    },
+    "community": {
+      "title": "Join our community",
+      "description": "VideoSOS is an open-source project. Star us on GitHub and contribute to help shape the future of AI-powered video editing.",
+      "starGithub": "Star on GitHub"
+    },
+    "footer": {
+      "appName": "VideoSOS",
+      "tagline": "Open-source AI video editor built for creators.",
+      "credits": "Credits",
+      "community": "Community",
+      "github": "GitHub"
+    }
+  },
+  "app": {
+    "metadata": {
+      "title": "VideoSOS | AI Video Editor",
+      "description": "Open-source AI video editor that runs entirely in your browser."
+    },
+    "header": {
+      "github": "GitHub"
+    },
+    "leftPanel": {
+      "projectSettings": "Project Settings",
+      "untitled": "untitled",
+      "describeVideo": "Describe your video",
+      "timelineDuration": "Timeline duration (seconds)",
+      "fitToContent": "Fit to Content",
+      "gallery": "Gallery",
+      "all": "All",
+      "image": "Image",
+      "music": "Music",
+      "voiceover": "Voiceover",
+      "video": "Video",
+      "generate": "Generate...",
+      "emptyMessage": "Create your image, audio and voiceover collection to compose your videos"
+    },
+    "rightPanel": {
+      "generateMedia": "Generate Media",
+      "image": "Image",
+      "video": "Video",
+      "voiceover": "Voiceover",
+      "music": "Music",
+      "audio": "Audio",
+      "using": "Using",
+      "reference": "Reference",
+      "back": "Back",
+      "select": "Select",
+      "upload": "Upload",
+      "optional": "Optional",
+      "removeMedia": "Remove media",
+      "imaginePlaceholder": "Imagine...",
+      "enhancePrompt": "Enhance Prompt",
+      "duration": "Duration",
+      "generate": "Generate",
+      "thisModelRequiresAsset": "Add the following before generating: {assets}",
+      "missingAssetsTooltip": "Select {assets} to enable Generate"
+    },
+    "videoPreview": {
+      "export": "Export"
+    },
+    "bottomBar": {
+      "video": "Video",
+      "music": "Music",
+      "voiceover": "Voiceover"
+    },
+    "projectDialog": {
+      "title": "New Project",
+      "description": "Create a new or open an existent project",
+      "createNew": "Create New Project",
+      "projectTitle": "Project Title",
+      "describeProject": "Describe your project",
+      "aspectRatio": "Aspect Ratio:",
+      "generateTooltip": "Out of ideas? Generate a new random project.",
+      "generate": "Generate",
+      "creating": "Creating...",
+      "createProject": "Create Project",
+      "or": "or",
+      "openExisting": "Open Existing Project",
+      "noProjects": "No projects found"
+    },
+    "keyDialog": {
+      "title": "API Keys",
+      "saveKey": "Save your API Keys",
+      "placeholder": "Your FAL API Key",
+      "runwarePlaceholder": "Your Runware API Key",
+      "save": "Save",
+      "privacyNotice": "We don't store your keys on our servers. Everything stays in your browser.",
+      "footerText": "Get your FAL Key from <falLink>fal.ai</falLink> and Runware Key from <runwareLink>runware.ai</runwareLink>."
+    },
+    "exportDialog": {
+      "title": "Export video",
+      "description": "This may take a while, sit back and relax.",
+      "exporting": "Exporting...",
+      "videoUrl": "Video URL...",
+      "share": "Share",
+      "download": "Download",
+      "export": "Export"
+    },
+    "mediaGallery": {
+      "title": "Media Gallery",
+      "description": "The b-roll for your video composition",
+      "noDescription": "No description",
+      "upscaleVideo": "Upscale Video",
+      "makeVideo": "Make Video",
+      "rerun": "Re-run",
+      "delete": "Delete",
+      "mediaUrl": "Media URL",
+      "model": "Model (fal endpoint)",
+      "status": "Status",
+      "requestId": "Request ID"
+    },
+    "toast": {
+      "generationCompleted": "Generation completed",
+      "generationCompletedDesc": "Your {mediaType} has been generated successfully.",
+      "generationFailed": "Generation failed",
+      "generationFailedDesc": "Failed to generate {mediaType}.",
+      "enhancePromptFailed": "Failed to enhance prompt",
+      "enhancePromptFailedDesc": "There was an unexpected error. Try again.",
+      "generateMediaFailed": "Failed to generate media",
+      "generateMediaFailedDesc": "Please ensure you've set your FAL API key in the settings (click the gear icon).",
+      "generateMediaFailedDescRunware": "Please ensure you've set your Runware API key in the settings (click the gear icon).",
+      "falKeyRequired": "FAL API key required",
+      "falKeyRequiredDesc": "Add your FAL API key in Settings (gear icon) to use this model.",
+      "runwareKeyRequired": "Runware API key required",
+      "runwareKeyRequiredDesc": "Add your Runware API key in Settings (gear icon) to use this model.",
+      "uploadFailed": "Failed to upload file",
+      "uploadFailedDesc": "Please try again",
+      "suggestionFailed": "Failed to create suggestion",
+      "suggestionFailedDesc": "There was an unexpected error while generating a suggestion. Try again."
+    }
+  },
+  "share": {
+    "metadata": {
+      "notFoundTitle": "Video Not Found",
+      "watchDescription": "Watch on Video AI Studio"
+    },
+    "download": "Download",
+    "startProject": "Start your project"
+  },
+  "models": {
+    "image": {
+      "fluxKontext": {
+        "label": "FLUX.1 Kontext [pro]",
+        "description": "Professional image generation with context-aware editing capabilities"
+      },
+      "fluxDev": {
+        "label": "FLUX.1 [dev]",
+        "description": "High-quality image generation model optimized for creative workflows"
+      },
+      "ideogramV3Text": {
+        "label": "Ideogram V3 (Text)",
+        "description": "Advanced text-to-image model with superior text rendering capabilities"
+      },
+      "ideogramV3Image": {
+        "label": "Ideogram V3 (Image)",
+        "description": "Image-to-image transformation with text rendering excellence"
+      },
+      "recraftV3": {
+        "label": "Recraft V3",
+        "description": "Professional design-focused image generation"
+      },
+      "nanoBanana": {
+        "label": "Nano Banana",
+        "description": "Fast image editing with mask support"
+      },
+      "sd35Large": {
+        "label": "Stable Diffusion 3.5 Large",
+        "description": "Latest Stable Diffusion with enhanced quality and control"
+      },
+      "fluxSchnell": {
+        "label": "FLUX.1 [schnell]",
+        "description": "Ultra-fast image generation model"
+      },
+      "imagen4": {
+        "label": "Imagen 4",
+        "description": "Google's latest image generation model"
+      }
+    },
+    "video": {
+      "veo3FastText": {
+        "label": "Veo 3 Fast (Text)",
+        "description": "Ultra-fast text-to-video generation with high quality"
+      },
+      "veo3FastImage": {
+        "label": "Veo 3 Fast (Image)",
+        "description": "Ultra-fast image-to-video generation"
+      },
+      "kling25Text": {
+        "label": "Kling 2.5 Turbo Pro (Text)",
+        "description": "Top-tier text-to-video generation with unparalleled motion fluidity"
+      },
+      "kling25Image": {
+        "label": "Kling 2.5 Turbo Pro (Image)",
+        "description": "Top-tier image-to-video generation with cinematic visuals"
+      },
+      "lumaDream": {
+        "label": "Luma Dream Machine",
+        "description": "High quality video generation with Ray2 and Flash modes"
+      },
+      "pika22Text": {
+        "label": "Pika 2.2 (Text)",
+        "description": "Advanced text-to-video with camera control"
+      },
+      "pika22Image": {
+        "label": "Pika 2.2 (Image)",
+        "description": "Image-to-video with advanced motion control"
+      }
+    },
+    "music": {
+      "stableAudio": {
+        "label": "Stable Audio",
+        "description": "Generate high-quality audio from text prompts"
+      },
+      "minimaxMusic": {
+        "label": "Minimax Music",
+        "description": "Music generation with mood control"
+      }
+    },
+    "voiceover": {
+      "minimaxSpeech": {
+        "label": "MiniMax Speech-02 HD",
+        "description": "High-definition text-to-speech"
+      },
+      "playhtV3": {
+        "label": "PlayHT TTS v3",
+        "description": "High-quality voice synthesis"
+      },
+      "diaTTS": {
+        "label": "Dia TTS Voice Clone",
+        "description": "Voice cloning from sample"
+      }
+    }
+  }
+}

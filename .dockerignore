@@ -1,0 +1,21 @@
+# Dependencies
+node_modules
+
+# Next.js build output
+.next
+out
+
+# Git
+.git
+
+# IDE
+.vscode
+.idea
+
+# Environment
+.env*.local
+
+# Misc
+.DS_Store
+
+

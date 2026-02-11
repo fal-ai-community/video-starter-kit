@@ -1,15 +1,22 @@
-import Link from "next/link";
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Video } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
+import { LanguageSwitcher } from "./language-switcher";
 
 export default function Header() {
+  const t = useTranslations("landing.header");
+  const locale = useLocale();
+
   return (
     <header className="fixed top-0 w-full border-b border-white/10 bg-black/50 backdrop-blur-md z-50">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex flex-1">
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href={`/${locale}`} className="flex items-center space-x-2">
             <Video className="w-6 h-6" />
-            <span className="font-semibold">fal.ai</span>
+            <span className="font-semibold">VideoSOS</span>
           </Link>
         </div>
 
@@ -18,28 +25,27 @@ export default function Header() {
             href="#features"
             className="text-sm text-gray-400 hover:text-white transition-colors"
           >
-            Features
+            {t("features")}
           </Link>
           <Link
             href="#community"
             className="text-sm text-gray-400 hover:text-white transition-colors"
           >
-            Community
+            {t("community")}
           </Link>
           <Link
-            href="https://github.com/fal-ai-community/video-starter-kit"
+            href="https://github.com/timoncool/videosos"
             className="text-sm text-gray-400 hover:text-white transition-colors"
           >
-            GitHub
+            {t("github")}
           </Link>
         </nav>
 
         <div className="flex flex-1 justify-end items-center space-x-4">
-          <Link href="/app">
-            <Button className="bg-white text-black hover:bg-gray-200">
-              Try it now
-            </Button>
-          </Link>
+          <LanguageSwitcher />
+          <Button className="bg-white text-black hover:bg-gray-200" asChild>
+            <Link href={`/${locale}/app`}>{t("tryNow")}</Link>
+          </Button>
         </div>
       </div>
     </header>
