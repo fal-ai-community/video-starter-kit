@@ -1,5 +1,9 @@
-import { IS_SHARE_ENABLED, shareVideo, ShareVideoParams } from "@/lib/share";
-import { NextRequest, NextResponse } from "next/server";
+import {
+  IS_SHARE_ENABLED,
+  type ShareVideoParams,
+  shareVideo,
+} from "@/lib/share";
+import { type NextRequest, NextResponse } from "next/server";
 
 export const POST = async (req: NextRequest) => {
   if (!IS_SHARE_ENABLED) {

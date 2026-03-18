@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 
 export const GET = async (req: NextRequest) => {
   const url = req.nextUrl.searchParams.get("url");

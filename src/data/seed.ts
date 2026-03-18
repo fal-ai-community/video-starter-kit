@@ -1,5 +1,10 @@
 import { db } from "@/data/db";
-import { VideoProject, MediaItem, VideoTrack, VideoKeyFrame } from "./schema";
+import type {
+  MediaItem,
+  VideoKeyFrame,
+  VideoProject,
+  VideoTrack,
+} from "./schema";
 
 type ProjectSeed = {
   project: VideoProject;
@@ -15,6 +20,7 @@ const TEMPLATE_PROJECT_SEED: ProjectSeed = {
       "A starter project that shows off the features of the video editor.",
     aspectRatio: "16:9",
     id: "433685b7-3494-4a56-9657-c1522686139d",
+    duration: 30000,
   },
   media: [
     {
@@ -140,10 +146,8 @@ const TEMPLATE_PROJECT_SEED: ProjectSeed = {
           bitrate: 527931,
         },
         audio: null,
-        start_frame_url:
-          "https://v3.fal.media/files/lion/lNDR8wzGJmAgPtSdroZso_start_frame.png",
-        end_frame_url:
-          "https://v3.fal.media/files/monkey/IrmTo3WlXwU_xt2e7LWZR_end_frame.png",
+        start_frame_url: null,
+        end_frame_url: null,
       },
     },
     {
@@ -196,10 +200,8 @@ const TEMPLATE_PROJECT_SEED: ProjectSeed = {
           bitrate: 552459,
         },
         audio: null,
-        start_frame_url:
-          "https://v3.fal.media/files/tiger/vcYlw7KVM_GYJ27Rbwe5k_start_frame.png",
-        end_frame_url:
-          "https://v3.fal.media/files/koala/oslkG0Zf4xKBWk1oY95GD_end_frame.png",
+        start_frame_url: null,
+        end_frame_url: null,
       },
     },
     {
@@ -316,10 +318,8 @@ const TEMPLATE_PROJECT_SEED: ProjectSeed = {
           bitrate: 564785,
         },
         audio: null,
-        start_frame_url:
-          "https://v3.fal.media/files/monkey/WuO2_lfG3R6uggUWBA6Qv_start_frame.png",
-        end_frame_url:
-          "https://v3.fal.media/files/elephant/Ti8XbHVdc78bgONN4waSL_end_frame.png",
+        start_frame_url: null,
+        end_frame_url: null,
       },
     },
     {
@@ -401,7 +401,7 @@ const TEMPLATE_PROJECT_SEED: ProjectSeed = {
       timestamp: 1,
       duration: 5640,
       id: "e0ad9534-267d-47fb-b512-a723e7ac04c6",
-    } as any,
+    } as VideoKeyFrame,
     {
       trackId: "700049df-22c3-4419-b886-c9b200851ac8",
       data: {
@@ -409,11 +409,12 @@ const TEMPLATE_PROJECT_SEED: ProjectSeed = {
         type: "image",
         prompt:
           "Image of a steaming cup of coffee in a quiet morning setting, showcasing the morning brew process, using the Coffee machine as a central feature",
+        url: "",
       },
       timestamp: 5642,
       duration: 5640,
       id: "2596b76f-a198-49a9-bcd8-6f8263fd45b1",
-    },
+    } as VideoKeyFrame,
     {
       trackId: "700049df-22c3-4419-b886-c9b200851ac8",
       data: {
@@ -421,6 +422,7 @@ const TEMPLATE_PROJECT_SEED: ProjectSeed = {
         type: "image",
         prompt:
           "a steaming cup of coffee on a cozy morning scene, with the warm sunlight peeking through the blinds, as the sound of gentle brewing fills the air.",
+        url: "",
       },
       timestamp: 11283,
       duration: 5640,

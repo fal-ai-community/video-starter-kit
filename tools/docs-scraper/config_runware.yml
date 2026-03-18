@@ -1,0 +1,33 @@
+site_name: runware
+base_url: https://runware.ai
+docs_base_url: https://runware.ai/docs/en
+sitemap_url: https://runware.ai/docs/sitemap.xml
+locale_filter: /docs/en/
+
+# Content extraction
+content_selector: article
+nav_selector: nav ul
+main_content_selector: article > div
+
+# Discovery method: sitemap | sidebar | bfs
+discovery_method: sitemap
+
+# Link rewriting
+internal_link_pattern: ^https://runware\.ai/docs/en/
+external_link_pattern: ^https://
+
+# Models page
+models_url: https://runware.ai/models#image-featured
+models_selector: main > div > div:nth-of-type(2) > div:nth-of-type(2) > div
+model_card_selector: div[class*=""]
+
+# Output paths (relative to repo root)
+output_dir: docs/runware
+pages_dir: docs/runware/pages
+models_dir: docs/runware/models
+toc_file: docs/runware/TOC.md
+
+# Incremental update settings
+manifest_file: tools/docs-scraper/manifest_runware.json
+check_etag: true
+check_last_modified: true

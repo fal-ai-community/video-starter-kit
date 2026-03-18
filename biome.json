@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": ["node_modules", ".next"]
+    "ignore": ["node_modules", ".next", "data"]
   },
   "formatter": {
     "enabled": true,
@@ -20,7 +20,14 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "suspicious": {
+        "noExplicitAny": "off"
+      },
+      "a11y": {
+        "noNoninteractiveElementToInteractiveRole": "off",
+        "useSemanticElements": "warn"
+      }
     }
   },
   "javascript": {

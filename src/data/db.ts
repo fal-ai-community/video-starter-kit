@@ -1,51 +1,83 @@
 import { openDB } from "idb";
-import type {
-  MediaItem,
-  VideoKeyFrame,
-  VideoProject,
-  VideoTrack,
+import {
+  type MediaItem,
+  PROJECT_PLACEHOLDER,
+  type VideoKeyFrame,
+  type VideoProject,
+  type VideoTrack,
 } from "./schema";
 
+const dbPromise = typeof indexedDB !== "undefined" ? openDB("ai-vstudio-db-v2", 1, {
+  upgrade(db) {
+    db.createObjectStore("projects", { keyPath: "id" });
+
+    const trackStore = db.createObjectStore("tracks", { keyPath: "id" });
+    trackStore.createIndex("by_projectId", "projectId");
+
+    const keyFrameStore = db.createObjectStore("keyFrames", {
+      keyPath: "id",
+    });
+    keyFrameStore.createIndex("by_trackId", "trackId");
+
+    const mediaStore = db.createObjectStore("media_items", {
+      keyPath: "id",
+    });
+    mediaStore.createIndex("by_projectId", "projectId");
+  },
+  blocked() {
+    console.warn(
+      "[IndexedDB] Database upgrade blocked - another connection is open",
+    );
+  },
+  blocking() {
+    console.warn("[IndexedDB] This connection is blocking a version upgrade");
+  },
+  terminated() {
+    console.error("[IndexedDB] Database connection terminated unexpectedly");
+  },
+}) : null;
+
 function open() {
-  return openDB("ai-vstudio-db-v2", 1, {
-    upgrade(db) {
-      db.createObjectStore("projects", { keyPath: "id" });
-
-      const trackStore = db.createObjectStore("tracks", { keyPath: "id" });
-      trackStore.createIndex("by_projectId", "projectId");
-
-      const keyFrameStore = db.createObjectStore("keyFrames", {
-        keyPath: "id",
-      });
-      keyFrameStore.createIndex("by_trackId", "trackId");
-
-      const mediaStore = db.createObjectStore("media_items", {
-        keyPath: "id",
-      });
-      mediaStore.createIndex("by_projectId", "projectId");
-    },
-  });
+  return dbPromise!;
 }
 
 export const db = {
   projects: {
     async find(id: string): Promise<VideoProject | null> {
       const db = await open();
-      return db.get("projects", id);
+      const project = await db.get("projects", id);
+      if (!project) return null;
+      return {
+        ...PROJECT_PLACEHOLDER,
+        ...project,
+        duration:
+          typeof project.duration === "number"
+            ? project.duration
+            : PROJECT_PLACEHOLDER.duration,
+      } satisfies VideoProject;
     },
     async list(): Promise<VideoProject[]> {
       const db = await open();
-      return db.getAll("projects");
+      const projects = await db.getAll("projects");
+      return projects.map((project) => ({
+        ...PROJECT_PLACEHOLDER,
+        ...project,
+        duration:
+          typeof project.duration === "number"
+            ? project.duration
+            : PROJECT_PLACEHOLDER.duration,
+      })) as VideoProject[];
     },
     async create(project: Omit<VideoProject, "id">) {
       const db = await open();
-      const tx = db.transaction("projects", "readwrite");
-      const result = await tx.store.put({
+      return db.put("projects", {
         id: crypto.randomUUID(),
         ...project,
+        duration:
+          typeof project.duration === "number"
+            ? project.duration
+            : PROJECT_PLACEHOLDER.duration,
       });
-      await tx.done;
-      return result;
     },
     async update(id: string, project: Partial<VideoProject>) {
       const db = await open();
@@ -55,7 +87,56 @@ export const db = {
         ...existing,
         ...project,
         id,
+        duration:
+          typeof (project.duration ?? existing.duration) === "number"
+            ? (project.duration ?? existing.duration)
+            : PROJECT_PLACEHOLDER.duration,
       });
+    },
+    async delete(id: string) {
+      const db = await open();
+
+      const tracks = await db.getAllFromIndex("tracks", "by_projectId", id);
+      const trackIds = tracks.map((track) => track.id);
+
+      const frames = (
+        await Promise.all(
+          trackIds.map((trackId) =>
+            db.getAllFromIndex("keyFrames", "by_trackId", trackId),
+          ),
+        )
+      ).flat();
+
+      const mediaItems = await db.getAllFromIndex(
+        "media_items",
+        "by_projectId",
+        id,
+      );
+
+      // Clean up blob URLs for all media items that have blobs (both uploaded and generated)
+      for (const media of mediaItems) {
+        const { revokeBlobUrl } = await import("@/lib/utils");
+        if (media.blob) {
+          revokeBlobUrl(media.id);
+        }
+        if (media.thumbnailBlob) {
+          revokeBlobUrl(`${media.id}-thumbnail`);
+        }
+      }
+
+      const tx = db.transaction(
+        ["projects", "tracks", "keyFrames", "media_items"],
+        "readwrite",
+      );
+
+      await Promise.all([
+        ...frames.map((f) => tx.objectStore("keyFrames").delete(f.id)),
+        ...tracks.map((t) => tx.objectStore("tracks").delete(t.id)),
+        ...mediaItems.map((m) => tx.objectStore("media_items").delete(m.id)),
+        tx.objectStore("projects").delete(id),
+      ]);
+
+      await tx.done;
     },
   },
 
@@ -132,14 +213,11 @@ export const db = {
     },
     async create(media: Omit<MediaItem, "id">) {
       const db = await open();
-      const tx = db.transaction("media_items", "readwrite");
       const id = crypto.randomUUID().toString();
-      const result = await tx.store.put({
+      return db.put("media_items", {
         id,
         ...media,
       });
-      await tx.done;
-      return result;
     },
     async update(id: string, media: Partial<MediaItem>) {
       const db = await open();
@@ -158,7 +236,16 @@ export const db = {
       const db = await open();
       const media: MediaItem | null = await db.get("media_items", id);
       if (!media) return;
-      // Delete associated keyframes
+
+      // Clean up blob URLs if this media item has blobs (both uploaded and generated)
+      const { revokeBlobUrl } = await import("@/lib/utils");
+      if (media.blob) {
+        revokeBlobUrl(id);
+      }
+      if (media.thumbnailBlob) {
+        revokeBlobUrl(`${id}-thumbnail`);
+      }
+
       const tracks = await db.getAllFromIndex(
         "tracks",
         "by_projectId",
@@ -175,7 +262,7 @@ export const db = {
           ),
         )
       )
-        .flatMap((f) => f)
+        .flat()
         .filter((f) => f.data.mediaId === id)
         .map((f) => f.id);
       const tx = db.transaction(["media_items", "keyFrames"], "readwrite");

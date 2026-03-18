@@ -1,72 +1,110 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Github } from "lucide-react";
 import { LaptopMockup } from "@/components/ui/landing-laptop-mockup";
+import { ArrowRight, Sparkles, Zap } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Hero() {
   return (
-    <section className="pt-32 pb-16 md:pt-40 md:pb-24">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm mb-8">
-            <span className="text-gray-400">Now Open Source</span>
-            <span className="ml-3 h-4 w-px bg-white/20" />
-            <a
-              href="https://github.com/fal-ai-community/video-starter-kit"
-              className="ml-3 flex items-center text-white hover:text-gray-300"
+    <section className="relative pt-32 pb-20 md:pt-44 md:pb-28 overflow-hidden bg-white">
+      {/* Subtle background gradient */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full bg-gradient-to-br from-violet-100/80 via-purple-50/60 to-transparent blur-3xl" />
+      </div>
+
+      <div className="container mx-auto px-6 max-w-7xl relative z-10">
+        {/* Badge */}
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-4 py-1.5 text-sm text-violet-700">
+            <Sparkles className="w-3.5 h-3.5 text-violet-500" />
+            <span className="font-medium">AI Video by GoStudio.ai</span>
+            <span className="h-3.5 w-px bg-violet-200" />
+            <Link
+              href="https://gostudio.ai"
+              target="_blank"
+              className="flex items-center gap-1 text-violet-600 hover:text-violet-800 transition-colors font-semibold"
             >
-              Star on GitHub <ArrowRight className="ml-1 h-4 w-4" />
-            </a>
-          </div>
-
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-8 bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
-            AI Video Developer
-            <br />
-            Starter Kit
-          </h1>
-
-          <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-12">
-            A powerful, open-source AI video editor built for creators. Create
-            stunning videos with our intuitive tools, or develop your own AI
-            video product using our kit.
-          </p>
-
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-16">
-            <Link href="/app">
-              <Button
-                size="lg"
-                className="bg-white text-black hover:bg-gray-200 min-w-[200px]"
-              >
-                Try it now
-              </Button>
-            </Link>
-            <Link href="https://github.com/fal-ai-community/video-starter-kit">
-              <Button size="lg" variant="outline" className="min-w-[200px]">
-                <Github className="mr-2 h-5 w-5" />
-                Star on GitHub
-              </Button>
+              Learn more <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
 
-        {/* App Screenshot */}
-        <div className="relative group max-w-6xl mx-auto">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/40 to-blue-500/40 blur-3xl opacity-20" />
-          <LaptopMockup>
-            <Image
-              src="/screenshot.webp?height=800&width=1200"
-              width={1200}
-              height={800}
-              alt="Video Starter Kit interface"
-              className="w-full h-auto"
-              priority
-            />
-          </LaptopMockup>
+        {/* Headline */}
+        <div className="text-center mb-8">
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight mb-6 text-gray-900">
+            Create stunning
+            <br />
+            <span className="bg-gradient-to-r from-violet-600 via-purple-500 to-fuchsia-500 bg-clip-text text-transparent">
+              AI videos
+            </span>
+            <br />
+            in seconds
+          </h1>
 
-          {/* Floating gradient elements */}
-          <div className="absolute -top-16 -right-16 w-32 h-32 bg-purple-500/30 rounded-full blur-3xl opacity-20" />
-          <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-blue-500/30 rounded-full blur-3xl opacity-20" />
+          <p className="text-gray-500 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+            GoStudio Clips harnesses the latest AI video models to turn your
+            ideas into professional-quality video content — no editing skills
+            required.
+          </p>
+        </div>
+
+        {/* CTAs */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
+          <Link href="/en/app">
+            <Button
+              size="lg"
+              className="bg-violet-600 hover:bg-violet-700 text-white font-semibold px-8 rounded-full text-base min-w-[200px] shadow-lg shadow-violet-200 hover:shadow-violet-300 transition-all duration-300"
+            >
+              Start creating free
+              <ArrowRight className="ml-2 w-4 h-4" />
+            </Button>
+          </Link>
+          <Link href="#how-it-works">
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-full text-base min-w-[200px] transition-all duration-300"
+            >
+              <Zap className="mr-2 w-4 h-4 text-violet-500" />
+              See how it works
+            </Button>
+          </Link>
+        </div>
+
+        {/* App Screenshot */}
+        <div className="relative group max-w-5xl mx-auto">
+          <div className="absolute inset-0 bg-gradient-to-r from-violet-200/40 to-purple-200/40 blur-3xl opacity-60 rounded-3xl" />
+          <div className="relative ring-1 ring-gray-200 rounded-2xl overflow-hidden shadow-2xl shadow-violet-100">
+            <LaptopMockup>
+              <Image
+                src="/screenshot.webp"
+                width={1200}
+                height={800}
+                alt="GoStudio Clips — AI Video Editor"
+                className="w-full h-auto"
+                priority
+              />
+            </LaptopMockup>
+          </div>
+        </div>
+
+        {/* Social proof strip */}
+        <div className="mt-16 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-gray-400">
+          <div className="flex items-center gap-2">
+            <div className="flex -space-x-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-400 to-fuchsia-500 border-2 border-white"
+                />
+              ))}
+            </div>
+            <span>50,000+ creators</span>
+          </div>
+          <span className="h-4 w-px bg-gray-200 hidden sm:block" />
+          <span>✦ Powered by the latest AI models</span>
+          <span className="h-4 w-px bg-gray-200 hidden sm:block" />
+          <span>✦ No credit card required</span>
         </div>
       </div>
     </section>

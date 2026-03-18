@@ -1,10 +1,38 @@
+"use client";
+
+import { db } from "@/data/db";
 import {
-  ComponentProps,
-  HTMLAttributes,
-  MouseEventHandler,
-  PropsWithChildren,
+  queryKeys,
+  refreshVideoCache,
+  useProjectMediaItems,
+} from "@/data/queries";
+import type { MediaItem } from "@/data/schema";
+import { useProjectId, useVideoProjectStore } from "@/data/store";
+import { AVAILABLE_ENDPOINTS } from "@/lib/fal";
+import { RUNWARE_ENDPOINTS } from "@/lib/runware-models";
+import { cn, resolveMediaUrl } from "@/lib/utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { formatDuration } from "date-fns";
+import {
+  CopyIcon,
+  FilmIcon,
+  ImageUpscale,
+  ImagesIcon,
+  MicIcon,
+  MusicIcon,
+  TrashIcon,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import {
+  type ComponentProps,
+  type HTMLAttributes,
+  type MouseEventHandler,
+  type PropsWithChildren,
   useMemo,
 } from "react";
+import { Button } from "./ui/button";
+import { LoadingIcon } from "./ui/icons";
+import { Separator } from "./ui/separator";
 import {
   Sheet,
   SheetDescription,
@@ -14,30 +42,8 @@ import {
   SheetPortal,
   SheetTitle,
 } from "./ui/sheet";
-import {
-  queryKeys,
-  refreshVideoCache,
-  useProjectMediaItems,
-} from "@/data/queries";
-import { useProjectId, useVideoProjectStore } from "@/data/store";
-import { cn, resolveMediaUrl } from "@/lib/utils";
-import { MediaItem } from "@/data/schema";
-import {
-  CopyIcon,
-  FilmIcon,
-  ImagesIcon,
-  ImageUpscale,
-  MicIcon,
-  MusicIcon,
-  TrashIcon,
-} from "lucide-react";
-import { Button } from "./ui/button";
-import { Separator } from "./ui/separator";
-import { formatDuration } from "date-fns";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { db } from "@/data/db";
-import { LoadingIcon } from "./ui/icons";
-import { AVAILABLE_ENDPOINTS } from "@/lib/fal";
+
+const ALL_ENDPOINTS = [...AVAILABLE_ENDPOINTS, ...RUNWARE_ENDPOINTS];
 
 type MediaGallerySheetProps = ComponentProps<typeof Sheet> & {
   selectedMediaId: string;
@@ -118,6 +124,7 @@ export function MediaGallerySheet({
   selectedMediaId,
   ...props
 }: MediaGallerySheetProps) {
+  const t = useTranslations("app.mediaGallery");
   const projectId = useProjectId();
   const { data: mediaItems = [] } = useProjectMediaItems(projectId);
   const selectedMedia =
@@ -151,11 +158,11 @@ export function MediaGallerySheet({
     setGenerateMediaType("video");
     const image = selectedMedia.output?.images?.[0]?.url;
 
-    const endpoint = AVAILABLE_ENDPOINTS.find(
+    const endpoint = ALL_ENDPOINTS.find(
       (endpoint) => endpoint.category === "video",
     );
 
-    setEndpointId(endpoint?.endpointId ?? AVAILABLE_ENDPOINTS[0].endpointId);
+    setEndpointId(endpoint?.endpointId ?? ALL_ENDPOINTS[0].endpointId);
 
     setGenerateData({
       ...(selectedMedia.input || {}),
@@ -176,6 +183,11 @@ export function MediaGallerySheet({
 
   // Event handlers
   const preventClose: MouseEventHandler = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const preventPointerClose = (e: Event) => {
     e.preventDefault();
     e.stopPropagation();
   };
@@ -203,17 +215,30 @@ export function MediaGallerySheet({
     <Sheet {...props}>
       <SheetOverlay className="pointer-events-none flex flex-col" />
       <SheetPortal>
-        <div
-          className="pointer-events-auto fixed inset-0 z-[51] mr-[42rem] flex flex-col items-center justify-center gap-4 px-32 py-16"
+        <button
+          type="button"
+          className="pointer-events-auto fixed inset-0 z-[51] mr-[42rem] flex flex-col items-center justify-center gap-4 px-32 py-16 border-0 bg-transparent p-0"
           onClick={close}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              close();
+            }
+          }}
         >
           {!!mediaUrl && (
             <>
               {selectedMedia.mediaType === "image" && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={mediaUrl}
+                  alt={"Media preview"}
                   className="animate-fade-scale-in h-auto max-h-[90%] w-auto max-w-[90%] object-contain transition-all"
                   onClick={preventClose}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      preventClose(e as any);
+                    }
+                  }}
                 />
               )}
               {selectedMedia.mediaType === "video" && (
@@ -222,7 +247,14 @@ export function MediaGallerySheet({
                   className="animate-fade-scale-in h-auto max-h-[90%] w-auto max-w-[90%] object-contain transition-all"
                   controls
                   onClick={preventClose}
-                />
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      preventClose(e as any);
+                    }
+                  }}
+                >
+                  <track kind="captions" />
+                </video>
               )}
               {(selectedMedia.mediaType === "music" ||
                 selectedMedia.mediaType === "voiceover") && (
@@ -245,23 +277,23 @@ export function MediaGallerySheet({
               animation: fadeScaleIn 0.3s ease-out forwards;
             }
           `}</style>
-        </div>
+        </button>
         <SheetPanel
           className="flex h-screen max-h-screen min-h-screen flex-col overflow-hidden sm:max-w-2xl"
-          onPointerDownOutside={preventClose as any}
+          onPointerDownOutside={preventPointerClose}
         >
           <SheetHeader>
-            <SheetTitle>Media Gallery</SheetTitle>
+            <SheetTitle>{t("title")}</SheetTitle>
             <SheetDescription className="sr-only">
-              The b-roll for your video composition
+              {t("description")}
             </SheetDescription>
           </SheetHeader>
           <div className="flex h-full max-h-full flex-1 flex-col gap-8 overflow-y-hidden">
             <div className="flex flex-col gap-4">
               <p className="text-muted-foreground">
-                {prompt ?? <span className="italic">No description</span>}
+                {prompt ?? <span className="italic">{t("noDescription")}</span>}
               </p>
-              <div></div>
+              <div />
             </div>
             <div className="flex flex-row gap-2">
               {selectedMedia?.mediaType === "video" && (
@@ -271,7 +303,7 @@ export function MediaGallerySheet({
                   disabled={deleteMedia.isPending}
                 >
                   <ImageUpscale className="w-4 h-4 opacity-50" />
-                  Upscale Video
+                  {t("upscaleVideo")}
                 </Button>
               )}
               {selectedMedia?.mediaType === "image" && (
@@ -281,7 +313,7 @@ export function MediaGallerySheet({
                   disabled={deleteMedia.isPending}
                 >
                   <FilmIcon className="w-4 h-4 opacity-50" />
-                  Make Video
+                  {t("makeVideo")}
                 </Button>
               )}
               <Button
@@ -290,7 +322,7 @@ export function MediaGallerySheet({
                 disabled={deleteMedia.isPending}
               >
                 <ImagesIcon className="w-4 h-4 opacity-50" />
-                Re-run
+                {t("rerun")}
               </Button>
               <Button
                 variant="secondary"
@@ -302,33 +334,103 @@ export function MediaGallerySheet({
                 ) : (
                   <TrashIcon className="w-4 h-4 opacity-50" />
                 )}
-                Delete
+                {t("delete")}
               </Button>
             </div>
-            <div className="flex-1 flex flex-col gap-2 justify-end">
-              <MediaPropertyItem label="Media URL" value={mediaUrl ?? "n/a"} />
+            <div className="flex-1 flex flex-col gap-2 justify-end overflow-y-auto">
               <MediaPropertyItem
-                label="Model (fal endpoint)"
+                label={t("mediaUrl")}
+                value={mediaUrl ?? "n/a"}
+              />
+              <MediaPropertyItem
+                label={t("model")}
                 value={selectedMedia.endpointId ?? "n/a"}
               >
                 <a
                   href={`https://fal.ai/models/${selectedMedia.endpointId}`}
                   target="_blank"
                   className="underline underline-offset-4 decoration-muted-foreground/70 decoration-dotted"
+                  rel="noreferrer"
                 >
                   <code>{selectedMedia.endpointId}</code>
                 </a>
               </MediaPropertyItem>
               <MediaPropertyItem
-                label="Status"
+                label={t("status")}
                 value={selectedMedia.status ?? "n/a"}
               />
               <MediaPropertyItem
-                label="Request ID"
+                label={t("requestId")}
                 value={selectedMedia.requestId ?? "n/a"}
               >
                 <code>{selectedMedia.requestId}</code>
               </MediaPropertyItem>
+
+              <Separator className="my-2" />
+
+              {/* Generation Parameters Section */}
+              <div className="text-xs font-semibold text-muted-foreground mb-2">
+                Generation Parameters
+              </div>
+              {selectedMedia.input &&
+                Object.entries(selectedMedia.input).map(([key, value]) => {
+                  // Skip rendering complex objects and null/undefined values
+                  if (
+                    value === null ||
+                    value === undefined ||
+                    (typeof value === "object" && !Array.isArray(value))
+                  ) {
+                    return null;
+                  }
+
+                  const displayValue =
+                    typeof value === "object"
+                      ? JSON.stringify(value)
+                      : String(value);
+
+                  return (
+                    <MediaPropertyItem
+                      key={key}
+                      label={key}
+                      value={displayValue}
+                    />
+                  );
+                })}
+
+              {selectedMedia.metadata &&
+                Object.keys(selectedMedia.metadata).length > 0 && (
+                  <>
+                    <Separator className="my-2" />
+                    <div className="text-xs font-semibold text-muted-foreground mb-2">
+                      Generation Metadata
+                    </div>
+                    {Object.entries(selectedMedia.metadata).map(
+                      ([key, value]) => {
+                        // Skip rendering complex objects and null/undefined values
+                        if (
+                          value === null ||
+                          value === undefined ||
+                          (typeof value === "object" && !Array.isArray(value))
+                        ) {
+                          return null;
+                        }
+
+                        const displayValue =
+                          typeof value === "object"
+                            ? JSON.stringify(value)
+                            : String(value);
+
+                        return (
+                          <MediaPropertyItem
+                            key={key}
+                            label={key}
+                            value={displayValue}
+                          />
+                        );
+                      },
+                    )}
+                  </>
+                )}
             </div>
           </div>
         </SheetPanel>

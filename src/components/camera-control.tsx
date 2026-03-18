@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -8,7 +6,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronUp, ChevronDown, FocusIcon } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { ChevronDown, ChevronUp, FocusIcon } from "lucide-react";
+import { useState } from "react";
 
 const CameraMovement = ({
   value: initialValue,
@@ -42,25 +42,31 @@ const CameraMovement = ({
 
   const handleChange = (type: "movement" | "value", val: string | number) => {
     if (type === "movement") {
-      setMovement(val as string);
+      const newMovement = val as string;
+      setMovement(newMovement);
       setValue(0);
-      if (movement === "default") {
-        setValue(0);
+      if (newMovement === "default") {
         onChange(undefined);
+      } else {
+        onChange({ movement: newMovement, value: 0 });
       }
-      onChange({ movement: val as string, value: value });
     } else {
-      setValue(val as number);
-      onChange({ movement: movement, value: val as number });
+      const newValue = val as number;
+      setValue(newValue);
+      if (movement === "default" || newValue === 0) {
+        onChange(undefined);
+      } else {
+        onChange({ movement: movement, value: newValue });
+      }
     }
   };
 
   return (
     <div className="w-full mx-auto border-t border-neutral-800 py-3">
       {/* Header */}
-      <div
-        className="flex justify-between items-center select-none"
-        role="button"
+      <button
+        type="button"
+        className="flex justify-between items-center select-none w-full text-left"
         onClick={() => setOpen(!open)}
       >
         <div className="flex items-center gap-2">
@@ -73,7 +79,7 @@ const CameraMovement = ({
             <ChevronDown className="h-6 w-6" />
           )}
         </Button>
-      </div>
+      </button>
 
       {open && (
         <>

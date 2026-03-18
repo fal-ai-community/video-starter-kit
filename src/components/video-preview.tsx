@@ -1,3 +1,5 @@
+"use client";
+
 import { db } from "@/data/db";
 import {
   EMPTY_VIDEO_COMPOSITION,
@@ -15,7 +17,9 @@ import {
 import { useProjectId, useVideoProjectStore } from "@/data/store";
 import { cn, resolveDuration, resolveMediaUrl } from "@/lib/utils";
 import { Player, type PlayerRef } from "@remotion/player";
-import { preloadVideo, preloadAudio } from "@remotion/preload";
+import { preloadAudio, preloadVideo } from "@remotion/preload";
+import { DownloadIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect } from "react";
 import {
   AbsoluteFill,
@@ -27,7 +31,6 @@ import {
 } from "remotion";
 import { throttle } from "throttle-debounce";
 import { Button } from "./ui/button";
-import { DownloadIcon } from "lucide-react";
 
 interface VideoCompositionProps {
   project: VideoProject;
@@ -144,7 +147,7 @@ const VideoTrackSequence: React.FC<TrackSequenceProps> = ({
             durationInFrames={durationInFrames}
             premountFor={3000}
           >
-            {media.mediaType === "video" && <Video src={mediaUrl} />}
+            {media.mediaType === "video" && <Video src={mediaUrl} volume={1} />}
             {media.mediaType === "image" && (
               <Img src={mediaUrl} style={{ objectFit: "cover" }} />
             )}
@@ -187,6 +190,7 @@ const AudioTrackSequence: React.FC<TrackSequenceProps> = ({
 };
 
 export default function VideoPreview() {
+  const t = useTranslations("app.videoPreview");
   const projectId = useProjectId();
   const setPlayer = useVideoProjectStore((s) => s.setPlayer);
 
@@ -238,6 +242,7 @@ export default function VideoPreview() {
 
   const setPlayerState = useVideoProjectStore((s) => s.setPlayerState);
   // Frame updates are super frequent, so we throttle the updates to the timestamp
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const updatePlayerCurrentTimestamp = useCallback(
     throttle(64, setPlayerCurrentTimestamp),
     [],
@@ -290,7 +295,7 @@ export default function VideoPreview() {
         disabled={isCompositionLoading || tracks.length === 0}
       >
         <DownloadIcon className="w-4 h-4" />
-        Export
+        {t("export")}
       </Button>
       <div className="w-full h-full flex items-center justify-center mx-6  max-h-[calc(100vh-25rem)]">
         <Player

@@ -1,6 +1,9 @@
 "use client";
 
 import { AVAILABLE_ENDPOINTS } from "@/lib/fal";
+import { RUNWARE_ENDPOINTS } from "@/lib/runware-models";
+
+const ALL_ENDPOINTS = [...AVAILABLE_ENDPOINTS, ...RUNWARE_ENDPOINTS];
 import type { PlayerRef } from "@remotion/player";
 import { createContext, useContext } from "react";
 import { createStore } from "zustand";
@@ -22,6 +25,7 @@ export type GenerateData = {
 
 interface VideoProjectProps {
   projectId: string;
+  timelineDuration: number;
   projectDialogOpen: boolean;
   player: PlayerRef | null;
   playerCurrentTimestamp: number;
@@ -37,6 +41,7 @@ interface VideoProjectProps {
 
 interface VideoProjectState extends VideoProjectProps {
   setProjectId: (projectId: string) => void;
+  setTimelineDuration: (timelineDuration: number) => void;
   setProjectDialogOpen: (open: boolean) => void;
   resetGenerateData: () => void;
   setPlayer: (player: PlayerRef) => void;
@@ -55,7 +60,8 @@ interface VideoProjectState extends VideoProjectProps {
 
 const DEFAULT_PROPS: VideoProjectProps = {
   projectId: "",
-  endpointId: AVAILABLE_ENDPOINTS[0].endpointId,
+  timelineDuration: 30,
+  endpointId: ALL_ENDPOINTS[0].endpointId,
   projectDialogOpen: false,
   player: null,
   playerCurrentTimestamp: 0,
@@ -83,15 +89,20 @@ export const createVideoProjectStore = (
   return createStore<VideoProjectState>()((set, state) => ({
     ...DEFAULT_PROPS,
     ...initProps,
-    projectDialogOpen: initProps?.projectId ? false : true,
+    projectDialogOpen: !initProps?.projectId,
     setEndpointId: (endpointId: string) => set({ endpointId }),
     setProjectId: (projectId: string) => set({ projectId }),
+    setTimelineDuration: (timelineDuration: number) =>
+      set({ timelineDuration }),
     setProjectDialogOpen: (projectDialogOpen: boolean) =>
       set({ projectDialogOpen }),
     setGenerateData: (generateData: Partial<GenerateData>) =>
-      set({
-        generateData: Object.assign({}, state().generateData, generateData),
-      }),
+      set((current) => ({
+        generateData: {
+          ...current.generateData,
+          ...generateData,
+        },
+      })),
     resetGenerateData: () =>
       set({
         generateData: {

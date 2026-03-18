@@ -11,13 +11,13 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { useStore } from "zustand";
-import { ProjectDialog } from "./project-dialog";
+import { ExportDialog } from "./export-dialog";
+import { KeyDialog } from "./key-dialog";
+import LeftPanel from "./left-panel";
 import { MediaGallerySheet } from "./media-gallery";
+import { ProjectDialog } from "./project-dialog";
 import { ToastProvider } from "./ui/toast";
 import { Toaster } from "./ui/toaster";
-import { ExportDialog } from "./export-dialog";
-import LeftPanel from "./left-panel";
-import { KeyDialog } from "./key-dialog";
 
 type AppProps = {
   projectId: string;
@@ -56,7 +56,7 @@ export function App({ projectId }: AppProps) {
             <Header openKeyDialog={() => setKeyDialog(true)} />
             <main className="flex overflow-hidden h-full w-screen">
               <LeftPanel />
-              <div className="flex flex-col flex-1">
+              <div className="flex flex-col flex-1 min-w-0">
                 <VideoPreview />
                 <BottomBar />
               </div>
