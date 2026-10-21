@@ -10,6 +10,9 @@
     "format": "biome format --write",
     "prepare": "husky"
   },
+  "engines": {
+    "node": ">=22.23.4 <23"
+  },
   "dependencies": {
     "@fal-ai/client": "^1.2.1",
     "@fal-ai/server-proxy": "^1.1.1",
